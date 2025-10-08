@@ -31,7 +31,7 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.topHeader}>
-        <Pressable onPress={() => router.push("Home")}>
+        <Pressable onPress={() => router.back()}>
           <Back dark="#041105" />
         </Pressable>
         <Text style={styles.boldText}>Profile</Text>

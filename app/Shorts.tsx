@@ -6,6 +6,7 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Badge } from "react-native-paper";
@@ -33,7 +34,7 @@ const { height } = Dimensions.get("window");
  * @constructor
  */
 
-export default function ScreenHome() {
+export default function Shorts() {
   const router = useRouter();
   const { primary: colorPrimary } = useColors();
   const [shareVisible, setShareVisible] = useState(false)
@@ -68,19 +69,25 @@ export default function ScreenHome() {
           <TwikklIcon name={EIcon.TIMER_24} size={24} color={DEFAULT_CAMERA_ACTION_COLOR} />
           <View style={ViewVariant.centered}>
             <Text variant="titleMedium" style={styles.headActionText}>
-              {t("home.myFeed")}
+              Shorts
             </Text>
             <Badge size={10} style={{ ...styles.headActionIndicator, backgroundColor: colorPrimary }} />
           </View>
-          <Pressable onPress={() => router.push("Discover")}>
+          <Pressable onPress={() => router.push("Server")}>
             <Text variant="titleMedium" style={styles.headActionText}>
-              {t("home.discover")}
+              Server
             </Text>
             <Badge size={10} style={{ ...styles.headActionIndicator, backgroundColor: DEFAULT_CAMERA_ACTION_COLOR }} />
           </Pressable>
           <Pressable onPress={() => router.push("Notification")}>
             <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_CAMERA_ACTION_COLOR} />
             <Badge size={10} style={{ backgroundColor: colorPrimary, position: "absolute" }} />
+          </Pressable>
+          <Pressable onPress={() => router.push("Profile")}>
+            <Image
+              source={require("@assets/imgs/profile.png")}
+              style={styles.profileIcon}
+            />
           </Pressable>
         </View>
       </SafeAreaView>
@@ -129,6 +136,13 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderWidth: 1,
     borderColor: "#FFF",
+  },
+  profileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#50A040",
   },
   bottomContainer: {
     position: "absolute",

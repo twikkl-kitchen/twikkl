@@ -33,7 +33,7 @@ interface Group {
 
 type ModalType = "access" | "leave" | null;
 
-const Discover = () => {
+const Server = () => {
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [groups, setGroups] = useState<Group[]>(cardDataGroup);
   const [yourGroups, setYourGroups] = useState<Group[]>(cardDataYou);
@@ -42,14 +42,14 @@ const Discover = () => {
   const [modalType, setModalType] = useState<ModalType>(null);
   const router = useRouter();
 
-  const discoverTabs = [
+  const serverTabs = [
     {
       title: "For you",
       activeIcon: <FontAwesome5 name="user-friends" size={22} color={colors.white200} />,
       icon: <Feather name="users" size={22} color="#000" />,
     },
     {
-      title: "Your Groups",
+      title: "Your Servers",
       activeIcon: <FontAwesome5 name="user-friends" size={22} color={colors.white200} />,
       icon: <Feather name="users" size={22} color="#000" />,
     },
@@ -61,8 +61,8 @@ const Discover = () => {
   ];
 
   const criterias = [
-    { icon: require("../../assets/imgs/bayc.png"), text: "BAYC NFT" },
-    { icon: require("../../assets/imgs/jgy.png"), text: "10 JGY" },
+    { icon: require("../assets/imgs/bayc.png"), text: "BAYC NFT" },
+    { icon: require("../assets/imgs/jgy.png"), text: "10 JGY" },
   ];
 
   const pressButton = (item: Group) => {
@@ -101,7 +101,7 @@ const Discover = () => {
               ))}
               <View style={{ width: 200 }}>
                 <ButtonEl onPress={() => selectedGroup && pressButton(selectedGroup)} height={45}>
-                  <Text style={{ color: "#fff" }}>Access Group</Text>
+                  <Text style={{ color: "#fff" }}>Access Server</Text>
                 </ButtonEl>
               </View>
             </>
@@ -137,7 +137,7 @@ const Discover = () => {
     return [];
   };
 
-  const titleText = activeTabIndex === 0 ? "For You" : activeTabIndex === 1 ? "Your Groups" : "Favorite Groups";
+  const titleText = activeTabIndex === 0 ? "For You" : activeTabIndex === 1 ? "Your Servers" : "Favorite Servers";
 
   return (
     <View style={{ flex: 1 }}>
@@ -146,7 +146,7 @@ const Discover = () => {
           <TouchableOpacity onPressOut={() => router.back()} style={styles.iconContainer}>
             <Octicons name="chevron-left" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.text}>Groups</Text>
+          <Text style={styles.text}>Servers</Text>
           <AntDesign name="search1" size={24} />
         </View>
         <View style={{ flexDirection: "row" }}>
@@ -158,7 +158,7 @@ const Discover = () => {
             <TouchableOpacity style={styles.addButton}>
               <Ionicons name="add-outline" size={30} color="#fff" />
             </TouchableOpacity>
-            {discoverTabs.map(({ icon, title, activeIcon }, index) => (
+            {serverTabs.map(({ icon, title, activeIcon }, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={() => setActiveTabIndex(index)}
@@ -199,7 +199,7 @@ const Discover = () => {
   );
 };
 
-export default Discover;
+export default Server;
 
 const styles = StyleSheet.create({
   header: {
