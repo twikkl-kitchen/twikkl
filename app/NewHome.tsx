@@ -18,64 +18,136 @@ import { useRouter } from "expo-router";
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
 
-const mockPosts = [
+const profiles = [
+  {
+    name: "Beauty",
+    image: require("@assets/imgs/profile.png"),
+  },
+  {
+    name: "EMEN",
+    image: require("@assets/imgs/profile.png"),
+  },
+  {
+    name: "Rockwel",
+    image: require("@assets/imgs/profile.png"),
+  },
+  {
+    name: "Animal",
+    image: require("@assets/imgs/profile.png"),
+  },
+];
+
+const videos = [
   {
     id: "1",
-    username: "jerry.jgy",
-    avatar: require("@assets/imgs/profile.png"),
-    content: "Just dropped a new Twikk! Check it out 🔥",
-    likes: 234,
-    comments: 45,
-    timestamp: "2h ago",
+    title: "Adele - Easy On Me (Live at the NRJ Awards 2021)",
+    creator: "Adele",
+    views: "5.8M views",
+    time: "3 months ago",
+    thumbnail: require("@assets/imgs/prof1.png"),
+    duration: "3:47",
+    isLive: true,
   },
   {
     id: "2",
-    username: "sarah_tech",
-    avatar: require("@assets/imgs/profile.png"),
-    content: "Building something amazing with the community! 🚀",
-    likes: 567,
-    comments: 89,
-    timestamp: "4h ago",
+    title: "Lord of Rings: The Rings of Power Official Trailer",
+    creator: "Prime Video",
+    views: "12M views",
+    time: "1 week ago",
+    thumbnail: require("@assets/imgs/prof2.png"),
+    duration: "2:30",
+  },
+];
+
+const shorts = [
+  {
+    id: "1",
+    title: "Amazing Dance Moves",
+    creator: "DanceQueen",
+    views: "2.3M",
+    thumbnail: require("@assets/imgs/prof3.png"),
+  },
+  {
+    id: "2",
+    title: "Quick Recipe Tips",
+    creator: "FoodieLife",
+    views: "1.8M",
+    thumbnail: require("@assets/imgs/prof4.png"),
   },
   {
     id: "3",
-    username: "crypto_king",
-    avatar: require("@assets/imgs/profile.png"),
-    content: "New features coming soon to Twikkl! Stay tuned 👀",
-    likes: 892,
-    comments: 156,
-    timestamp: "6h ago",
+    title: "Workout Challenge",
+    creator: "FitGuru",
+    views: "3.1M",
+    thumbnail: require("@assets/imgs/prof5.png"),
+  },
+  {
+    id: "4",
+    title: "Gaming Setup Tour",
+    creator: "GameZone",
+    views: "950K",
+    thumbnail: require("@assets/imgs/prof6.png"),
   },
 ];
+
+const categories = ["All", "Gaming", "Figma", "UI Design", "Coding"];
 
 export default function NewHome() {
   const router = useRouter();
   const { primary: colorPrimary } = useColors();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"feed" | "discover">("feed");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
-  const PostCard = ({ item }: { item: typeof mockPosts[0] }) => (
-    <View style={styles.postCard}>
-      <View style={styles.postHeader}>
-        <Image source={item.avatar} style={styles.avatar} />
-        <View style={styles.postInfo}>
-          <Text style={styles.username}>{item.username}</Text>
-          <Text style={styles.timestamp}>{item.timestamp}</Text>
+  const ProfileStory = ({ item }: { item: typeof profiles[0] }) => (
+    <View style={styles.storyItem}>
+      <View style={styles.storyBorder}>
+        <Image source={item.image} style={styles.storyImage} />
+      </View>
+      <Text style={styles.storyName}>{item.name}</Text>
+    </View>
+  );
+
+  const ShortCard = ({ item }: { item: typeof shorts[0] }) => (
+    <View style={styles.shortCard}>
+      <View style={styles.shortThumbnail}>
+        <Image source={item.thumbnail} style={styles.shortImage} />
+        <View style={styles.shortBadge}>
+          <TwikklIcon name={EIcon.HEART} size={12} color="#FFF" />
         </View>
       </View>
-      <Text style={styles.postContent}>{item.content}</Text>
-      <View style={styles.postActions}>
-        <Pressable style={styles.actionButton}>
-          <TwikklIcon name={EIcon.HEART} size={20} color="#50A040" />
-          <Text style={styles.actionText}>{item.likes}</Text>
-        </Pressable>
-        <Pressable style={styles.actionButton}>
-          <TwikklIcon name={EIcon.HEART} size={20} color="#50A040" />
-          <Text style={styles.actionText}>{item.comments}</Text>
-        </Pressable>
-        <Pressable style={styles.actionButton}>
-          <TwikklIcon name={EIcon.SHARE_NETWORK} size={20} color="#50A040" />
-        </Pressable>
+      <Text style={styles.shortTitle} numberOfLines={2}>
+        {item.title}
+      </Text>
+      <Text style={styles.shortViews}>{item.views} views</Text>
+    </View>
+  );
+
+  const VideoCard = ({ item }: { item: typeof videos[0] }) => (
+    <View style={styles.videoCard}>
+      <View style={styles.videoThumbnailContainer}>
+        <Image source={item.thumbnail} style={styles.videoThumbnail} />
+        {item.isLive && (
+          <View style={styles.liveBadge}>
+            <Text style={styles.liveText}>Live</Text>
+          </View>
+        )}
+        <View style={styles.durationBadge}>
+          <Text style={styles.durationText}>{item.duration}</Text>
+        </View>
+      </View>
+      <View style={styles.videoInfo}>
+        <Image source={profiles[0].image} style={styles.creatorAvatar} />
+        <View style={styles.videoDetails}>
+          <Text style={styles.videoTitle} numberOfLines={2}>
+            {item.title}
+          </Text>
+          <Text style={styles.videoMeta}>
+            {item.creator}
+          </Text>
+          <Text style={styles.videoMeta}>
+            {item.views} • {item.time}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -84,48 +156,75 @@ export default function NewHome() {
     <>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TwikklIcon name={EIcon.TIMER_24} size={24} color={DEFAULT_HEADER_COLOR} />
-          <View style={styles.tabsContainer}>
-            <Pressable onPress={() => setActiveTab("feed")}>
-              <Text
-                variant="titleMedium"
-                style={[styles.tabText, activeTab === "feed" && styles.activeTabText]}
-              >
-                {t("home.myFeed")}
-              </Text>
-              {activeTab === "feed" && (
-                <Badge size={10} style={{ ...styles.tabIndicator, backgroundColor: colorPrimary }} />
-              )}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIcon}>
+              <TwikklIcon name={EIcon.PLUS} size={16} color="#FFF" />
+            </View>
+            <Text style={styles.logoText}>twikkl</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <Pressable onPress={() => router.push("Notification")}>
+              <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
             </Pressable>
-            <Pressable onPress={() => router.push("Server")}>
-              <Text variant="titleMedium" style={styles.tabText}>
-                Server
-              </Text>
-              <Badge
-                size={10}
-                style={{ ...styles.tabIndicator, backgroundColor: DEFAULT_HEADER_COLOR }}
+            <Pressable onPress={() => router.push("Profile")}>
+              <Image
+                source={require("@assets/imgs/profile.png")}
+                style={styles.profileIcon}
               />
             </Pressable>
           </View>
-          <Pressable onPress={() => router.push("Notification")}>
-            <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
-            <Badge size={10} style={{ backgroundColor: colorPrimary, position: "absolute" }} />
-          </Pressable>
-          <Pressable onPress={() => router.push("Profile")}>
-            <Image
-              source={require("@assets/imgs/profile.png")}
-              style={styles.profileIcon}
-            />
-          </Pressable>
         </View>
 
-        <FlatList
-          data={mockPosts}
-          renderItem={({ item }) => <PostCard item={item} />}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.feedContainer}
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.categoriesContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {categories.map((category) => (
+                <Pressable
+                  key={category}
+                  onPress={() => setSelectedCategory(category)}
+                  style={[
+                    styles.categoryChip,
+                    selectedCategory === category && styles.categoryChipActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategory === category && styles.categoryTextActive,
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.storiesContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {profiles.map((profile, index) => (
+                <ProfileStory key={index} item={profile} />
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Shorts</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {shorts.map((short) => (
+                <ShortCard key={short.id} item={short} />
+              ))}
+            </ScrollView>
+          </View>
+
+          <View style={styles.videosContainer}>
+            {videos.map((video) => (
+              <VideoCard key={video.id} item={video} />
+            ))}
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
       </SafeAreaView>
 
       <BottomNav commentCount={0} />
@@ -142,29 +241,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 10,
-    paddingHorizontal: 14,
-    paddingBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  tabsContainer: {
+  logoContainer: {
     flexDirection: "row",
-    gap: 20,
-    flex: 1,
+    alignItems: "center",
+    gap: 8,
+  },
+  logoIcon: {
+    width: 32,
+    height: 32,
+    backgroundColor: "#50A040",
+    borderRadius: 6,
+    alignItems: "center",
     justifyContent: "center",
   },
-  tabText: {
+  logoText: {
     color: DEFAULT_HEADER_COLOR,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "bold",
   },
-  activeTabText: {
-    color: DEFAULT_HEADER_COLOR,
-  },
-  tabIndicator: {
-    alignSelf: "center",
-    marginTop: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    height: 5,
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
   },
   profileIcon: {
     width: 32,
@@ -173,57 +274,166 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#50A040",
   },
-  feedContainer: {
-    paddingBottom: 100,
+  categoriesContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
-  postCard: {
-    backgroundColor: "#143615",
-    marginHorizontal: 14,
-    marginVertical: 8,
-    borderRadius: 12,
-    padding: 16,
-  },
-  postHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
     marginRight: 12,
+    backgroundColor: "transparent",
   },
-  postInfo: {
-    flex: 1,
+  categoryChipActive: {
+    backgroundColor: "#FFF",
   },
-  username: {
-    color: "#F1FCF2",
-    fontSize: 16,
+  categoryText: {
+    color: "#A0A0A0",
+    fontSize: 14,
+  },
+  categoryTextActive: {
+    color: "#000",
     fontWeight: "600",
   },
-  timestamp: {
+  storiesContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  storyItem: {
+    alignItems: "center",
+    marginRight: 16,
+    width: 60,
+  },
+  storyBorder: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: "#404040",
+    padding: 2,
+  },
+  storyImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 26,
+  },
+  storyName: {
     color: "#A0A0A0",
     fontSize: 12,
-    marginTop: 2,
+    marginTop: 4,
+    textAlign: "center",
   },
-  postContent: {
-    color: "#F1FCF2",
-    fontSize: 14,
-    lineHeight: 20,
+  section: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  sectionTitle: {
+    color: DEFAULT_HEADER_COLOR,
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 12,
   },
-  postActions: {
-    flexDirection: "row",
-    gap: 24,
+  shortCard: {
+    width: 112,
+    marginRight: 12,
   },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  shortThumbnail: {
+    position: "relative",
+    aspectRatio: 9 / 16,
+    borderRadius: 8,
+    overflow: "hidden",
   },
-  actionText: {
-    color: "#F1FCF2",
+  shortImage: {
+    width: "100%",
+    height: "100%",
+  },
+  shortBadge: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    borderRadius: 12,
+    padding: 4,
+  },
+  shortTitle: {
+    color: DEFAULT_HEADER_COLOR,
+    fontSize: 12,
+    marginTop: 8,
+    lineHeight: 16,
+  },
+  shortViews: {
+    color: "#808080",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  videosContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  videoCard: {
+    marginBottom: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  videoThumbnailContainer: {
+    position: "relative",
+    height: 192,
+  },
+  videoThumbnail: {
+    width: "100%",
+    height: "100%",
+  },
+  liveBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    backgroundColor: "#50A040",
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  liveText: {
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  durationBadge: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  durationText: {
+    color: "#FFF",
+    fontSize: 12,
+  },
+  videoInfo: {
+    flexDirection: "row",
+    padding: 12,
+    gap: 12,
+  },
+  creatorAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  videoDetails: {
+    flex: 1,
+  },
+  videoTitle: {
+    color: DEFAULT_HEADER_COLOR,
     fontSize: 14,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  videoMeta: {
+    color: "#808080",
+    fontSize: 12,
+    marginTop: 2,
   },
 });

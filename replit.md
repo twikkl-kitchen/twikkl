@@ -75,8 +75,13 @@ The app is configured to run on the web using Expo's web support:
 
 ## Recent Changes
 - **October 08, 2025** - Navigation Restructure:
-  - Created new home feed screen (NewHome.tsx) with social feed layout
-  - Converted original home to Shorts screen (Shorts.tsx) for video content
+  - Created new home feed screen (NewHome.tsx) with YouTube-style layout including:
+    - Twikkl branding header with logo and icons
+    - Horizontal scrollable categories
+    - Story-style profile circles
+    - Shorts section with vertical thumbnails
+    - Video content cards with live badges and duration
+  - Converted original home to Shorts screen (Shorts.tsx) for vertical video feed
   - Created Server screen (Server.tsx) to replace Discover in navigation
   - Updated bottom navigation to: Home, Shorts, Create, Server
   - Moved Profile from bottom nav to top-right corner icon
