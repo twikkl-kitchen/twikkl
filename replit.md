@@ -92,8 +92,8 @@ The app is configured to run on the web using Expo's web support:
 - Green + button (bottom right) - triggers Create/Upload flow (requires auth)
 
 ## Known Issues & Notes
-- **MetaMask Browser Extension**: If you see "Failed to connect to MetaMask" errors in the browser console, these are from the MetaMask browser extension trying to auto-connect. The app does NOT use MetaMask - wallet functionality is handled by Para (formerly Capsule) on the backend, which auto-generates wallets for users on account creation.
-- **Wallet Screen**: The current Wallet.tsx is a placeholder. Wallet data is managed by Para integration on the backend. Future updates will fetch and display wallet information via authenticated API endpoints.
+- **Wallet Integration**: Wallet functionality is powered by Para embedded wallet SDK. Para auto-generates wallets for users on account creation with support for EVM chains, Solana, and Cosmos.
+- **Servers**: Servers can be either public (anyone can join) or private (invite-only). There are no eligibility criteria required to join servers.
 
 ## Recent Changes
 - **October 09, 2025** - Figma Design Implementation:

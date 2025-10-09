@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable } from "react-native";
 import { Octicons, AntDesign, Ionicons, FontAwesome5, Feather } from "@expo/vector-icons";
 import Highlights from "@twikkl/components/Discover/Highlights";
 import Card from "@twikkl/components/Discover/Card";
@@ -60,22 +60,24 @@ const Server = () => {
     },
   ];
 
-  const criterias = [
-    { icon: require("../assets/imgs/bayc.png"), text: "BAYC NFT" },
-    { icon: require("../assets/imgs/jgy.png"), text: "10 JGY" },
-  ];
-
-  const pressButton = (item: Group) => {
+  const joinServer = (item: Group) => {
     setModalType(null);
-    if (modalType === "access") {
-      const filteredGroups = yourGroups.filter((group) => group?.title !== item?.title);
-      setYourGroups(filteredGroups);
-      setGroups((prevGroups) => [item, ...prevGroups]);
-    } else if (modalType === "leave") {
-      const filteredGroups = groups.filter((group) => group.title !== item.title);
-      setGroups(filteredGroups);
-      setYourGroups((prevGroups) => [item, ...prevGroups]);
+    
+    if (item.status === "Closed") {
+      alert("Access request sent! The server admin will review your request.");
+      return;
     }
+    
+    const filteredGroups = groups.filter((group) => group.title !== item.title);
+    setGroups(filteredGroups);
+    setYourGroups((prevGroups) => [item, ...prevGroups]);
+  };
+
+  const leaveServer = (item: Group) => {
+    setModalType(null);
+    const filteredGroups = yourGroups.filter((group) => group.title !== item.title);
+    setYourGroups(filteredGroups);
+    setGroups((prevGroups) => [item, ...prevGroups]);
   };
 
   const favPress = (item: Group) => {
@@ -90,18 +92,22 @@ const Server = () => {
         <View style={styles.modal}>
           {modalType === "access" ? (
             <>
-              <Ionicons name="lock-closed" color="#000" size={35} />
-              <Text style={{ fontWeight: "700", fontSize: 15, marginTop: 8 }}>{selectedGroup?.title}</Text>
-              <Text style={{ fontSize: 16, marginBottom: 14, marginTop: 22 }}>Eligibility Criteria</Text>
-              {criterias.map((item) => (
-                <View style={styles.criteria} key={item.text}>
-                  <Text style={{ fontWeight: "700", fontSize: 15 }}>{item.text}</Text>
-                  <Image source={item.icon} />
-                </View>
-              ))}
+              <Ionicons 
+                name={selectedGroup?.status === "Closed" ? "lock-closed" : "checkmark-circle"} 
+                color={selectedGroup?.status === "Closed" ? "#000" : "#50a040"} 
+                size={35} 
+              />
+              <Text style={{ fontWeight: "700", fontSize: 16, marginTop: 12 }}>{selectedGroup?.title}</Text>
+              <Text style={{ fontSize: 14, color: "#666", marginTop: 8, marginBottom: 20, textAlign: "center" }}>
+                {selectedGroup?.status === "Closed" 
+                  ? "This is a private server. Your request will be sent to the server admin." 
+                  : "Join this public server to access exclusive content and connect with the community."}
+              </Text>
               <View style={{ width: 200 }}>
-                <ButtonEl onPress={() => selectedGroup && pressButton(selectedGroup)} height={45}>
-                  <Text style={{ color: "#fff" }}>Access Server</Text>
+                <ButtonEl onPress={() => selectedGroup && joinServer(selectedGroup)} height={45}>
+                  <Text style={{ color: "#fff" }}>
+                    {selectedGroup?.status === "Closed" ? "Request Access" : "Join Server"}
+                  </Text>
                 </ButtonEl>
               </View>
             </>
@@ -118,7 +124,7 @@ const Server = () => {
                   </ButtonEl>
                 </View>
                 <View style={{ width: 100 }}>
-                  <ButtonEl onPress={() => selectedGroup && pressButton(selectedGroup)} height={45}>
+                  <ButtonEl onPress={() => selectedGroup && leaveServer(selectedGroup)} height={45}>
                     <Text style={{ color: "#fff" }}>Leave</Text>
                   </ButtonEl>
                 </View>
@@ -276,18 +282,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 24,
     justifyContent: "space-between",
-  },
-  criteria: {
-    borderWidth: 1,
-    borderColor: "#000",
-    flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 24,
   },
   groupContainer: {
     flex: 1,
