@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import Play from "@assets/svg/Play";
 import People from "@assets/svg/People";
 import Grid1 from "@assets/svg/Grid1";
+import { useAuth } from "@twikkl/entities/auth.entity";
 
 type BottomNavProps = {
   commentCount?: number | string;
@@ -26,6 +27,15 @@ type BottomNavProps = {
 function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
   const { t } = useTranslation();
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
+
+  const handleCreateClick = () => {
+    if (isLoggedIn) {
+      router.push("video/CreateUploadVideo");
+    } else {
+      router.push("auth/Register");
+    }
+  };
 
   return (
     <SafeAreaView style={styles.bottomContainer}>
@@ -43,7 +53,7 @@ function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push("video/CreateUploadVideo")} style={styles.tabContainer}>
+      <TouchableOpacity onPress={handleCreateClick} style={styles.tabContainer}>
         <View style={styles.createButton}>
           <TwikklIcon name={EIcon.PLUS} size={28} color="#FFF" />
         </View>

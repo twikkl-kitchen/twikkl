@@ -19,8 +19,8 @@ import BottomNav from "@twikkl/components/BottomNav";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import AppBottomSheet from "@twikkl/components/BottomSheet";
-import { color } from "react-native-reanimated";
 import Share from "@twikkl/components/Share";
+import { useAuth } from "@twikkl/entities/auth.entity";
 
 const DEFAULT_CAMERA_ACTION_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -37,6 +37,7 @@ const { height } = Dimensions.get("window");
 export default function Shorts() {
   const router = useRouter();
   const { primary: colorPrimary } = useColors();
+  const { isLoggedIn } = useAuth();
   const [shareVisible, setShareVisible] = useState(false)
 
   // get static videos
@@ -44,6 +45,14 @@ export default function Shorts() {
 
   const { t } = useTranslation();
   const [visibleIndex, setVisibleIndex] = useState<number>(0);
+
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      router.push("Profile");
+    } else {
+      router.push("auth/Register");
+    }
+  };
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffset = event.nativeEvent.contentOffset.y;
@@ -83,7 +92,7 @@ export default function Shorts() {
             <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_CAMERA_ACTION_COLOR} />
             <Badge size={10} style={{ backgroundColor: colorPrimary, position: "absolute" }} />
           </Pressable>
-          <Pressable onPress={() => router.push("Profile")}>
+          <Pressable onPress={handleProfileClick}>
             <Image
               source={require("@assets/imgs/profile.png")}
               style={styles.profileIcon}

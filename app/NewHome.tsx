@@ -14,6 +14,7 @@ import { useState } from "react";
 import BottomNav from "@twikkl/components/BottomNav";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
+import { useAuth } from "@twikkl/entities/auth.entity";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -96,7 +97,16 @@ export default function NewHome() {
   const router = useRouter();
   const { primary: colorPrimary } = useColors();
   const { t } = useTranslation();
+  const { isLoggedIn } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      router.push("Profile");
+    } else {
+      router.push("auth/Register");
+    }
+  };
 
   const ProfileStory = ({ item }: { item: typeof profiles[0] }) => (
     <View style={styles.storyItem}>
@@ -166,7 +176,7 @@ export default function NewHome() {
             <Pressable onPress={() => router.push("Notification")}>
               <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
             </Pressable>
-            <Pressable onPress={() => router.push("Profile")}>
+            <Pressable onPress={handleProfileClick}>
               <Image
                 source={{ uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" }}
                 style={styles.profileIcon}

@@ -53,7 +53,7 @@ TwikkL is a cross-platform DApp (Decentralized Application) built with React Nat
 - `@assets/*` → `./assets/*`
 
 ## Environment Variables
-- `BASE_URL` - Backend API URL (configured in .env)
+- `BASE_URL` - Backend API URL (configured in Replit Secrets and .env)
 
 ## Development Setup (Replit)
 The app is configured to run on the web using Expo's web support:
@@ -61,19 +61,47 @@ The app is configured to run on the web using Expo's web support:
 - Host: 0.0.0.0 (to support Replit's proxy)
 - Expo web platform automatically configured
 
-## Navigation Structure
+## User Flow & Navigation
+
+**First-Time User Experience:**
+1. **Splash Screen** - Twikkl logo displayed for 2 seconds
+2. **Video Animation** - Animated intro with "Video Resources, Everywhere All At Once"
+3. **Home Screen** - Direct access to browse videos (no login required)
+
+**Authentication:**
+- Optional authentication - users can browse without account
+- Login/signup triggered from profile icon in top-right corner
+- Authentication required for:
+  - Creating videos (Create button)
+  - User interactions (comments, likes, follows)
+  - Profile access
+
 **Bottom Navigation (4 tabs):**
 - **Home** → NewHome.tsx - Social feed with posts
 - **Shorts** → Shorts.tsx - Vertical video feed
-- **Create** → video/CreateUploadVideo - Upload/create content
+- **Create** → video/CreateUploadVideo - Upload/create content (requires auth)
 - **Server** → Server.tsx - Community/server discovery
 
 **Top Right Navigation:**
-- Profile icon accessible from NewHome and Shorts headers
+- Profile icon (triggers auth if not logged in)
 - Notification bell on all main screens
 - Server quick access from headers
 
 ## Recent Changes
+- **October 09, 2025** - Onboarding Flow & Optional Authentication:
+  - Implemented first-time user onboarding flow with:
+    - Splash screen showing Twikkl logo
+    - Video animation screen with custom intro video
+    - AsyncStorage-based detection (animation shows only on first launch)
+  - Changed authentication to optional:
+    - Users can browse home and shorts without login
+    - Profile icon triggers signup/login for unauthenticated users
+    - Create button requires authentication
+    - All user interactions require authentication
+  - Updated backend URL to: https://twikkl-eba1ec2fec21.herokuapp.com/v1/
+  - Created /app/onboarding/ folder with Splash.tsx and VideoAnimation.tsx
+  - Updated app/index.tsx to handle first-time vs returning user flow
+  - Added authentication checks in BottomNav, NewHome, and Shorts screens
 - **October 09, 2025** - Complete Dependency Modernization:
   - Updated all outdated dependencies for Expo SDK 51 compatibility
   - Fixed Babel configuration with proper plugins (react-native-dotenv, module-resolver, react-native-reanimated)
