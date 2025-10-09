@@ -124,8 +124,27 @@ The app is configured to run on the web using Expo's web support:
   3. Settings screen (privacy toggles, member management)
 - **Features**: Join/leave, favorites, member invites, content moderation
 - **Service Layer**: Complete API integration for CRUD operations
+- **Video System**:
+  - Videos display as list cards (matching home screen)
+  - Create button opens camera/gallery for recording/selecting videos
+  - Upload limit: 2 videos per 24 hours (rolling window, not calendar day)
+  - Category selection: Tutorial, Trading, Development, General, News
+  - Visibility options: Followers, Public, Private
+- **Image Management**:
+  - Owners/admins can upload profile images (1:1 aspect ratio)
+  - Owners/admins can upload banner images (16:9 aspect ratio)
+  - Accessed via Settings → Change Server Images
 
 ## Recent Changes
+- **October 09, 2025** - Server Video & Image Management Features:
+  - **Video Display**: Updated server detail screens to show videos as cards (matching home screen layout)
+  - **Create Flow**: Built complete video creation flow in servers (CreateVideo → CaptionVideo → Post)
+  - **Camera/Gallery**: Create button in servers opens camera/gallery for video recording/selection
+  - **Upload Limit**: Implemented rolling 24-hour limit (2 videos per server per 24 hours)
+  - **Image Management**: Server owners/admins can upload/edit profile (1:1) and banner (16:9) images
+  - **Dark Theme**: All server screens follow consistent dark theme (#000 bg, #fff text)
+  - Created reusable VideoCard component for consistent video display across app
+  - Added category selection, visibility options (Followers/Public/Private) for server posts
 - **October 09, 2025** - Global Theme System Implementation:
   - Created global theme entity with persistent dark/light mode state
   - Updated all screens to use consistent theming (NewHome, Server, Shorts, Discover detail)
