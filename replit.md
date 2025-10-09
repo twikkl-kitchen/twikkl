@@ -93,10 +93,9 @@ The app is configured to run on the web using Expo's web support:
 
 ## Recent Changes
 - **October 09, 2025** - Home Screen UI Update & Bug Fixes:
-  - Updated NewHome header to match original design:
-    - Home icon on the left
-    - My Feed/Discover navigation tabs in center
-    - Notification bell on the right
+  - Updated NewHome header with YouTube-style layout:
+    - Twikkl logo on the left
+    - Wallet icon, notification bell, and profile icon on the right
   - Changed "Server" button to "Following" in Shorts screen
   - Fixed back button navigation on create account screen
   - Added WalletIcon component from design assets

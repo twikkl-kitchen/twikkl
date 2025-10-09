@@ -15,8 +15,7 @@ import BottomNav from "@twikkl/components/BottomNav";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { useAuth } from "@twikkl/entities/auth.entity";
-import Grid1 from "@assets/svg/Grid1";
-import People from "@assets/svg/People";
+import WalletIcon from "@assets/svg/WalletIcon";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -101,7 +100,6 @@ export default function NewHome() {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [activeTab, setActiveTab] = useState<"feed" | "discover">("feed");
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
@@ -169,35 +167,26 @@ export default function NewHome() {
     <>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.push("NewHome")} style={styles.homeIconContainer}>
-            <Grid1 color={DEFAULT_HEADER_COLOR} />
-          </Pressable>
-          <View style={styles.headerTabs}>
-            <Pressable 
-              onPress={() => setActiveTab("feed")}
-              style={styles.headerTab}
-            >
-              <Text style={[styles.headerTabText, activeTab === "feed" && styles.headerTabTextActive]}>
-                My Feed
-              </Text>
-              {activeTab === "feed" && <View style={styles.headerTabIndicator} />}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIcon}>
+              <TwikklIcon name={EIcon.PLUS} size={16} color="#FFF" />
+            </View>
+            <Text style={styles.logoText}>twikkl</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <Pressable onPress={() => router.push("Wallet")}>
+              <WalletIcon color={DEFAULT_HEADER_COLOR} />
             </Pressable>
-            <Pressable 
-              onPress={() => {
-                setActiveTab("discover");
-                router.push("Server");
-              }}
-              style={styles.headerTab}
-            >
-              <Text style={[styles.headerTabText, activeTab === "discover" && styles.headerTabTextActive]}>
-                Discover
-              </Text>
-              {activeTab === "discover" && <View style={styles.headerTabIndicator} />}
+            <Pressable onPress={() => router.push("Notification")}>
+              <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
+            </Pressable>
+            <Pressable onPress={handleProfileClick}>
+              <Image
+                source={{ uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" }}
+                style={styles.profileIcon}
+              />
             </Pressable>
           </View>
-          <Pressable onPress={() => router.push("Notification")} style={styles.notificationIcon}>
-            <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
-          </Pressable>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -269,43 +258,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  homeIconContainer: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTabs: {
+  logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 24,
-    flex: 1,
-    justifyContent: "center",
+    gap: 8,
   },
-  headerTab: {
-    alignItems: "center",
-    paddingVertical: 4,
-  },
-  headerTabText: {
-    color: "#808080",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  headerTabTextActive: {
-    color: DEFAULT_HEADER_COLOR,
-  },
-  headerTabIndicator: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#50A040",
-    marginTop: 4,
-  },
-  notificationIcon: {
+  logoIcon: {
     width: 32,
     height: 32,
+    backgroundColor: "#50A040",
+    borderRadius: 6,
     alignItems: "center",
     justifyContent: "center",
+  },
+  logoText: {
+    color: DEFAULT_HEADER_COLOR,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  profileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#50A040",
   },
   categoriesContainer: {
     paddingHorizontal: 16,
