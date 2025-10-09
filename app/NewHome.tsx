@@ -21,19 +21,19 @@ const BACKGROUND_COLOR = "#041105";
 const profiles = [
   {
     name: "Beauty",
-    image: require("@assets/imgs/profile.png"),
+    image: { uri: "https://images.unsplash.com/photo-1557053910-d9eadeed1c58?w=200&h=200&fit=crop" },
   },
   {
     name: "EMEN",
-    image: require("@assets/imgs/profile.png"),
+    image: { uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" },
   },
   {
     name: "Rockwel",
-    image: require("@assets/imgs/profile.png"),
+    image: { uri: "https://images.unsplash.com/photo-1722322426803-101270837197?w=200&h=200&fit=crop" },
   },
   {
     name: "Animal",
-    image: require("@assets/imgs/profile.png"),
+    image: { uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" },
   },
 ];
 
@@ -44,7 +44,7 @@ const videos = [
     creator: "Adele",
     views: "5.8M views",
     time: "3 months ago",
-    thumbnail: require("@assets/imgs/prof1.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1759503407457-3683579f080b?w=800&h=450&fit=crop" },
     duration: "3:47",
     isLive: true,
   },
@@ -54,7 +54,7 @@ const videos = [
     creator: "Prime Video",
     views: "12M views",
     time: "1 week ago",
-    thumbnail: require("@assets/imgs/prof2.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1576497587501-f71f94bef499?w=800&h=450&fit=crop" },
     duration: "2:30",
   },
 ];
@@ -65,28 +65,28 @@ const shorts = [
     title: "Amazing Dance Moves",
     creator: "DanceQueen",
     views: "2.3M",
-    thumbnail: require("@assets/imgs/prof3.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1560088186-8811763e95d2?w=300&h=500&fit=crop" },
   },
   {
     id: "2",
     title: "Quick Recipe Tips",
     creator: "FoodieLife",
     views: "1.8M",
-    thumbnail: require("@assets/imgs/prof4.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1718324864477-0a7811b309b6?w=300&h=500&fit=crop" },
   },
   {
     id: "3",
     title: "Workout Challenge",
     creator: "FitGuru",
     views: "3.1M",
-    thumbnail: require("@assets/imgs/prof5.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1718975102800-fb102d865db5?w=300&h=500&fit=crop" },
   },
   {
     id: "4",
     title: "Gaming Setup Tour",
     creator: "GameZone",
     views: "950K",
-    thumbnail: require("@assets/imgs/prof6.png"),
+    thumbnail: { uri: "https://images.unsplash.com/photo-1756575802484-7aab6829d600?w=300&h=500&fit=crop" },
   },
 ];
 
@@ -168,7 +168,7 @@ export default function NewHome() {
             </Pressable>
             <Pressable onPress={() => router.push("Profile")}>
               <Image
-                source={require("@assets/imgs/profile.png")}
+                source={{ uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" }}
                 style={styles.profileIcon}
               />
             </Pressable>

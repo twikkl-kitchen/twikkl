@@ -1,9 +1,15 @@
 import URLS from "./URLS";
 import { IUserStory } from "react-native-insta-story";
 import { appToast } from "@twikkl/utils/AppAlert";
-import { Image } from "react-native";
+import { Image, Platform } from "react-native";
 
-const renderImage = (localImage: any) => Image.resolveAssetSource(localImage).uri;
+const renderImage = (localImage: any) => {
+  if (Platform.OS === 'web') {
+    // For web, use a placeholder or return the localImage if it's already a string/URI
+    return typeof localImage === 'string' ? localImage : 'https://via.placeholder.com/150';
+  }
+  return Image.resolveAssetSource(localImage).uri;
+};
 
 const data: IUserStory<Record<string, any>>[] = [
   {

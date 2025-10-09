@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import * as Font from "expo-font";
 import { useFonts } from "expo-font";
-import { SplashScreen, Stack } from "expo-router";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { Provider as PaperProvider } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
 import { theme } from "@twikkl/configs";
@@ -15,6 +16,9 @@ export {
   ErrorBoundary,
 } from "expo-router";
 
+// Prevent the splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
+
 const axiforma = require("@assets/fonts/Axiforma-Regular.ttf") as Font.FontResource;
 const TwikkLIconFonts = require("@assets/fonts/twikkl-icons-v1.0/fonts/twikkl-icons.ttf") as Font.FontResource;
 
@@ -26,12 +30,17 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  return (
-    <>
-      {!loaded && <SplashScreen />}
-      {loaded && <RootLayoutNav />}
-    </>
-  );
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
+  return <RootLayoutNav />;
 }
 
 function RootLayoutNav() {
