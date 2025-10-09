@@ -15,6 +15,7 @@ import BottomNav from "@twikkl/components/BottomNav";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { useAuth } from "@twikkl/entities/auth.entity";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 import WalletIcon from "@assets/svg/WalletIcon";
 import SunIcon from "@assets/svg/SunIcon";
 import MoonIcon from "@assets/svg/MoonIcon";
@@ -103,8 +104,8 @@ export default function NewHome() {
   const { primary: colorPrimary } = useColors();
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
+  const { isDarkMode, toggleTheme } = useThemeMode();
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
@@ -120,10 +121,6 @@ export default function NewHome() {
     } else {
       router.push("auth/Register");
     }
-  };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
   };
 
   const backgroundColor = isDarkMode ? BACKGROUND_COLOR : LIGHT_BACKGROUND_COLOR;

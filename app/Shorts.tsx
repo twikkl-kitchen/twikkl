@@ -21,6 +21,7 @@ import { useRouter } from "expo-router";
 import AppBottomSheet from "@twikkl/components/BottomSheet";
 import Share from "@twikkl/components/Share";
 import { useAuth } from "@twikkl/entities/auth.entity";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 const DEFAULT_CAMERA_ACTION_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";

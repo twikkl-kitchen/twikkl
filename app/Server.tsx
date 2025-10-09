@@ -8,6 +8,7 @@ import ModalEl from "@twikkl/components/ModalEl";
 import ButtonEl from "@twikkl/components/ButtonEl";
 import Scroll from "@twikkl/components/Scrollable";
 import { useRouter } from "expo-router";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 export const colors = {
   green100: "#041105",
@@ -34,6 +35,7 @@ interface Group {
 type ModalType = "access" | "leave" | null;
 
 const Server = () => {
+  const { isDarkMode } = useThemeMode();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
   const [groups, setGroups] = useState<Group[]>(cardDataGroup);
   const [yourGroups, setYourGroups] = useState<Group[]>(cardDataYou);
@@ -144,16 +146,19 @@ const Server = () => {
   };
 
   const titleText = activeTabIndex === 0 ? "For You" : activeTabIndex === 1 ? "Your Servers" : "Favorite Servers";
+  const backgroundColor = isDarkMode ? "#000" : "#F5F5F5";
+  const textColor = isDarkMode ? "#fff" : "#000";
+  const headerBg = isDarkMode ? "#041105" : "#fff";
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles.header}>
+    <View style={{ flex: 1, backgroundColor }}>
+      <View style={[styles.header, { backgroundColor: headerBg }]}>
         <View style={styles.top}>
-          <TouchableOpacity onPressOut={() => router.back()} style={styles.iconContainer}>
-            <Octicons name="chevron-left" size={24} color="#fff" />
+          <TouchableOpacity onPressOut={() => router.back()} style={[styles.iconContainer, { backgroundColor: isDarkMode ? "#000" : "#E0E0E0" }]}>
+            <Octicons name="chevron-left" size={24} color={textColor} />
           </TouchableOpacity>
-          <Text style={styles.text}>Servers</Text>
-          <AntDesign name="search1" size={24} />
+          <Text style={[styles.text, { color: textColor }]}>Servers</Text>
+          <AntDesign name="search1" size={24} color={textColor} />
         </View>
         <View style={{ flexDirection: "row" }}>
           <ScrollView
@@ -182,7 +187,7 @@ const Server = () => {
       </View>
       <Highlights />
       <View style={styles.groupContainer}>
-        <Text style={styles.text}>{titleText}</Text>
+        <Text style={[styles.text, { color: textColor }]}>{titleText}</Text>
         <Scroll>
           {renderDisplay().map((item) => (
             <Pressable key={item.id} onPress={() => router.push(`/Discover/${item.id}`)}>

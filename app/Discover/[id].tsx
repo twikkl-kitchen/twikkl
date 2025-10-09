@@ -4,6 +4,7 @@ import Header from "@twikkl/components/Group/Header";
 import VideoCard from "@twikkl/components/Group/VideoCard";
 import { cardDataGroup, cardDataYou } from "@twikkl/data/discover/cardData";
 import { useState } from "react";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 export interface IGroup {
   desc: string;
@@ -21,13 +22,16 @@ export interface IGroup {
 
 const Group = (): JSX.Element => {
   const { id } = useLocalSearchParams();
+  const { isDarkMode } = useThemeMode();
   const groups = [...cardDataYou, ...cardDataGroup];
   const groupData = groups.find((item) => item.id === id);
   const [select, setSelect] = useState(0);
   const numColumns = select + 1;
 
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
+
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor }}>
       <Header select={select} setSelect={setSelect} {...groupData} />
       <View style={{ zIndex: -2, flex: 1 }}>
         <FlatList
