@@ -198,7 +198,7 @@ export default function NewHome() {
                 <MoonIcon color={headerColor} />
               )}
             </Pressable>
-            <Pressable>
+            <Pressable onPress={() => alert("Search feature coming soon!")}>
               <SearchIcon color={headerColor} />
             </Pressable>
             <Pressable onPress={() => router.push("Notification")}>

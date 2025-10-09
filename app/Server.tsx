@@ -43,21 +43,26 @@ const Server = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [modalType, setModalType] = useState<ModalType>(null);
   const router = useRouter();
+  
+  const backgroundColor = isDarkMode ? "#000" : "#F5F5F5";
+  const textColor = isDarkMode ? "#fff" : "#000";
+  const headerBg = isDarkMode ? "#041105" : "#fff";
+  const inactiveIconColor = isDarkMode ? "#888" : "#000";
 
   const serverTabs = [
     {
       title: "For you",
       activeIcon: <FontAwesome5 name="user-friends" size={22} color={colors.white200} />,
-      icon: <Feather name="users" size={22} color="#000" />,
+      icon: <Feather name="users" size={22} color={inactiveIconColor} />,
     },
     {
       title: "Your Servers",
       activeIcon: <FontAwesome5 name="user-friends" size={22} color={colors.white200} />,
-      icon: <Feather name="users" size={22} color="#000" />,
+      icon: <Feather name="users" size={22} color={inactiveIconColor} />,
     },
     {
       title: "Favorites",
-      icon: <Feather name="star" size={22} color="#000" />,
+      icon: <Feather name="star" size={22} color={inactiveIconColor} />,
       activeIcon: <Ionicons name="star" size={22} color={colors.white100} />,
     },
   ];
@@ -146,9 +151,6 @@ const Server = () => {
   };
 
   const titleText = activeTabIndex === 0 ? "For You" : activeTabIndex === 1 ? "Your Servers" : "Favorite Servers";
-  const backgroundColor = isDarkMode ? "#000" : "#F5F5F5";
-  const textColor = isDarkMode ? "#fff" : "#000";
-  const headerBg = isDarkMode ? "#041105" : "#fff";
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
@@ -251,6 +253,7 @@ const styles = StyleSheet.create({
     fontFamily: "axiforma",
     fontWeight: "300",
     fontSize: 14,
+    color: "#888",
   },
   activeNavText: {
     color: "#fff",
