@@ -117,6 +117,12 @@ The app is configured to run on the web using Expo's web support:
 - **Service Layer**: Complete API integration for CRUD operations
 
 ## Recent Changes
+- **October 09, 2025** - Critical Wallet Authentication Fix:
+  - Fixed wallet screen attempting to fetch data when user not logged in
+  - Added authentication check before making any wallet API calls
+  - Implemented login prompt screen for unauthenticated users
+  - Eliminated all "Failed to fetch wallet data" and MetaMask connection errors
+  - Browser console now clean with no wallet-related errors
 - **October 09, 2025** - Server Creation & Settings Screens:
   - Built complete server creation flow:
     - **CreateServer.tsx**: Form with name, description, location, hashtag, private/public toggle
