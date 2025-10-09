@@ -42,10 +42,13 @@ const ServerSettings = () => {
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={() => router.push("/server/EditImages")}
+          >
             <View style={styles.settingLeft}>
               <Ionicons name="image" size={20} color="#50a040" />
-              <Text style={styles.settingText}>Change Server Image</Text>
+              <Text style={styles.settingText}>Change Server Images</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#666" />
           </TouchableOpacity>

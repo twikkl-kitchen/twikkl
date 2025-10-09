@@ -40,6 +40,7 @@ const Header = ({
   smallGroup,
   select,
   setSelect,
+  id,
 }: Header): JSX.Element => {
   const { height } = Dimensions.get("window");
   const { isDarkMode } = useThemeMode();
@@ -102,31 +103,16 @@ const Header = ({
 
       <View style={{ backgroundColor, marginBottom: 16 }}>
         <View style={styles.actionContainer}>
-          <View style={styles.horizontal}>
+          <Pressable 
+            style={styles.horizontal}
+            onPress={() => router.push(`/server/CreateVideo?serverId=${id}`)}
+          >
             <Image source={require("../../../assets/imgs/smallImg1.png")} style={styles.actionAvatar} />
             <PlayUpload />
-          </View>
+          </Pressable>
           <View style={[styles.horizontal, { gap: 20 }]}>
-            <Pressable onPress={() => setDropDown(!dropDown)} style={[styles.horizontal, { gap: 7 }]}>
-              <GroupSettings />
-              <ArrowDown />
-            </Pressable>
-            <View style={styles.gridWrapper}>{gridArr[select]}</View>
+            {/* Grid options removed - videos now display as list cards like home screen */}
           </View>
-          {dropDown && (
-            <View style={styles.dropdown}>
-              {gridArr.map((grid, index) => (
-                <Pressable
-                  onPress={() => {
-                    setDropDown(false);
-                    setSelect(index);
-                  }}
-                >
-                  {grid}
-                </Pressable>
-              ))}
-            </View>
-          )}
         </View>
       </View>
     </View>
