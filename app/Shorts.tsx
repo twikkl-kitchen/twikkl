@@ -39,6 +39,7 @@ export default function Shorts() {
   const router = useRouter();
   const { primary: colorPrimary } = useColors();
   const { isLoggedIn } = useAuth();
+  const { isDarkMode } = useThemeMode();
   const [shareVisible, setShareVisible] = useState(false)
 
   // get static videos
@@ -106,7 +107,7 @@ export default function Shorts() {
       {
         shareVisible &&
         <AppBottomSheet 
-        backgroundColor= {BACKGROUND_COLOR}
+        backgroundColor={isDarkMode ? BACKGROUND_COLOR : "#fff"}
         height="50%"
         closeModal={() => setShareVisible(false)}>
           <Share />

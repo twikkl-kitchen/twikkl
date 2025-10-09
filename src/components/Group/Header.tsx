@@ -23,6 +23,7 @@ import ArrowDown from "@assets/svg/ArrowDown";
 import { useState } from "react";
 import Grid3 from "@assets/svg/Grid3";
 import Grid2 from "@assets/svg/Grid2";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 interface Header extends IGroup {
   select: number;
@@ -41,9 +42,13 @@ const Header = ({
   setSelect,
 }: Header): JSX.Element => {
   const { height } = Dimensions.get("window");
+  const { isDarkMode } = useThemeMode();
   const [dropDown, setDropDown] = useState(false);
   const router = useRouter();
   const gridArr = [<Grid1 />, <Grid2 />, <Grid3 />];
+  
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
+  const textColor = isDarkMode ? "#fff" : "#000";
   return (
     <View>
       <ImageBackground style={[styles.bannerImage, { height: height * 0.32 }]} source={img}>
@@ -57,10 +62,10 @@ const Header = ({
           </TouchableOpacity>
         </View>
       </ImageBackground>
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor }]}>
         <Image style={styles.profilePicture} source={smallImg} />
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.description}>{desc}</Text>
+        <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+        <Text style={[styles.description, { color: textColor }]}>{desc}</Text>
         <View style={[styles.horizontal, styles.detailsContainer]}>
           <View style={styles.horizontal}>
             <View style={styles.horizontal}>
@@ -68,8 +73,8 @@ const Header = ({
               <Text style={styles.details}>{status}</Text>
             </View>
             <View style={[styles.horizontal, { marginLeft: 10 }]}>
-              <FontAwesome5 name="user-friends" size={17} color={colors.white200} />
-              <Text style={styles.details}>{members} members</Text>
+              <FontAwesome5 name="user-friends" size={17} color={isDarkMode ? colors.white200 : "#666"} />
+              <Text style={[styles.details, { color: textColor }]}>{members} members</Text>
             </View>
           </View>
           <View style={[styles.horizontal, { gap: 10 }]}>
@@ -85,17 +90,17 @@ const Header = ({
         </View>
       </View>
 
-      <ScrollView horizontal>
+      <ScrollView horizontal style={{ backgroundColor }}>
         {smallGroup?.map((topic, index) => {
           return (
             <TouchableOpacity key={index} style={[styles.topicsButton]}>
-              <Text>{topic}</Text>
+              <Text style={{ color: textColor }}>{topic}</Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
-      <View style={{ backgroundColor: "#000", marginBottom: 16 }}>
+      <View style={{ backgroundColor, marginBottom: 16 }}>
         <View style={styles.actionContainer}>
           <View style={styles.horizontal}>
             <Image source={require("../../../assets/imgs/smallImg1.png")} style={styles.actionAvatar} />
