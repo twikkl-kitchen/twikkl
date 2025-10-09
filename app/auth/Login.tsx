@@ -6,6 +6,7 @@ import { useLogin } from "@twikkl/hooks/auth.hooks";
 import OAuthButton from "@twikkl/components/OAuthButton";
 import { useRouter } from "expo-router";
 import { ViewVariant } from "@twikkl/configs";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 const defaultLoginData = {
   email: "",
@@ -14,10 +15,14 @@ const defaultLoginData = {
 
 const Login = () => {
   const router = useRouter();
+  const { isDarkMode } = useThemeMode();
   const { form, updateField, login, canLogin, requesting } = useLogin(defaultLoginData);
+  
+  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const textColor = isDarkMode ? "#FFF" : "#000";
 
   return (
-    <View style={ViewVariant.wrapper}>
+    <View style={[ViewVariant.wrapper, { backgroundColor }]}>
       <AuthLayout
         handleBack={() => router.push("auth")}
         btnText="Sign In"
@@ -49,7 +54,7 @@ const Login = () => {
         </>
       </AuthLayout>
       <View style={styles.option}>
-        <Text>Don’t have an account?</Text>
+        <Text style={{ color: textColor }}>Don't have an account?</Text>
         <Pressable onPress={() => router.push("auth/Register")}>
           <Text style={styles.signUpText}>Sign up</Text>
         </Pressable>

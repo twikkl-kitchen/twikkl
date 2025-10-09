@@ -4,13 +4,17 @@ import { Signup as ISignup } from "@twikkl/services";
 import Checkbox from "expo-checkbox";
 import OAuthButton from "@twikkl/components/OAuthButton";
 import { useRouter } from "expo-router";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 export function SubSignup() {
   const router = useRouter();
+  const { isDarkMode } = useThemeMode();
+  const textColor = isDarkMode ? "#FFF" : "#000";
+  
   return (
     <View>
       <View style={styles.select}>
-        <Text>Already have an account?</Text>
+        <Text style={{ color: textColor }}>Already have an account?</Text>
         <Pressable onPress={() => router.push("auth/Login")}>
           <Text style={styles.greenText}>Login</Text>
         </Pressable>
@@ -34,6 +38,9 @@ const Signup = ({
   tc: boolean;
   setTc: Function;
 }) => {
+  const { isDarkMode } = useThemeMode();
+  const textColor = isDarkMode ? "#FFF" : "#000";
+  
   return (
     <View>
       <View style={{ gap: 12 }}>
@@ -61,11 +68,11 @@ const Signup = ({
       <View style={styles.selectWrapper}>
         <Checkbox color="#50A040" value={tc} onValueChange={() => setTc(!tc)} />
         <View style={styles.select}>
-          <Text>I agree to</Text>
+          <Text style={{ color: textColor }}>I agree to</Text>
           <Pressable>
             <Text style={styles.greenText}>Terms of Service</Text>
           </Pressable>
-          <Text>and</Text>
+          <Text style={{ color: textColor }}>and</Text>
           <Pressable>
             <Text style={styles.greenText}>Privacy Policy</Text>
           </Pressable>

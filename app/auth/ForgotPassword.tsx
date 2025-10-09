@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { forgotButtonText, forgotDesc, forgotHeader } from "./data";
 import ConfirmationField from "@twikkl/components/ConfirmationField";
 import { ViewVariant } from "@twikkl/configs";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 const defaultForm = {
   email: "",
@@ -17,8 +18,12 @@ const defaultForm = {
 
 const ForgotPassword = () => {
   const router = useRouter();
+  const { isDarkMode } = useThemeMode();
   const { stage, setStage, updateField, form, forgotPassword, _verifyOtp, _resendOtp, _resetPassword, loading } =
     useForgotPassword(defaultForm);
+  
+  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const textColor = isDarkMode ? "#FFF" : "#000";
 
   const handleClick = () => (stage === "reset" ? _resetPassword() : forgotPassword());
 
@@ -36,7 +41,7 @@ const ForgotPassword = () => {
     stage === "forgot" ? loading.forgotPassword : stage === "verify" ? loading.verifyOtp : loading.resetPassword;
 
   return (
-    <View style={ViewVariant.wrapper}>
+    <View style={[ViewVariant.wrapper, { backgroundColor }]}>
       <AuthLayout
         handleBack={backClick}
         btnText={forgotButtonText[stage]}
@@ -77,7 +82,7 @@ const ForgotPassword = () => {
       </AuthLayout>
       {stage === "verify" && (
         <View style={styles.option}>
-          <Text>You didn’t receive the email?</Text>
+          <Text style={{ color: textColor }}>You didn't receive the email?</Text>
           <Pressable>
             <Text style={styles.resendText}>Click to resend</Text>
           </Pressable>

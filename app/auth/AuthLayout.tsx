@@ -4,6 +4,7 @@ import { ViewVariant } from "@twikkl/configs";
 import { ReactElement } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Logo from "@twikkl/components/Logo";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 type IProps = {
   title: string;
@@ -18,16 +19,19 @@ type IProps = {
 };
 
 const AuthLayout = ({ title, desc, children, btnText, onPress, disabled, handleBack, loading, verify }: IProps) => {
+  const { isDarkMode } = useThemeMode();
+  const textColor = isDarkMode ? "#FFF" : "#000";
+  
   return (
     <View>
-      <Back style={styles.backButton} onPress={() => handleBack()} dark="#041105" />
+      <Back style={styles.backButton} onPress={() => handleBack()} dark={isDarkMode ? "#FFF" : "#041105"} />
       <View style={styles.image}>
         <Logo width={80} height={80} />
       </View>
       <View style={{ marginBottom: 24 }}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.desc}>{desc}</Text>
-        {verify && <Text style={styles.email}>{verify}</Text>}
+        <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+        <Text style={[styles.desc, { color: textColor }]}>{desc}</Text>
+        {verify && <Text style={[styles.email, { color: textColor }]}>{verify}</Text>}
         <View style={styles.children}>{children}</View>
         <ButtonEl loading={loading} disabled={disabled} onPress={() => onPress()}>
           <Text style={[ViewVariant.buttonText, disabled && { color: "#000" }]}>{btnText}</Text>
