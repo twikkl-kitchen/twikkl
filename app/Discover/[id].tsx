@@ -1,5 +1,5 @@
 import { View, FlatList } from "react-native";
-import { useSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import Header from "@twikkl/components/Group/Header";
 import VideoCard from "@twikkl/components/Group/VideoCard";
 import { cardDataGroup, cardDataYou } from "@twikkl/data/discover/cardData";
@@ -20,7 +20,7 @@ export interface IGroup {
 }
 
 const Group = (): JSX.Element => {
-  const { id } = useSearchParams();
+  const { id } = useLocalSearchParams();
   const groups = [...cardDataYou, ...cardDataGroup];
   const groupData = groups.find((item) => item.id === id);
   const [select, setSelect] = useState(0);
