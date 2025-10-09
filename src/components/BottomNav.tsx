@@ -13,12 +13,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Badge } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useColors } from "@twikkl/hooks";
-import { TwikklIcon, EIcon } from "@twikkl/configs";
 import { useTranslation } from "react-i18next";
 import Play from "@assets/svg/Play";
 import People from "@assets/svg/People";
 import Grid1 from "@assets/svg/Grid1";
-import { useAuth } from "@twikkl/entities/auth.entity";
+import WalletIcon from "@assets/svg/WalletIcon";
 
 type BottomNavProps = {
   commentCount?: number | string;
@@ -27,15 +26,6 @@ type BottomNavProps = {
 function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
-
-  const handleCreateClick = () => {
-    if (isLoggedIn) {
-      router.push("video/CreateUploadVideo");
-    } else {
-      router.push("auth/Register");
-    }
-  };
 
   return (
     <SafeAreaView style={styles.bottomContainer}>
@@ -53,19 +43,17 @@ function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleCreateClick} style={styles.tabContainer}>
-        <View style={styles.createButton}>
-          <TwikklIcon name={EIcon.PLUS} size={28} color="#FFF" />
-        </View>
-        <Text variant="titleMedium" style={styles.tabText}>
-          Create
-        </Text>
-      </TouchableOpacity>
-
       <TouchableOpacity onPress={() => router.push("Server")} style={styles.tabContainer}>
         <People />
         <Text variant="titleMedium" style={styles.tabText}>
-          Server
+          Servers
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push("Wallet")} style={styles.tabContainer}>
+        <WalletIcon color="#FFF" />
+        <Text variant="titleMedium" style={styles.tabText}>
+          Wallet
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -94,13 +82,5 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     alignItems: "center",
-  },
-  createButton: {
-    backgroundColor: "#50A040",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

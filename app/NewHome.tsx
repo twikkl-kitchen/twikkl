@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { useAuth } from "@twikkl/entities/auth.entity";
 import WalletIcon from "@assets/svg/WalletIcon";
+import SunIcon from "@assets/svg/SunIcon";
+import SearchIcon from "@assets/svg/SearchIcon";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -109,6 +111,14 @@ export default function NewHome() {
     }
   };
 
+  const handleCreateClick = () => {
+    if (isLoggedIn) {
+      router.push("video/CreateUploadVideo");
+    } else {
+      router.push("auth/Register");
+    }
+  };
+
   const ProfileStory = ({ item }: { item: typeof profiles[0] }) => (
     <View style={styles.storyItem}>
       <View style={styles.storyBorder}>
@@ -174,8 +184,11 @@ export default function NewHome() {
             <Text style={styles.logoText}>twikkl</Text>
           </View>
           <View style={styles.headerActions}>
-            <Pressable onPress={() => router.push("Wallet")}>
-              <WalletIcon color={DEFAULT_HEADER_COLOR} />
+            <Pressable>
+              <SunIcon color={DEFAULT_HEADER_COLOR} />
+            </Pressable>
+            <Pressable>
+              <SearchIcon color={DEFAULT_HEADER_COLOR} />
             </Pressable>
             <Pressable onPress={() => router.push("Notification")}>
               <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
@@ -240,6 +253,10 @@ export default function NewHome() {
           <View style={{ height: 100 }} />
         </ScrollView>
       </SafeAreaView>
+
+      <Pressable style={styles.fab} onPress={handleCreateClick}>
+        <TwikklIcon name={EIcon.PLUS} size={28} color="#FFF" />
+      </Pressable>
 
       <BottomNav commentCount={0} />
     </>
@@ -449,5 +466,21 @@ const styles = StyleSheet.create({
     color: "#808080",
     fontSize: 12,
     marginTop: 2,
+  },
+  fab: {
+    position: "absolute",
+    bottom: 90,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#50A040",
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
 });
