@@ -77,21 +77,34 @@ The app is configured to run on the web using Expo's web support:
   - Profile access
 
 **Bottom Navigation (4 tabs):**
-- **Home** → NewHome.tsx - Social feed with posts
-- **Shorts** → Shorts.tsx - Vertical video feed
-- **Create** → video/CreateUploadVideo - Upload/create content (requires auth)
-- **Server** → Server.tsx - Community/server discovery
+- **Home** → NewHome.tsx - Social feed with posts (house icon)
+- **Shorts** → Shorts.tsx - Vertical video feed (play icon)
+- **Servers** → Server.tsx - Community/server discovery (server icon)
+- **Wallet** → Wallet.tsx - Wallet management (wallet icon)
 
 **Top Right Navigation:**
+- Theme toggle (sun/moon icon) - switches between dark/light mode
+- Search icon (placeholder for future search functionality)
+- Notification bell
 - Profile icon (triggers auth if not logged in)
-- Notification bell on all main screens
-- Server quick access from headers
+
+**Floating Action Button:**
+- Green + button (bottom right) - triggers Create/Upload flow (requires auth)
 
 ## Known Issues & Notes
 - **MetaMask Browser Extension**: If you see "Failed to connect to MetaMask" errors in the browser console, these are from the MetaMask browser extension trying to auto-connect. The app does NOT use MetaMask - wallet functionality is handled by Para (formerly Capsule) on the backend, which auto-generates wallets for users on account creation.
 - **Wallet Screen**: The current Wallet.tsx is a placeholder. Wallet data is managed by Para integration on the backend. Future updates will fetch and display wallet information via authenticated API endpoints.
 
 ## Recent Changes
+- **October 09, 2025** - Figma Design Implementation:
+  - Implemented complete UI redesign matching Figma specifications:
+    - **Header Icons**: Added sun/moon theme toggle, search icon alongside notification bell and profile
+    - **Theme System**: Fully functional dark/light mode with adaptive colors for all UI elements
+    - **Bottom Navigation**: Replaced Create tab with Wallet, updated icons (Home → house icon, Servers → server icon)
+    - **Floating Action Button**: Green + FAB in bottom right for Create functionality
+    - **New Icon Components**: Created SunIcon, MoonIcon, SearchIcon, HomeIcon, ServersIcon
+    - Theme state manages: background colors, text colors, category chips, video cards
+    - All navigation routes verified and functional
 - **October 09, 2025** - Home Screen UI Update & Bug Fixes:
   - Updated NewHome header with YouTube-style layout:
     - Twikkl logo on the left

@@ -15,8 +15,8 @@ import { useRouter } from "expo-router";
 import { useColors } from "@twikkl/hooks";
 import { useTranslation } from "react-i18next";
 import Play from "@assets/svg/Play";
-import People from "@assets/svg/People";
-import Grid1 from "@assets/svg/Grid1";
+import HomeIcon from "@assets/svg/HomeIcon";
+import ServersIcon from "@assets/svg/ServersIcon";
 import WalletIcon from "@assets/svg/WalletIcon";
 
 type BottomNavProps = {
@@ -30,7 +30,7 @@ function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
   return (
     <SafeAreaView style={styles.bottomContainer}>
       <TouchableOpacity onPress={() => router.push("NewHome")} style={styles.tabContainer}>
-        <Grid1 />
+        <HomeIcon color="#FFF" />
         <Text variant="titleMedium" style={styles.tabText}>
           Home
         </Text>
@@ -44,7 +44,7 @@ function BottomNav({ commentCount = 0 }: BottomNavProps, {}) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("Server")} style={styles.tabContainer}>
-        <People />
+        <ServersIcon color="#FFF" />
         <Text variant="titleMedium" style={styles.tabText}>
           Servers
         </Text>

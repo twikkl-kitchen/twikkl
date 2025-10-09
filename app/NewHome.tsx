@@ -17,10 +17,12 @@ import { useRouter } from "expo-router";
 import { useAuth } from "@twikkl/entities/auth.entity";
 import WalletIcon from "@assets/svg/WalletIcon";
 import SunIcon from "@assets/svg/SunIcon";
+import MoonIcon from "@assets/svg/MoonIcon";
 import SearchIcon from "@assets/svg/SearchIcon";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
+const LIGHT_BACKGROUND_COLOR = "#F5F5F5";
 
 const profiles = [
   {
@@ -102,6 +104,7 @@ export default function NewHome() {
   const { t } = useTranslation();
   const { isLoggedIn } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   const handleProfileClick = () => {
     if (isLoggedIn) {
@@ -119,12 +122,20 @@ export default function NewHome() {
     }
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const backgroundColor = isDarkMode ? BACKGROUND_COLOR : LIGHT_BACKGROUND_COLOR;
+  const textColor = isDarkMode ? DEFAULT_HEADER_COLOR : "#000";
+  const headerColor = isDarkMode ? DEFAULT_HEADER_COLOR : "#000";
+
   const ProfileStory = ({ item }: { item: typeof profiles[0] }) => (
     <View style={styles.storyItem}>
       <View style={styles.storyBorder}>
         <Image source={item.image} style={styles.storyImage} />
       </View>
-      <Text style={styles.storyName}>{item.name}</Text>
+      <Text style={[styles.storyName, { color: isDarkMode ? "#A0A0A0" : "#666" }]}>{item.name}</Text>
     </View>
   );
 
@@ -136,15 +147,15 @@ export default function NewHome() {
           <TwikklIcon name={EIcon.HEART} size={12} color="#FFF" />
         </View>
       </View>
-      <Text style={styles.shortTitle} numberOfLines={2}>
+      <Text style={[styles.shortTitle, { color: textColor }]} numberOfLines={2}>
         {item.title}
       </Text>
-      <Text style={styles.shortViews}>{item.views} views</Text>
+      <Text style={[styles.shortViews, { color: isDarkMode ? "#808080" : "#666" }]}>{item.views} views</Text>
     </View>
   );
 
   const VideoCard = ({ item }: { item: typeof videos[0] }) => (
-    <View style={styles.videoCard}>
+    <View style={[styles.videoCard, { backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }]}>
       <View style={styles.videoThumbnailContainer}>
         <Image source={item.thumbnail} style={styles.videoThumbnail} />
         {item.isLive && (
@@ -159,13 +170,13 @@ export default function NewHome() {
       <View style={styles.videoInfo}>
         <Image source={profiles[0].image} style={styles.creatorAvatar} />
         <View style={styles.videoDetails}>
-          <Text style={styles.videoTitle} numberOfLines={2}>
+          <Text style={[styles.videoTitle, { color: textColor }]} numberOfLines={2}>
             {item.title}
           </Text>
-          <Text style={styles.videoMeta}>
+          <Text style={[styles.videoMeta, { color: isDarkMode ? "#808080" : "#666" }]}>
             {item.creator}
           </Text>
-          <Text style={styles.videoMeta}>
+          <Text style={[styles.videoMeta, { color: isDarkMode ? "#808080" : "#666" }]}>
             {item.views} • {item.time}
           </Text>
         </View>
@@ -175,23 +186,27 @@ export default function NewHome() {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <View style={styles.logoIcon}>
               <TwikklIcon name={EIcon.PLUS} size={16} color="#FFF" />
             </View>
-            <Text style={styles.logoText}>twikkl</Text>
+            <Text style={[styles.logoText, { color: textColor }]}>twikkl</Text>
           </View>
           <View style={styles.headerActions}>
-            <Pressable>
-              <SunIcon color={DEFAULT_HEADER_COLOR} />
+            <Pressable onPress={toggleTheme}>
+              {isDarkMode ? (
+                <SunIcon color={headerColor} />
+              ) : (
+                <MoonIcon color={headerColor} />
+              )}
             </Pressable>
             <Pressable>
-              <SearchIcon color={DEFAULT_HEADER_COLOR} />
+              <SearchIcon color={headerColor} />
             </Pressable>
             <Pressable onPress={() => router.push("Notification")}>
-              <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
+              <TwikklIcon name={EIcon.BELL} size={24} color={headerColor} />
             </Pressable>
             <Pressable onPress={handleProfileClick}>
               <Image
@@ -211,12 +226,13 @@ export default function NewHome() {
                   onPress={() => setSelectedCategory(category)}
                   style={[
                     styles.categoryChip,
-                    selectedCategory === category && styles.categoryChipActive,
+                    selectedCategory === category && (isDarkMode ? styles.categoryChipActive : styles.categoryChipActiveLight),
                   ]}
                 >
                   <Text
                     style={[
                       styles.categoryText,
+                      { color: selectedCategory === category ? (isDarkMode ? "#000" : "#FFF") : (isDarkMode ? "#A0A0A0" : "#666") },
                       selectedCategory === category && styles.categoryTextActive,
                     ]}
                   >
@@ -236,7 +252,7 @@ export default function NewHome() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Shorts</Text>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Shorts</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {shorts.map((short) => (
                 <ShortCard key={short.id} item={short} />
@@ -319,12 +335,13 @@ const styles = StyleSheet.create({
   categoryChipActive: {
     backgroundColor: "#FFF",
   },
+  categoryChipActiveLight: {
+    backgroundColor: "#000",
+  },
   categoryText: {
-    color: "#A0A0A0",
     fontSize: 14,
   },
   categoryTextActive: {
-    color: "#000",
     fontWeight: "600",
   },
   storiesContainer: {
@@ -350,7 +367,6 @@ const styles = StyleSheet.create({
     borderRadius: 26,
   },
   storyName: {
-    color: "#A0A0A0",
     fontSize: 12,
     marginTop: 4,
     textAlign: "center",
@@ -360,7 +376,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   sectionTitle: {
-    color: DEFAULT_HEADER_COLOR,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
@@ -388,13 +403,11 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   shortTitle: {
-    color: DEFAULT_HEADER_COLOR,
     fontSize: 12,
     marginTop: 8,
     lineHeight: 16,
   },
   shortViews: {
-    color: "#808080",
     fontSize: 12,
     marginTop: 4,
   },
@@ -404,7 +417,6 @@ const styles = StyleSheet.create({
   },
   videoCard: {
     marginBottom: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 12,
     overflow: "hidden",
   },
@@ -457,13 +469,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   videoTitle: {
-    color: DEFAULT_HEADER_COLOR,
     fontSize: 14,
     lineHeight: 18,
     marginBottom: 4,
   },
   videoMeta: {
-    color: "#808080",
     fontSize: 12,
     marginTop: 2,
   },
