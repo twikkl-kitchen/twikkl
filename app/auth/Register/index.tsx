@@ -113,7 +113,7 @@ const Register = () => {
       {currentStage === "signup" && <SubSignup />}
       {currentStage === "verify" && (
         <View style={styles.select}>
-          <Text>You didn’t receive a code?</Text>
+          <Text style={{ color: textColor }}>You didn't receive a code?</Text>
           <Pressable onPress={() => getOTP()}>
             <Text style={styles.resendText}>Resend Code</Text>
           </Pressable>
