@@ -4,7 +4,6 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { ResizeMode, Video } from "expo-av";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import * as Permissions from "expo-permissions";
 import { Bar } from "react-native-progress";
 import Speed from "@assets/svg/Speed";
 import Timer from "@assets/svg/Timer";
@@ -41,7 +40,7 @@ const CreateVideo = () => {
     timer === "15s" ? 15000 : timer === "30s" ? 30000 : timer === "60s" ? 60000 : timer === "3m" ? 180000 : 300000;
 
   const getMediaLibraryPermission = async () => {
-    const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       console.log("Permission denied!");
     }

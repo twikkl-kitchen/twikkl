@@ -12,7 +12,6 @@ import Cancel from "@assets/svg/Cancel";
 import Send from "@assets/svg/Send";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import * as Permissions from "expo-permissions";
 import AppBottomSheet from "@twikkl/components/BottomSheet";
 import { Bar } from "react-native-progress";
 import Effects from "@twikkl/components/Effects";
@@ -45,17 +44,11 @@ const CreateUploadvideo = () => {
     timer === "15s" ? 15000 : timer === "30s" ? 30000 : timer === "60s" ? 60000 : timer === "3m" ? 180000 : 300000;
 
   const getMediaLibraryPermission = async () => {
-    const { status } = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       console.log("Permission denied!");
     }
   };
-  // const getAudioRecordingPermission = async () => {
-  //   const { status } = await Permissions.askAsync(Permissions.AUDIO_RECORDING);
-  //   if (status !== "granted") {
-  //     console.log("Audio recording permission denied!");
-  //   }
-  // };
 
   const activateProgress = () => {
     const duration = iDuration;
