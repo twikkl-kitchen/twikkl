@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
@@ -12,6 +12,15 @@ export default function VideoAnimation() {
   const [canSkip, setCanSkip] = useState(false);
 
   useEffect(() => {
+    // On web, skip video and go straight to home after showing message
+    if (Platform.OS === 'web') {
+      const timer = setTimeout(() => {
+        handleComplete();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
+    // On mobile, allow skipping after 3 seconds
     const timer = setTimeout(() => {
       setCanSkip(true);
     }, 3000);
@@ -28,6 +37,19 @@ export default function VideoAnimation() {
     handleComplete();
   };
 
+  // On web, show text-only version (video is too large for web)
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.overlay}>
+          <Text style={styles.text}>Video Resources,</Text>
+          <Text style={styles.text}>Everywhere All At Once</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // On mobile, show video
   return (
     <View style={styles.container}>
       <Video
