@@ -98,6 +98,15 @@ The app is configured to run on the web using Expo's web support:
 **Floating Action Button:**
 - Green + button (bottom right) - triggers Create/Upload flow (requires auth)
 
+## Theme System
+- **Global State**: App-wide dark/light mode using `theme.entity.ts`
+- **Persistent**: Theme preference saved to AsyncStorage
+- **Consistent**: All screens respond to theme changes instantly
+- **Brand Colors**: 
+  - Primary Green: `#50A040`
+  - Dark Mode: `#041105` (brand), `#000` (dark)
+  - Light Mode: `#F5F5F5`, `#fff`
+
 ## Features
 
 ### Wallet System
@@ -117,6 +126,14 @@ The app is configured to run on the web using Expo's web support:
 - **Service Layer**: Complete API integration for CRUD operations
 
 ## Recent Changes
+- **October 09, 2025** - Global Theme System Implementation:
+  - Created global theme entity with persistent dark/light mode state
+  - Updated all screens to use consistent theming (NewHome, Server, Shorts, Discover detail)
+  - Theme toggle in NewHome now affects entire app globally
+  - Dark mode: `#000`/`#041105` backgrounds, `#fff` text
+  - Light mode: `#F5F5F5`/`#fff` backgrounds, `#000` text
+  - Primary green `#50A040` consistent across all themes
+  - Theme state persists across app restarts using AsyncStorage
 - **October 09, 2025** - Critical Wallet Authentication Fix:
   - Fixed wallet screen attempting to fetch data when user not logged in
   - Added authentication check before making any wallet API calls
