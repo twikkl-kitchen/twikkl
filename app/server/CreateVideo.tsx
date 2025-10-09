@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import { Camera } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { ResizeMode, Video } from "expo-av";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -22,6 +22,7 @@ const CreateVideo = () => {
   const router = useRouter();
   const { serverId } = useLocalSearchParams();
   const cameraRef = useRef<any>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [actions, setActions] = useState<"Speed" | "Effect" | "Timer" | string | null>(null);
@@ -111,10 +112,10 @@ const CreateVideo = () => {
   };
 
   useEffect(() => {
-    (async () => {
-      await Camera.requestCameraPermissionsAsync();
-    })();
-  }, []);
+    if (!permission) {
+      requestPermission();
+    }
+  }, [permission]);
 
   return (
     <>
@@ -146,11 +147,9 @@ const CreateVideo = () => {
           </Pressable>
         ) : (
           <>
-            <Camera
+            <CameraView
               style={[StyleSheet.absoluteFill]}
               ref={cameraRef}
-              onCameraReady={() => console.log("ready")}
-              onMountError={(error) => console.log("mountError", error)}
             />
             <View style={styles.container}>
               <View>

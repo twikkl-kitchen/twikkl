@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable, Image } from "react-native";
-import { Camera } from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 // import File from 'expo-file-system'
 import { ResizeMode, Video } from "expo-av";
@@ -18,17 +18,13 @@ import { Bar } from "react-native-progress";
 import Effects from "@twikkl/components/Effects";
 import CaptionVideo from "./CaptionVideo";
 
-const actionArr = [
-  { icon: <Speed />, text: "Speed", focused: <Speed focused={1} /> },
-  { icon: <Effect />, text: "Effect", focused: <Effect focused={1} /> },
-  { icon: <Timer />, text: "Timer", focused: <Timer focused={1} /> },
-];
 const speedArr = ["0.25x", "0.5x", "1x", "1.5x", "2x"];
 const timerArr = ["15s", "30s", "60s", "3m", "5m"];
 
 const CreateUploadvideo = () => {
   const router = useRouter();
   const cameraRef = useRef<any>(null);
+  const [permission, requestPermission] = useCameraPermissions();
   const [isRecording, setIsRecording] = useState(false);
   const [videoUri, setVideoUri] = useState<string | null>(null);
   // const [cameraRef, setCameraRef] = useState<any>(null);
@@ -38,6 +34,12 @@ const CreateUploadvideo = () => {
   const [progress, setProgress] = useState(0);
   const [shouldPlay, setShouldPlay] = useState(false);
   const [caption, setCaption] = useState(false);
+
+  const actionArr = [
+    { icon: <Speed />, text: "Speed", focused: <Speed focused={1} /> },
+    { icon: <Effect />, text: "Effect", focused: <Effect focused={1} /> },
+    { icon: <Timer />, text: "Timer", focused: <Timer focused={1} /> },
+  ];
 
   const iDuration =
     timer === "15s" ? 15000 : timer === "30s" ? 30000 : timer === "60s" ? 60000 : timer === "3m" ? 180000 : 300000;
@@ -120,11 +122,10 @@ const CreateUploadvideo = () => {
   };
 
   useEffect(() => {
-    (async () => {
-      await Camera.requestCameraPermissionsAsync();
-      // await getAudioRecordingPermission();
-    })();
-  }, []);
+    if (!permission) {
+      requestPermission();
+    }
+  }, [permission]);
 
   return (
     <>
@@ -160,11 +161,9 @@ const CreateUploadvideo = () => {
           )
         ) : (
           <>
-            <Camera
+            <CameraView
               style={[StyleSheet.absoluteFill]}
               ref={cameraRef}
-              onCameraReady={() => console.log("ready")}
-              onMountError={(error) => console.log("mountError", error)}
             />
             <View style={styles.container}>
               <View>

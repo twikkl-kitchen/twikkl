@@ -136,6 +136,11 @@ The app is configured to run on the web using Expo's web support:
   - Accessed via Settings → Change Server Images
 
 ## Recent Changes
+- **October 09, 2025** - Fixed Expo Camera SDK 51 Compatibility:
+  - Updated camera imports from `Camera` to `CameraView` and `useCameraPermissions`
+  - Fixed JSX rendering errors in CreateVideo.tsx and CreateUploadVideo.tsx
+  - Moved actionArr array inside component to prevent web platform errors
+  - Camera functionality now fully compatible with Expo SDK 51
 - **October 09, 2025** - Server Video & Image Management Features:
   - **Video Display**: Updated server detail screens to show videos as cards (matching home screen layout)
   - **Create Flow**: Built complete video creation flow in servers (CreateVideo → CaptionVideo → Post)
