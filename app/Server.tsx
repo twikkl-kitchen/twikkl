@@ -161,7 +161,10 @@ const Server = () => {
             showsHorizontalScrollIndicator={false}
             horizontal
           >
-            <TouchableOpacity style={styles.addButton}>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => router.push("/server/CreateServer")}
+            >
               <Ionicons name="add-outline" size={30} color="#fff" />
             </TouchableOpacity>
             {serverTabs.map(({ icon, title, activeIcon }, index) => (

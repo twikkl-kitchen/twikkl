@@ -51,8 +51,10 @@ const Header = ({
           <Octicons name="chevron-left" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={{ flexDirection: "row", gap: 26 }}>
-          <AntDesign name="search1" size={24} />
-          <MenuIcon />
+          <AntDesign name="search1" size={24} color="#fff" />
+          <TouchableOpacity onPress={() => router.push("/server/Settings")}>
+            <Ionicons name="settings-outline" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
       </ImageBackground>
       <View style={styles.container}>
