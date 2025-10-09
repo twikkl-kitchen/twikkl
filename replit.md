@@ -26,17 +26,24 @@ TwikkL is a cross-platform DApp (Decentralized Application) built with React Nat
   /auth          - Authentication screens
   /Discover      - Discovery screens (legacy)
   /video         - Video creation screens
+  /server        - Server management screens
+    CreateServer.tsx - Server creation form
+    AddMembers.tsx   - Member invitation
+    Settings.tsx     - Server settings
   NewHome.tsx    - Main social feed home screen
   Shorts.tsx     - Short-form video feed (TikTok-style)
   Server.tsx     - Server/community discovery screen
   Profile.tsx    - User profile screen
+  Wallet.tsx     - Multi-chain wallet screen
 /src
   /components    - Reusable components
-    BottomNav.tsx - Main navigation bar (Home, Shorts, Create, Server)
+    BottomNav.tsx - Main navigation bar (Home, Shorts, Wallet, Server)
   /configs       - App configuration (theme, etc.)
   /entities      - Entity management
   /hooks         - Custom React hooks
   /services      - API services
+    server.services.ts - Server CRUD and member operations
+    wallet.services.ts - Multi-chain wallet operations
   /utils         - Utility functions
 /assets          - Images, fonts, and static assets
 /translations    - i18n resources
@@ -91,11 +98,45 @@ The app is configured to run on the web using Expo's web support:
 **Floating Action Button:**
 - Green + button (bottom right) - triggers Create/Upload flow (requires auth)
 
-## Known Issues & Notes
-- **Wallet Integration**: Wallet functionality is powered by Para embedded wallet SDK. Para auto-generates wallets for users on account creation with support for EVM chains, Solana, and Cosmos.
-- **Servers**: Servers can be either public (anyone can join) or private (invite-only). There are no eligibility criteria required to join servers.
+## Features
+
+### Wallet System
+- **Multi-Chain Support**: Ethereum, Solana, Polygon
+- **Para Integration**: Para embedded wallet SDK auto-generates wallets on account creation
+- **Features**: Balance display, transaction history, send/receive, chain switching
+- **Error Handling**: Comprehensive retry functionality with user-friendly messages
+
+### Server System
+- **Server Types**: Public (immediate join) or Private (request access)
+- **No Join Criteria**: No eligibility requirements (removed BAYC NFT/token gates)
+- **Creation Flow**: 
+  1. Create Server form (name, description, location, hashtag, privacy)
+  2. Add Members screen (search, multi-select invitation)
+  3. Settings screen (privacy toggles, member management)
+- **Features**: Join/leave, favorites, member invites, content moderation
+- **Service Layer**: Complete API integration for CRUD operations
 
 ## Recent Changes
+- **October 09, 2025** - Server Creation & Settings Screens:
+  - Built complete server creation flow:
+    - **CreateServer.tsx**: Form with name, description, location, hashtag, private/public toggle
+    - **AddMembers.tsx**: Search users, multi-select, skip option, dynamic "Create Server" button
+    - **Settings.tsx**: General, Privacy & Members, Content, Danger Zone sections
+  - Updated Server.tsx "+" button to trigger CreateServer flow
+  - Added settings icon to server detail header (replaced menu icon)
+  - Created server.services.ts with complete API integration
+  - All screens use consistent dark theme styling and icons
+  - Validation: server name required, button disabled until filled
+- **October 09, 2025** - Wallet Screen Implementation:
+  - Built multi-chain wallet screen with Ethereum, Solana, Polygon support
+  - Features: Balance display, transaction history, send/receive buttons
+  - Comprehensive error handling with retry functionality
+  - Created wallet.services.ts for backend API integration
+  - Fixed wallet state management for proper chain switching
+- **October 09, 2025** - Server System Updates:
+  - Removed all eligibility criteria (BAYC NFT/token requirements)
+  - Simplified to public (immediate join) vs private (request access) servers
+  - Fixed useSearchParams error in Discover screen
 - **October 09, 2025** - Figma Design Implementation:
   - Implemented complete UI redesign matching Figma specifications:
     - **Header Icons**: Added sun/moon theme toggle, search icon alongside notification bell and profile

@@ -13,10 +13,12 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getWalletInfo, getWalletBalance, getWalletTransactions, WalletData, Transaction } from "@twikkl/services";
+import { useAuth } from "@twikkl/entities/auth.entity";
 
 export default function Wallet(): ReactElement {
   const { t } = useTranslation();
   const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [walletData, setWalletData] = useState<WalletData | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,16 +26,22 @@ export default function Wallet(): ReactElement {
   const [activeChain, setActiveChain] = useState("ethereum");
 
   useEffect(() => {
-    fetchWalletData();
-  }, []);
+    if (isLoggedIn) {
+      fetchWalletData();
+    } else {
+      setLoading(false);
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
-    if (walletData) {
+    if (walletData && isLoggedIn) {
       fetchChainData();
     }
   }, [activeChain, walletData?.address]);
 
   const fetchWalletData = async () => {
+    if (!isLoggedIn) return;
+    
     try {
       setLoading(true);
       setError(null);
@@ -97,6 +105,30 @@ export default function Wallet(): ReactElement {
     { id: "solana", name: "Solana", symbol: "SOL", icon: "sunny-outline" as const },
     { id: "polygon", name: "Polygon", symbol: "MATIC", icon: "git-network-outline" as const },
   ];
+
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Wallet</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="wallet-outline" size={64} color="#50a040" />
+          <Text style={styles.errorText}>Please log in to access your wallet</Text>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            onPress={() => router.push("/auth/createAccount")}
+          >
+            <Text style={styles.retryText}>Log In / Sign Up</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
 
   if (loading) {
     return (
