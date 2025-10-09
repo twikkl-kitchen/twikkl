@@ -41,12 +41,19 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Development Setup**: Configured for web execution on Replit, running on port 5000 with host `0.0.0.0` to support Replit's proxy.
 
 ## External Dependencies
-*   **Backend API**: `https://twikkl-api-a7e6db9b083a.herokuapp.com/v1/`
+*   **Backend API**: `https://twikkl-eba1ec2fec21.herokuapp.com/v1/` (NestJS backend deployed on Heroku)
 *   **State Management**: simpler-state
 *   **Internationalization**: i18next, react-i18next
 *   **UI Library**: React Native Paper
 *   **Styling**: Styled Components
 *   **Wallet SDK**: Para embedded wallet SDK
-*   **Authentication**: Google OAuth (via custom Node.js/Express backend)
-*   **Database/Storage**: Supabase (PostgreSQL for data, storage for videos)
+*   **Authentication**: Google OAuth (integrated in Heroku NestJS backend)
+*   **Database/Storage**: Supabase (PostgreSQL for data, storage for videos with 50MB limit)
 *   **Local Storage**: AsyncStorage (for theme persistence)
+
+## Recent Changes (Oct 9, 2025)
+*   **Backend Consolidation**: Migrated from dual backends to single Heroku NestJS backend (`https://twikkl-eba1ec2fec21.herokuapp.com/v1/`)
+*   **Google OAuth Integration**: Added Google authentication to Heroku backend with deep linking support (`twikkl://auth`)
+*   **Video Upload System**: Implemented Supabase video upload with 50MB limit, upload count tracking, and server video management
+*   **API Configuration**: Updated frontend to use Heroku backend endpoints (`/auth/google`, `/videos/upload`, etc.)
+*   **Workflow Cleanup**: Removed local Replit backend workflow, now using single Web Server workflow on port 5000
