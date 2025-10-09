@@ -136,6 +136,14 @@ The app is configured to run on the web using Expo's web support:
   - Accessed via Settings → Change Server Images
 
 ## Recent Changes
+- **October 09, 2025** - Logo Update & Package Compatibility:
+  - Replaced all old logo instances with new SVG logo component
+  - New logo features dual play button design (green #50A040 and light #F1FCF2)
+  - Updated in: NewHome header, Splash screen, Register screen, AuthLayout
+  - Removed deprecated expo-permissions package
+  - Removed @types/react-native (types included with react-native)
+  - Fixed react-native-webview version to 13.8.6 for Expo SDK 51 compatibility
+  - All Expo packages now verified compatible for APK builds
 - **October 09, 2025** - Google OAuth & Supabase Integration:
   - Built complete Node.js/Express backend with Google OAuth authentication
   - Integrated Supabase for PostgreSQL database and video storage

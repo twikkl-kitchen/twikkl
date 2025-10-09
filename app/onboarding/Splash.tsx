@@ -1,6 +1,7 @@
-import { View, Image, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
+import Logo from "@twikkl/components/Logo";
 
 export default function Splash() {
   const router = useRouter();
@@ -15,11 +16,7 @@ export default function Splash() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("@assets/imgs/logos/logo.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+      <Logo width={200} height={200} />
     </View>
   );
 }

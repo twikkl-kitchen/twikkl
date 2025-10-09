@@ -7,8 +7,8 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import InputField from "@twikkl/components/InputField";
+import Logo from "@twikkl/components/Logo";
 
-const logoImg = require("@assets/imgs/logos/logo.png") as ImagePropsBase["source"];
 const logoGoogle = require("@assets/imgs/logos/google.png") as ImagePropsBase["source"];
 
 export default function ScreenRegister(): ReactElement {
@@ -30,7 +30,9 @@ export default function ScreenRegister(): ReactElement {
     <SafeAreaView style={{ ...ViewVariant.page, backgroundColor: colorBrand }}>
       <KeyboardAwareScrollView contentContainerStyle={ViewVariant.centered}>
         <View style={{ ...styles.inner, paddingTop: "20%" }}>
-          <Image style={styles.logo} source={logoImg} />
+          <View style={styles.logo}>
+            <Logo width={100} height={100} />
+          </View>
           <Text style={{ ...fonts.titleMedium, color: colorWhite }}>{t("register.createAccount")}</Text>
           <TextInput
             value="john.doe@test.com"

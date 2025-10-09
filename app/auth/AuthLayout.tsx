@@ -2,7 +2,8 @@ import Back from "@assets/svg/Back";
 import ButtonEl from "@twikkl/components/ButtonEl";
 import { ViewVariant } from "@twikkl/configs";
 import { ReactElement } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
+import Logo from "@twikkl/components/Logo";
 
 type IProps = {
   title: string;
@@ -20,7 +21,9 @@ const AuthLayout = ({ title, desc, children, btnText, onPress, disabled, handleB
   return (
     <View>
       <Back style={styles.backButton} onPress={() => handleBack()} dark="#041105" />
-      <Image style={styles.image} source={require("../../assets/imgs/logos/smLogo.png")} />
+      <View style={styles.image}>
+        <Logo width={80} height={80} />
+      </View>
       <View style={{ marginBottom: 24 }}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.desc}>{desc}</Text>

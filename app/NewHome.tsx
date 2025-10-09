@@ -20,6 +20,7 @@ import WalletIcon from "@assets/svg/WalletIcon";
 import SunIcon from "@assets/svg/SunIcon";
 import MoonIcon from "@assets/svg/MoonIcon";
 import SearchIcon from "@assets/svg/SearchIcon";
+import Logo from "@twikkl/components/Logo";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -186,10 +187,7 @@ export default function NewHome() {
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <View style={styles.logoIcon}>
-              <TwikklIcon name={EIcon.PLUS} size={16} color="#FFF" />
-            </View>
-            <Text style={[styles.logoText, { color: textColor }]}>twikkl</Text>
+            <Logo width={40} height={40} />
           </View>
           <View style={styles.headerActions}>
             <Pressable onPress={toggleTheme}>
