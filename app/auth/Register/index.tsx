@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { fetchFromApi, handleFetchError } from "@twikkl/utils/fetch";
 import { useAuth } from "@twikkl/entities/auth.entity";
 import { getOTP } from "@twikkl/services";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 const defaultSignUpData = {
   email: "",
@@ -23,9 +24,13 @@ const defaultSignUpData = {
 const Register = () => {
   const router = useRouter();
   const { signupDone = false } = useLocalSearchParams();
+  const { isDarkMode } = useThemeMode();
   const [suffix, setSuffix] = useState(".jgy");
   const [dropDown, setDropDown] = useState(false);
   const [tc, setTc] = useState(false);
+  
+  const textColor = isDarkMode ? "#FFF" : "#000";
+  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
   const {
     form,
     updateField,
@@ -61,7 +66,7 @@ const Register = () => {
   }, [currentStage]);
 
   return (
-    <View style={ViewVariant.wrapper}>
+    <View style={[ViewVariant.wrapper, { backgroundColor }]}>
       <AuthLayout
         handleBack={backClick}
         btnText={signupButtonText[currentStage]}

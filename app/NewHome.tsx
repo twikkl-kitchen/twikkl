@@ -188,6 +188,7 @@ export default function NewHome() {
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Logo width={40} height={40} />
+            <Text style={[styles.logoText, { color: textColor }]}>twikkl</Text>
           </View>
           <View style={styles.headerActions}>
             <Pressable onPress={toggleTheme}>

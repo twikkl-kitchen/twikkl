@@ -3,24 +3,31 @@ import React from "react";
 import ButtonEl from "@twikkl/components/ButtonEl";
 import { ViewVariant } from "@twikkl/configs";
 import { useRouter } from "expo-router";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
+import Logo from "@twikkl/components/Logo";
 
 const Index = () => {
   const router = useRouter();
+  const { isDarkMode } = useThemeMode();
+  
+  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const textColor = isDarkMode ? "#FFF" : "#000";
+  
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, { backgroundColor }]}>
       <View style={styles.top}>
-        <Image source={require("@assets/imgs/logos/logo.png")} />
-        <Text style={styles.bigText}>
+        <Logo width={120} height={120} />
+        <Text style={[styles.bigText, { color: textColor }]}>
           A blockchain-based distributed system for video sharing and social networking.
         </Text>
-        <Text style={styles.text}>Giving you power to recreate your thoughts in a decentralized system</Text>
+        <Text style={[styles.text, { color: textColor }]}>Giving you power to recreate your thoughts in a decentralized system</Text>
       </View>
       <View style={styles.btnWrapper}>
         <ButtonEl onPress={() => router.push("auth/Register")}>
           <Text style={ViewVariant.buttonText}>Create Account</Text>
         </ButtonEl>
       </View>
-      <ButtonEl bg="#C0CCC1" onPress={() => router.push("auth/Login")}>
+      <ButtonEl bg={isDarkMode ? "#1A1A1A" : "#C0CCC1"} onPress={() => router.push("auth/Login")}>
         <Text style={ViewVariant.buttonText}>Sign In</Text>
       </ButtonEl>
     </View>
@@ -34,7 +41,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 150,
-    backgroundColor: "#F1FCF2",
   },
   bigText: {
     fontSize: 24,

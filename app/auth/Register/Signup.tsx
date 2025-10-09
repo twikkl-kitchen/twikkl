@@ -15,7 +15,10 @@ export function SubSignup() {
           <Text style={styles.greenText}>Login</Text>
         </Pressable>
       </View>
-      <OAuthButton text="Sign up with Google" />
+      <OAuthButton 
+        text="Sign up with Google" 
+        onPress={() => router.push('/auth/GoogleAuth')}
+      />
     </View>
   );
 }
