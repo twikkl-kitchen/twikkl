@@ -136,6 +136,15 @@ The app is configured to run on the web using Expo's web support:
   - Accessed via Settings → Change Server Images
 
 ## Recent Changes
+- **October 09, 2025** - Google OAuth & Supabase Integration:
+  - Built complete Node.js/Express backend with Google OAuth authentication
+  - Integrated Supabase for PostgreSQL database and video storage
+  - Created WebView-based Google Sign-In flow for React Native
+  - Implemented JWT token authentication with secure session management
+  - Video upload service with 50MB limit (Supabase free tier)
+  - Deep link callback system (`twikkl://auth`) for OAuth flow
+  - Backend running on port 3000, frontend on port 5000
+  - Complete API: auth, video upload, server videos, upload count
 - **October 09, 2025** - Fixed Expo Camera SDK 51 Compatibility:
   - Updated camera imports from `Camera` to `CameraView` and `useCameraPermissions`
   - Fixed JSX rendering errors in CreateVideo.tsx and CreateUploadVideo.tsx

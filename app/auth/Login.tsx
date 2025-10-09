@@ -54,7 +54,10 @@ const Login = () => {
           <Text style={styles.signUpText}>Sign up</Text>
         </Pressable>
       </View>
-      <OAuthButton text="Continue with Google" />
+      <OAuthButton 
+        text="Continue with Google" 
+        onPress={() => router.push('/auth/GoogleAuth')}
+      />
     </View>
   );
 };

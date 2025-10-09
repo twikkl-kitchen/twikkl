@@ -1,8 +1,8 @@
 import { Text, Image, Pressable, StyleSheet } from "react-native";
 
-const OAuthButton = ({ text }: { text: string }) => {
+const OAuthButton = ({ text, onPress }: { text: string; onPress?: () => void }) => {
   return (
-    <Pressable style={styles.wrapper}>
+    <Pressable style={styles.wrapper} onPress={onPress}>
       <Image source={require("@assets/imgs/logos/google.png")} />
       <Text style={styles.text}>{text}</Text>
     </Pressable>

@@ -68,6 +68,7 @@
     "react-native-svg-transformer": "^1.0.0",
     "react-native-toast-message": "^2.1.6",
     "react-native-web": "^0.19.13",
+    "react-native-webview": "^13.16.0",
     "simpler-state": "^1.2.1",
     "styled-components": "^5.3.11",
     "unzipper": "^0.12.3",

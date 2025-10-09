@@ -15,7 +15,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit (Supabase free tier)
   },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('video/')) {
@@ -28,6 +28,19 @@ const upload = multer({
 
 // Upload video to Supabase Storage
 router.post('/upload', isAuthenticated, upload.single('video'), uploadVideo);
+
+// Handle multer errors (file size, etc.)
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        error: 'Video file is too large. Maximum size is 50MB.' 
+      });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+  next(error);
+});
 
 // Create video post
 router.post('/create', isAuthenticated, createVideoPost);
