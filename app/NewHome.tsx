@@ -15,6 +15,7 @@ import BottomNav from "@twikkl/components/BottomNav";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "expo-router";
 import { useAuth } from "@twikkl/entities/auth.entity";
+import WalletIcon from "@assets/svg/WalletIcon";
 
 const DEFAULT_HEADER_COLOR = "#FFF";
 const BACKGROUND_COLOR = "#041105";
@@ -173,6 +174,9 @@ export default function NewHome() {
             <Text style={styles.logoText}>twikkl</Text>
           </View>
           <View style={styles.headerActions}>
+            <Pressable onPress={() => router.push("Wallet")}>
+              <WalletIcon color={DEFAULT_HEADER_COLOR} />
+            </Pressable>
             <Pressable onPress={() => router.push("Notification")}>
               <TwikklIcon name={EIcon.BELL} size={24} color={DEFAULT_HEADER_COLOR} />
             </Pressable>
