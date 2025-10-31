@@ -9,7 +9,7 @@ import { Client as ObjectStorageClient } from "@replit/object-storage";
 import { v4 as uuidv4 } from "uuid";
 
 const app: Express = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());

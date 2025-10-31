@@ -1,6 +1,6 @@
 // API Configuration
-// Use Replit backend hosted on the same domain
-const API_BASE_URL = process.env.BACKEND_URL || '/api';
+// Use Replit backend on port 3001
+const API_BASE_URL = process.env.BACKEND_URL || 'http://localhost:3001/api';
 
 export const API_ENDPOINTS = {
   // Auth endpoints (Replit Auth)
