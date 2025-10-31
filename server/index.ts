@@ -36,8 +36,19 @@ const upload = multer({
   },
 });
 
-// Initialize Replit Object Storage
-const objectStorage = new ObjectStorageClient();
+// Initialize Replit Object Storage (lazy-loaded to handle missing bucket)
+let objectStorage: ObjectStorageClient | null = null;
+
+function getObjectStorage(): ObjectStorageClient {
+  if (!objectStorage) {
+    try {
+      objectStorage = new ObjectStorageClient();
+    } catch (error) {
+      throw new Error('Object Storage not configured. Please create a bucket in the Replit Object Storage pane.');
+    }
+  }
+  return objectStorage;
+}
 
 // Initialize routes
 async function registerRoutes(app: Express): Promise<Server> {
@@ -77,7 +88,8 @@ async function registerRoutes(app: Express): Promise<Server> {
       const storagePath = `videos/${userId}/${fileName}`;
 
       // Upload to Replit Object Storage
-      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+      const storage = getObjectStorage();
+      const uploadResult = await storage.uploadFromBytes(storagePath, file.buffer);
 
       if (!uploadResult.ok) {
         console.error('Upload error:', uploadResult.error);
@@ -183,7 +195,8 @@ async function registerRoutes(app: Express): Promise<Server> {
       const { userId, fileName } = req.params;
       const storagePath = `videos/${userId}/${fileName}`;
 
-      const downloadResult = await objectStorage.downloadAsBytes(storagePath);
+      const storage = getObjectStorage();
+      const downloadResult = await storage.downloadAsBytes(storagePath);
 
       if (!downloadResult.ok) {
         return res.status(404).json({ error: 'Video not found' });
@@ -192,7 +205,7 @@ async function registerRoutes(app: Express): Promise<Server> {
       // Set appropriate headers for video streaming
       res.setHeader('Content-Type', 'video/mp4');
       res.setHeader('Accept-Ranges', 'bytes');
-      res.send(Buffer.from(downloadResult.value));
+      res.send(downloadResult.value);
     } catch (error) {
       console.error('Video stream error:', error);
       res.status(500).json({ error: 'Failed to stream video' });
@@ -333,7 +346,7 @@ async function startServer() {
   try {
     const server = await registerRoutes(app);
     
-    server.listen(PORT, '0.0.0.0', () => {
+    server.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`✅ Twikkl backend server running on http://0.0.0.0:${PORT}`);
       console.log(`✅ API endpoints available at /api/*`);
     });
