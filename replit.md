@@ -40,20 +40,45 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Code Structure**: Follows a modular approach with dedicated directories for components, configurations, entities, hooks, services, and utilities.
 *   **Development Setup**: Configured for web execution on Replit, running on port 5000 with host `0.0.0.0` to support Replit's proxy.
 
-## External Dependencies
-*   **Backend API**: `https://twikkl-eba1ec2fec21.herokuapp.com/v1/` (NestJS backend deployed on Heroku)
+## External Dependencies & Backend Architecture
+*   **Backend API**: Express.js/TypeScript backend hosted on Replit (port 5000)
 *   **State Management**: simpler-state
 *   **Internationalization**: i18next, react-i18next
 *   **UI Library**: React Native Paper
 *   **Styling**: Styled Components
 *   **Wallet SDK**: Para embedded wallet SDK
-*   **Authentication**: Google OAuth (integrated in Heroku NestJS backend)
-*   **Database/Storage**: Supabase (PostgreSQL for data, storage for videos with 50MB limit)
-*   **Local Storage**: AsyncStorage (for theme persistence)
+*   **Authentication**: Replit Auth with Google OAuth support
+*   **Database**: PostgreSQL via Replit (Neon-backed) using Drizzle ORM
+*   **Storage**: Replit App Storage (Object Storage) for video files
+*   **Local Storage**: AsyncStorage (for theme persistence on mobile)
 
-## Recent Changes (Oct 9, 2025)
-*   **Backend Consolidation**: Migrated from dual backends to single Heroku NestJS backend (`https://twikkl-eba1ec2fec21.herokuapp.com/v1/`)
-*   **Google OAuth Integration**: Added Google authentication to Heroku backend with deep linking support (`twikkl://auth`)
-*   **Video Upload System**: Implemented Supabase video upload with 50MB limit, upload count tracking, and server video management
-*   **API Configuration**: Updated frontend to use Heroku backend endpoints (`/auth/google`, `/videos/upload`, etc.)
-*   **Workflow Cleanup**: Removed local Replit backend workflow, now using single Web Server workflow on port 5000
+## Backend Architecture (Oct 31, 2025)
+*   **Framework**: Express.js with TypeScript
+*   **Database ORM**: Drizzle ORM with PostgreSQL
+*   **Authentication**: Replit Auth (OpenID Connect) - supports Google, GitHub, X, Apple, email/password
+*   **Session Management**: express-session with PostgreSQL storage
+*   **File Storage**: Replit Object Storage (@replit/object-storage)
+*   **Database Schema**:
+    *   `users` - User profiles with referral codes
+    *   `servers` - Community servers (public/private)
+    *   `server_members` - Server membership tracking
+    *   `videos` - Video metadata with server associations
+    *   `upload_counts` - 24-hour upload limit tracking (2 per server)
+    *   `referrals` - Referral system tracking
+    *   `sessions` - Session storage (required for Replit Auth)
+
+## Backend API Endpoints
+*   **Auth**: `/api/login`, `/api/logout`, `/api/auth/user`
+*   **Videos**: `/api/videos/upload`, `/api/videos/create`, `/api/videos/stream/:userId/:fileName`
+*   **Servers**: `/api/servers`, `/api/servers/:serverId`, `/api/users/:userId/servers`
+*   **Referrals**: `/api/referrals`, `/api/referrals/code/:code`, `/api/users/:userId/referrals`
+
+## Recent Changes (Oct 31, 2025)
+*   **Backend Migration**: Migrated from Heroku NestJS backend to Replit-hosted Express.js backend
+*   **Replit Auth Integration**: Implemented Replit Auth for authentication (supports Google OAuth)
+*   **PostgreSQL Database**: Set up Replit PostgreSQL database with complete schema for users, videos, servers, referrals
+*   **Object Storage**: Integrated Replit App Storage for video file uploads and streaming
+*   **Referral System**: Implemented referral code generation, validation, and tracking
+*   **Upload Limits**: Enforced 2 videos per 24 hours per server limit
+*   **API Configuration**: Updated frontend to use local Replit backend (`/api/*` endpoints)
+*   **Deployment**: Configured for VM deployment on Replit

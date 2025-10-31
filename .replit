@@ -72,4 +72,4 @@ localPort = 46149
 
 [deployment]
 deploymentTarget = "vm"
-run = ["node", "backend/src/server.js"]
+run = ["npm", "run", "server"]
