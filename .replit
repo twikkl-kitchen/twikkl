@@ -71,4 +71,4 @@ localPort = 46149
 
 [deployment]
 deploymentTarget = "vm"
-run = ["npm", "run", "server"]
+run = ["bash", "-c", "PORT=3001 npm run server & npm run web"]
