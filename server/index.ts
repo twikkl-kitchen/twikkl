@@ -548,6 +548,270 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===== COMMENT ENDPOINTS =====
+  
+  // Create comment on video
+  app.post('/api/comments', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { videoId, content } = req.body;
+
+      if (!videoId || !content) {
+        return res.status(400).json({ error: 'Video ID and content are required' });
+      }
+
+      const comment = await storage.createComment({ videoId, userId, content });
+      res.json({ success: true, comment });
+    } catch (error) {
+      console.error('Create comment error:', error);
+      res.status(500).json({ error: 'Failed to create comment' });
+    }
+  });
+
+  // Get comments for a video
+  app.get('/api/videos/:videoId/comments', async (req: Request, res: Response) => {
+    try {
+      const { videoId } = req.params;
+      const comments = await storage.getVideoComments(videoId);
+      res.json({ comments });
+    } catch (error) {
+      console.error('Get comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  });
+
+  // Delete comment
+  app.delete('/api/comments/:commentId', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const { commentId } = req.params;
+      await storage.deleteComment(commentId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete comment error:', error);
+      res.status(500).json({ error: 'Failed to delete comment' });
+    }
+  });
+
+  // ===== LIKE ENDPOINTS =====
+  
+  // Toggle like on video
+  app.post('/api/videos/:videoId/like', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { videoId } = req.params;
+
+      const result = await storage.toggleLike(videoId, userId);
+      res.json({ success: true, ...result });
+    } catch (error) {
+      console.error('Toggle like error:', error);
+      res.status(500).json({ error: 'Failed to toggle like' });
+    }
+  });
+
+  // Check if video is liked by user
+  app.get('/api/videos/:videoId/liked', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { videoId } = req.params;
+
+      const liked = await storage.isVideoLiked(videoId, userId);
+      res.json({ liked });
+    } catch (error) {
+      console.error('Check like error:', error);
+      res.status(500).json({ error: 'Failed to check like status' });
+    }
+  });
+
+  // Get like count for video
+  app.get('/api/videos/:videoId/likes', async (req: Request, res: Response) => {
+    try {
+      const { videoId } = req.params;
+      const likeCount = await storage.getVideoLikeCount(videoId);
+      res.json({ likeCount });
+    } catch (error) {
+      console.error('Get like count error:', error);
+      res.status(500).json({ error: 'Failed to get like count' });
+    }
+  });
+
+  // ===== FOLLOW ENDPOINTS =====
+  
+  // Follow a user
+  app.post('/api/users/:userId/follow', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const followerId = req.user.claims.sub;
+      const { userId: followingId } = req.params;
+
+      if (followerId === followingId) {
+        return res.status(400).json({ error: 'Cannot follow yourself' });
+      }
+
+      const follow = await storage.followUser(followerId, followingId);
+      res.json({ success: true, follow });
+    } catch (error) {
+      console.error('Follow user error:', error);
+      res.status(500).json({ error: 'Failed to follow user' });
+    }
+  });
+
+  // Unfollow a user
+  app.delete('/api/users/:userId/follow', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const followerId = req.user.claims.sub;
+      const { userId: followingId } = req.params;
+
+      await storage.unfollowUser(followerId, followingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Unfollow user error:', error);
+      res.status(500).json({ error: 'Failed to unfollow user' });
+    }
+  });
+
+  // Check if following a user
+  app.get('/api/users/:userId/following', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const followerId = req.user.claims.sub;
+      const { userId: followingId } = req.params;
+
+      const isFollowing = await storage.isFollowing(followerId, followingId);
+      res.json({ isFollowing });
+    } catch (error) {
+      console.error('Check following error:', error);
+      res.status(500).json({ error: 'Failed to check following status' });
+    }
+  });
+
+  // Get user's followers
+  app.get('/api/users/:userId/followers', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const followers = await storage.getFollowers(userId);
+      const followerCount = await storage.getFollowerCount(userId);
+      res.json({ followers, followerCount });
+    } catch (error) {
+      console.error('Get followers error:', error);
+      res.status(500).json({ error: 'Failed to fetch followers' });
+    }
+  });
+
+  // Get users that user is following
+  app.get('/api/users/:userId/following-list', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const following = await storage.getFollowing(userId);
+      const followingCount = await storage.getFollowingCount(userId);
+      res.json({ following, followingCount });
+    } catch (error) {
+      console.error('Get following list error:', error);
+      res.status(500).json({ error: 'Failed to fetch following list' });
+    }
+  });
+
+  // ===== VIDEO VIEW ENDPOINTS =====
+  
+  // Record video view
+  app.post('/api/videos/:videoId/view', async (req: any, res: Response) => {
+    try {
+      const { videoId } = req.params;
+      const { watchDuration, completed } = req.body;
+      const userId = req.user?.claims?.sub || null; // Allow anonymous views
+
+      const view = await storage.recordView({
+        videoId,
+        userId,
+        watchDuration: watchDuration || 0,
+        completed: completed || false,
+      });
+
+      res.json({ success: true, view });
+    } catch (error) {
+      console.error('Record view error:', error);
+      res.status(500).json({ error: 'Failed to record view' });
+    }
+  });
+
+  // Get video view count
+  app.get('/api/videos/:videoId/views', async (req: Request, res: Response) => {
+    try {
+      const { videoId } = req.params;
+      const viewCount = await storage.getVideoViewCount(videoId);
+      res.json({ viewCount });
+    } catch (error) {
+      console.error('Get view count error:', error);
+      res.status(500).json({ error: 'Failed to get view count' });
+    }
+  });
+
+  // ===== SEARCH ENDPOINTS =====
+  
+  // Search videos
+  app.get('/api/search/videos', async (req: Request, res: Response) => {
+    try {
+      const { q: query, limit } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Search query is required' });
+      }
+
+      const videos = await storage.searchVideos(query, limit ? parseInt(limit as string) : 20);
+      res.json({ videos });
+    } catch (error) {
+      console.error('Search videos error:', error);
+      res.status(500).json({ error: 'Failed to search videos' });
+    }
+  });
+
+  // Search servers
+  app.get('/api/search/servers', async (req: Request, res: Response) => {
+    try {
+      const { q: query, limit } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Search query is required' });
+      }
+
+      const servers = await storage.searchServers(query, limit ? parseInt(limit as string) : 20);
+      res.json({ servers });
+    } catch (error) {
+      console.error('Search servers error:', error);
+      res.status(500).json({ error: 'Failed to search servers' });
+    }
+  });
+
+  // Search users
+  app.get('/api/search/users', async (req: Request, res: Response) => {
+    try {
+      const { q: query, limit } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        return res.status(400).json({ error: 'Search query is required' });
+      }
+
+      const users = await storage.searchUsers(query, limit ? parseInt(limit as string) : 20);
+      res.json({ users });
+    } catch (error) {
+      console.error('Search users error:', error);
+      res.status(500).json({ error: 'Failed to search users' });
+    }
+  });
+
+  // ===== FOLLOWING FEED ENDPOINT =====
+  
+  // Get videos from users you follow
+  app.get('/api/feed/following', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { limit } = req.query;
+
+      const videos = await storage.getFollowingFeed(userId, limit ? parseInt(limit as string) : 50);
+      res.json({ videos });
+    } catch (error) {
+      console.error('Get following feed error:', error);
+      res.status(500).json({ error: 'Failed to fetch following feed' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
