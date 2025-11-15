@@ -93,7 +93,7 @@ export default function Shorts() {
             </Text>
             <Badge size={10} style={{ ...styles.headActionIndicator, backgroundColor: colorPrimary }} />
           </View>
-          <Pressable onPress={() => router.push("Server")}>
+          <Pressable onPress={() => router.push("Following")}>
             <Text variant="titleMedium" style={styles.headActionText}>
               Following
             </Text>
