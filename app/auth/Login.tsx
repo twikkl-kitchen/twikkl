@@ -18,7 +18,7 @@ const Login = () => {
   const { isDarkMode } = useThemeMode();
   const { form, updateField, login, canLogin, requesting } = useLogin(defaultLoginData);
   
-  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#FFF" : "#000";
 
   return (

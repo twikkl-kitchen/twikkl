@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import { useRouter } from 'expo-router';
 import authService from '@twikkl/services/auth.service';
 import { API_ENDPOINTS } from '@twikkl/config/api';
+import { setAuth } from '@twikkl/entities/auth.entity';
 
 const GoogleAuth = () => {
   const router = useRouter();
@@ -23,8 +24,11 @@ const GoogleAuth = () => {
         if (token && userJson) {
           const user = JSON.parse(decodeURIComponent(userJson));
           
-          // Save authentication data
+          // Save authentication data to AsyncStorage
           await authService.saveAuth(token, user);
+          
+          // Update auth entity state (for useAuth() hook)
+          setAuth(user, token);
 
           // Navigate to home
           router.replace('/NewHome');
