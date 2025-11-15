@@ -1,7 +1,7 @@
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import Header from "@twikkl/components/Group/Header";
-import VideoCard from "@twikkl/components/VideoCard";
+import CategoryVideoRow from "@twikkl/components/Group/CategoryVideoRow";
 import { cardDataGroup, cardDataYou } from "@twikkl/data/discover/cardData";
 import { useState } from "react";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
@@ -20,6 +20,8 @@ export interface IGroup {
   videos: any;
 }
 
+const categories = ["Tutorial", "Trading", "Development", "General", "News"];
+
 const Group = (): JSX.Element => {
   const { id } = useLocalSearchParams();
   const { isDarkMode } = useThemeMode();
@@ -30,7 +32,7 @@ const Group = (): JSX.Element => {
   const backgroundColor = isDarkMode ? "#000" : "#fff";
 
   // Convert existing video images to VideoCard format
-  const serverVideos = groupData?.videos?.map((videoImg: any, index: number) => ({
+  const allServerVideos = groupData?.videos?.map((videoImg: any, index: number) => ({
     id: index.toString(),
     title: `${groupData?.title} - Tutorial ${index + 1}`,
     creator: groupData?.title || "Server",
@@ -40,27 +42,31 @@ const Group = (): JSX.Element => {
     duration: `${Math.floor(Math.random() * 10 + 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
     isLive: index === 0,
     creatorAvatar: groupData?.smallImg,
+    category: categories[index % categories.length],
   })) || [];
 
-  // Only show as list view (no grid options for video cards)
-  const numColumns = 1;
+  // Group videos by category
+  const videosByCategory = categories.map(category => ({
+    category,
+    videos: allServerVideos.filter(video => video.category === category)
+  }));
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
       <Header select={select} setSelect={setSelect} {...groupData} />
-      <View style={{ zIndex: -2, flex: 1 }}>
-        <FlatList
-          key={numColumns}
-          numColumns={numColumns}
-          data={serverVideos}
-          renderItem={({ item }) => {
-            return <VideoCard item={item} />;
-          }}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
-        />
-      </View>
+      <ScrollView 
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {videosByCategory.map(({ category, videos }) => (
+          <CategoryVideoRow
+            key={category}
+            category={category}
+            videos={videos}
+            serverId={id as string}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 };
