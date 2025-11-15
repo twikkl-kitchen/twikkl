@@ -21,8 +21,8 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.42;
-const CARD_HEIGHT = CARD_WIDTH * 0.9;
+const CARD_WIDTH = width * 0.38;
+const CARD_HEIGHT = CARD_WIDTH * 0.7;
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
   const router = useRouter();
