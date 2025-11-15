@@ -5,6 +5,7 @@ import { useThemeMode } from "@twikkl/entities/theme.entity";
 import OAuthButton from "@twikkl/components/OAuthButton";
 import TelegramAuthButton from "../../src/components/TelegramAuthButton";
 import { Octicons } from "@expo/vector-icons";
+import Constants from 'expo-constants';
 
 const Index = () => {
   const router = useRouter();
@@ -49,7 +50,7 @@ const Index = () => {
         {/* Telegram OAuth Button - Web only */}
         {Platform.OS === 'web' && (
           <View style={styles.telegramWrapper}>
-            <TelegramAuthButton botName={process.env.EXPO_PUBLIC_TELEGRAM_BOT_NAME || 'twikkl_bot'} />
+            <TelegramAuthButton botName={Constants.expoConfig?.extra?.EXPO_PUBLIC_TELEGRAM_BOT_NAME || 'twikklbot'} />
           </View>
         )}
         
