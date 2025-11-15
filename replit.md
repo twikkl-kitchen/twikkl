@@ -76,6 +76,20 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Referrals**: `/api/referrals`, `/api/referrals/code/:code`, `/api/users/:userId/referrals`
 
 ## Recent Changes (Nov 15, 2025)
+*   **Admin System & Custom Categories**: Complete server administration system with role-based permissions
+    *   **Database Schema**: Added `categories` field (JSON array) to servers table, `role` field to serverMembers table ('owner', 'admin', 'member')
+    *   **Backend API Endpoints**: 
+        *   GET/PUT `/api/servers/:serverId/categories` - Manage custom categories for each server
+        *   GET `/api/servers/:serverId/is-admin` - Check if user is admin
+        *   GET/POST/DELETE `/api/servers/:serverId/admins` - Admin management (add/remove)
+    *   **Permission Middleware**: Protected admin endpoints with role-based access control
+    *   **Server Settings Screen**: Tab-based UI (Categories, Admins) for server configuration (admin-only access)
+    *   **Category Editor**: Add, edit, delete custom categories with validation (no duplicates, non-empty)
+    *   **Admin Management**: Add/remove server admins, visual distinction for owners with shield icon
+    *   **Dynamic Category Selector**: Video upload fetches server's custom categories from backend
+    *   **Permission-Based UI**: Settings button only visible to server admins
+*   **Trending Servers Navigation**: Fixed trending server avatars to navigate to actual server detail pages instead of displaying images
+*   **Dark Mode Improvements**: Added dark mode support to trending section text and server UI components
 *   **Server UI Redesign**: Completely redesigned server screens for better UX and more video content visibility
     *   **Compact Header**: Reduced server header from ~40% to ~20% of screen height, increased profile image size to 80x80px
     *   **Banner Fixes**: Fixed banner images to properly fill entire container space (140px height) in both server list and detail views
