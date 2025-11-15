@@ -82,7 +82,7 @@ async function registerRoutes(app: Express): Promise<Server> {
         id: userId,
         email: `telegram_${userData.id}@telegram.user`,
         username: username,
-        profileImage: userData.photo_url,
+        profileImageUrl: userData.photo_url,
       });
 
       res.json({
