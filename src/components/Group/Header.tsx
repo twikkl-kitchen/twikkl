@@ -57,7 +57,7 @@ const Header = ({
         style={[styles.compactBannerImage]} 
         source={img}
         resizeMode="cover"
-        imageStyle={{ opacity: 0.7 }}
+        imageStyle={styles.bannerImageStyle}
       >
         <TouchableOpacity onPressOut={() => router.back()} style={styles.iconContainer}>
           <Octicons name="chevron-left" size={24} color="#fff" />
@@ -103,10 +103,6 @@ const Header = ({
             <Ionicons name="add-circle" size={20} color="#50A040" />
             <Text style={[styles.compactActionText, { color: textColor }]}>Create</Text>
           </Pressable>
-          <TouchableOpacity style={styles.compactActionButton}>
-            <Ionicons name="chatbubble-outline" size={18} color={mutedTextColor} />
-            <Text style={[styles.compactActionText, { color: textColor }]}>Chat</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={styles.compactActionButton}>
             <Ionicons name="person-add-outline" size={18} color={mutedTextColor} />
             <Text style={[styles.compactActionText, { color: textColor }]}>Invite</Text>
@@ -218,11 +214,16 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   compactBannerImage: {
-    height: 120,
+    height: 140,
     paddingTop: 50,
     paddingHorizontal: 16,
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "100%",
+  },
+  bannerImageStyle: {
+    width: "100%",
+    height: "100%",
   },
   compactContainer: {
     paddingHorizontal: 16,
@@ -234,9 +235,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   compactProfilePicture: {
-    borderRadius: 24,
-    height: 48,
-    width: 48,
+    borderRadius: 32,
+    height: 64,
+    width: 64,
     marginRight: 12,
   },
   compactInfo: {
