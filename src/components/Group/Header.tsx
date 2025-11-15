@@ -235,9 +235,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   compactProfilePicture: {
-    borderRadius: 32,
-    height: 64,
-    width: 64,
+    borderRadius: 40,
+    height: 80,
+    width: 80,
     marginRight: 12,
   },
   compactInfo: {

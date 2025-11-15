@@ -21,8 +21,8 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const THUMBNAIL_WIDTH = width * 0.38;
-const THUMBNAIL_HEIGHT = THUMBNAIL_WIDTH * 0.56;
+const CARD_WIDTH = width * 0.42;
+const CARD_HEIGHT = CARD_WIDTH * 0.9;
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
   const router = useRouter();
@@ -35,10 +35,15 @@ const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps)
 
   if (videos.length === 0) return <></>;
 
-  // Split videos into 2 rows for horizontal scrolling (like Netflix)
-  const videosPerRow = Math.ceil(videos.length / 2);
-  const firstRow = videos.slice(0, videosPerRow);
-  const secondRow = videos.slice(videosPerRow, videosPerRow * 2);
+  // Organize videos into columns of 2 (like YouTube grid)
+  const columns: VideoItem[][] = [];
+  for (let i = 0; i < videos.length; i += 2) {
+    const column = [videos[i]];
+    if (i + 1 < videos.length) {
+      column.push(videos[i + 1]);
+    }
+    columns.push(column);
+  }
 
   const renderVideoCard = (video: VideoItem) => (
     <TouchableOpacity 
@@ -82,32 +87,25 @@ const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps)
         </TouchableOpacity>
       </View>
 
-      {/* First Row */}
+      {/* Horizontal scrolling grid with 2 rows */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {firstRow.map(renderVideoCard)}
+        {columns.map((column, columnIndex) => (
+          <View key={columnIndex} style={styles.column}>
+            {column.map(renderVideoCard)}
+          </View>
+        ))}
       </ScrollView>
-
-      {/* Second Row */}
-      {secondRow.length > 0 && (
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[styles.scrollContent, styles.secondRowContent]}
-        >
-          {secondRow.map(renderVideoCard)}
-        </ScrollView>
-      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   header: {
     flexDirection: "row",
@@ -133,21 +131,21 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingLeft: 16,
     paddingRight: 8,
-    marginBottom: 8,
   },
-  secondRowContent: {
-    marginBottom: 0,
+  column: {
+    flexDirection: "column",
+    gap: 10,
+    marginRight: 12,
   },
   videoCard: {
-    marginRight: 12,
     borderRadius: 12,
     overflow: "hidden",
-    width: THUMBNAIL_WIDTH,
+    width: CARD_WIDTH,
   },
   thumbnailContainer: {
     position: "relative",
-    width: THUMBNAIL_WIDTH,
-    height: THUMBNAIL_HEIGHT,
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT * 0.65,
   },
   thumbnail: {
     width: "100%",
@@ -155,29 +153,29 @@ const styles = StyleSheet.create({
   },
   durationBadge: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    bottom: 6,
+    right: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.85)",
     paddingHorizontal: 6,
-    paddingVertical: 3,
+    paddingVertical: 2,
     borderRadius: 4,
   },
   durationText: {
     color: "#fff",
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
   videoInfo: {
-    padding: 10,
+    padding: 8,
   },
   videoTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
-    marginBottom: 4,
-    lineHeight: 17,
+    marginBottom: 3,
+    lineHeight: 16,
   },
   videoMeta: {
-    fontSize: 11,
+    fontSize: 10,
   },
 });
 
