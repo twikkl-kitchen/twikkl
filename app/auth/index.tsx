@@ -15,10 +15,18 @@ const Index = () => {
   const buttonBg = isDarkMode ? "#1E1E1E" : "#E8E8E8";
   const dividerColor = isDarkMode ? "#444" : "#CCC";
   
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push('/(tabs)/NewHome');
+    }
+  };
+  
   return (
     <View style={[styles.wrapper, { backgroundColor }]}>
       <TouchableOpacity 
-        onPress={() => router.back()} 
+        onPress={handleBack} 
         style={styles.backButton}
       >
         <Octicons name="chevron-left" size={28} color={textColor} />

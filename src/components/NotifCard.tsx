@@ -1,5 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 type IProps = {
   avatar: any;
@@ -12,12 +13,15 @@ type IProps = {
 };
 
 const NotifCard = ({ avatar, text, desc, time, like, img, action }: IProps) => {
+  const { isDarkMode } = useThemeMode();
+  const textColor = isDarkMode ? "#fff" : "#000";
+  
   return (
     <View style={styles.wrapper}>
       <Image source={avatar} />
       <View style={styles.flex}>
-        <Text style={styles.textBold}>{text}</Text>
-        <Text style={{ fontSize: 12 }}>
+        <Text style={[styles.textBold, { color: textColor }]}>{text}</Text>
+        <Text style={{ fontSize: 12, color: textColor }}>
           {desc} <Text style={{ color: "#50A040" }}>{time}</Text>
         </Text>
       </View>
