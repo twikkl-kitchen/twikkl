@@ -194,6 +194,20 @@ async function registerRoutes(app: Express): Promise<Server> {
         if (!isMember) {
           return res.status(403).json({ error: 'You are not a member of this server' });
         }
+
+        // Validate category against server's custom categories
+        if (category) {
+          const server = await storage.getServer(serverId);
+          const validCategories = server?.categories 
+            ? JSON.parse(server.categories)
+            : ['Tutorial', 'Trading', 'Development', 'General', 'News'];
+          
+          if (!validCategories.includes(category)) {
+            return res.status(400).json({ 
+              error: `Invalid category. Must be one of: ${validCategories.join(', ')}` 
+            });
+          }
+        }
       }
 
       // Create video record
@@ -328,6 +342,144 @@ async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Get user servers error:', error);
       res.status(500).json({ error: 'Failed to fetch user servers' });
+    }
+  });
+
+  // Server categories endpoints
+  app.get('/api/servers/:serverId/categories', async (req: Request, res: Response) => {
+    try {
+      const { serverId } = req.params;
+      const server = await storage.getServer(serverId);
+      
+      if (!server) {
+        return res.status(404).json({ error: 'Server not found' });
+      }
+
+      // Parse categories from JSON string or return default categories
+      const categories = server.categories 
+        ? JSON.parse(server.categories)
+        : ['Tutorial', 'Trading', 'Development', 'General', 'News'];
+      
+      res.json({ categories });
+    } catch (error) {
+      console.error('Get server categories error:', error);
+      res.status(500).json({ error: 'Failed to fetch server categories' });
+    }
+  });
+
+  app.put('/api/servers/:serverId/categories', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { serverId } = req.params;
+      const { categories } = req.body;
+
+      // Check if user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can update categories' });
+      }
+
+      if (!Array.isArray(categories) || categories.length === 0) {
+        return res.status(400).json({ error: 'Categories must be a non-empty array' });
+      }
+
+      // Update server categories
+      const server = await storage.updateServer(serverId, {
+        categories: JSON.stringify(categories),
+      });
+
+      res.json({ success: true, categories });
+    } catch (error) {
+      console.error('Update server categories error:', error);
+      res.status(500).json({ error: 'Failed to update server categories' });
+    }
+  });
+
+  // Server admin management endpoints
+  app.get('/api/servers/:serverId/is-admin', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { serverId } = req.params;
+      
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      res.json({ isAdmin });
+    } catch (error) {
+      console.error('Check admin status error:', error);
+      res.status(500).json({ error: 'Failed to check admin status' });
+    }
+  });
+
+  app.get('/api/servers/:serverId/admins', async (req: Request, res: Response) => {
+    try {
+      const { serverId } = req.params;
+      const members = await storage.getServerMembers(serverId);
+      
+      // Filter for owners and admins
+      const admins = members.filter(m => m.role === 'owner' || m.role === 'admin');
+      res.json({ admins });
+    } catch (error) {
+      console.error('Get server admins error:', error);
+      res.status(500).json({ error: 'Failed to fetch server admins' });
+    }
+  });
+
+  app.post('/api/servers/:serverId/admins', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const { serverId } = req.params;
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      // Check if current user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, currentUserId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only admins can add other admins' });
+      }
+
+      // Check if target user is a member
+      const isMember = await storage.isServerMember(serverId, userId);
+      if (!isMember) {
+        return res.status(400).json({ error: 'User must be a server member first' });
+      }
+
+      // Promote to admin
+      const member = await storage.updateServerMemberRole(serverId, userId, 'admin');
+      res.json({ success: true, member });
+    } catch (error) {
+      console.error('Add admin error:', error);
+      res.status(500).json({ error: 'Failed to add admin' });
+    }
+  });
+
+  app.delete('/api/servers/:serverId/admins/:targetUserId', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const currentUserId = req.user.claims.sub;
+      const { serverId, targetUserId } = req.params;
+
+      // Check if current user is owner (only owners can remove admins)
+      const server = await storage.getServer(serverId);
+      if (!server) {
+        return res.status(404).json({ error: 'Server not found' });
+      }
+
+      if (server.ownerId !== currentUserId) {
+        return res.status(403).json({ error: 'Only the server owner can remove admins' });
+      }
+
+      // Don't allow removing the owner
+      if (targetUserId === server.ownerId) {
+        return res.status(400).json({ error: 'Cannot remove the server owner' });
+      }
+
+      // Demote admin to member
+      const member = await storage.updateServerMemberRole(serverId, targetUserId, 'member');
+      res.json({ success: true, member });
+    } catch (error) {
+      console.error('Remove admin error:', error);
+      res.status(500).json({ error: 'Failed to remove admin' });
     }
   });
 

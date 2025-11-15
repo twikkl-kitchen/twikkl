@@ -41,6 +41,8 @@ export interface IStorage {
   removeServerMember(serverId: string, userId: string): Promise<void>;
   getServerMembers(serverId: string): Promise<ServerMember[]>;
   isServerMember(serverId: string, userId: string): Promise<boolean>;
+  isServerAdmin(serverId: string, userId: string): Promise<boolean>;
+  updateServerMemberRole(serverId: string, userId: string, role: string): Promise<ServerMember | undefined>;
   
   // Video operations
   createVideo(video: InsertVideo): Promise<Video>;
@@ -159,6 +161,37 @@ export class DatabaseStorage implements IStorage {
         eq(serverMembers.userId, userId)
       ));
     return !!member;
+  }
+
+  async isServerAdmin(serverId: string, userId: string): Promise<boolean> {
+    // Check if user is owner
+    const server = await this.getServer(serverId);
+    if (server?.ownerId === userId) {
+      return true;
+    }
+    
+    // Check if user is admin
+    const [member] = await db
+      .select()
+      .from(serverMembers)
+      .where(and(
+        eq(serverMembers.serverId, serverId),
+        eq(serverMembers.userId, userId)
+      ));
+    
+    return member?.role === 'admin' || member?.role === 'owner';
+  }
+
+  async updateServerMemberRole(serverId: string, userId: string, role: string): Promise<ServerMember | undefined> {
+    const [member] = await db
+      .update(serverMembers)
+      .set({ role })
+      .where(and(
+        eq(serverMembers.serverId, serverId),
+        eq(serverMembers.userId, userId)
+      ))
+      .returning();
+    return member;
   }
 
   // Video operations

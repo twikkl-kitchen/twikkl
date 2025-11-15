@@ -50,6 +50,7 @@ export const servers = pgTable("servers", {
   description: text("description"),
   location: varchar("location", { length: 100 }),
   hashtags: text("hashtags"), // JSON array stored as text
+  categories: text("categories"), // JSON array of custom category names
   privacy: varchar("privacy", { length: 20 }).notNull().default('public'), // 'public' or 'private'
   ownerId: varchar("owner_id").notNull().references(() => users.id),
   profileImageUrl: varchar("profile_image_url"),
