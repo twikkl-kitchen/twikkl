@@ -35,7 +35,7 @@ const Card = ({
 }: ICard): JSX.Element => {
   return (
     <View style={styles.container}>
-      <ImageBackground style={styles.image} source={img} resizeMode="cover">
+      <ImageBackground style={styles.image} source={img} resizeMode="cover" imageStyle={styles.bannerImageStyle}>
         {forYou ? (
           <Ionicons name="lock-closed" color="#fff" size={22} />
         ) : (
@@ -137,6 +137,11 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "flex-end",
     height: 220,
+    width: "100%",
+  },
+  bannerImageStyle: {
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   titleContainer: {
     flexDirection: "row",
