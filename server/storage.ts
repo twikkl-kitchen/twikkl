@@ -27,6 +27,7 @@ export interface IStorage {
   // User operations - Required for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, data: Partial<UpsertUser>): Promise<User | undefined>;
   
   // Server operations
   createServer(server: InsertServer): Promise<Server>;
@@ -78,6 +79,15 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, data: Partial<UpsertUser>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }

@@ -55,13 +55,13 @@ export default function VideoFeedItem({ item, index, visibleIndex, onShareClick 
 
   return (
     <TouchableWithoutFeedback onPress={togglePlay}>
-      <View style={{ height: height, width: width }}>
+      <View style={{ height: height, width: width, position: 'relative' }}>
         <Video
           source={item.video}
           shouldPlay={shouldPlay}
           isLooping
           resizeMode={ResizeMode.COVER}
-          style={[StyleSheet.absoluteFill]}
+          style={{ width: '100%', height: '100%' }}
         />
         <View style={styles.bottomContainer}>
           <View style={styles.rightActionsContainer}>

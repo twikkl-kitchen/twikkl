@@ -95,6 +95,30 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create username endpoint
+  app.post('/api/auth/create-username', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { username } = req.body;
+
+      if (!username) {
+        return res.status(400).json({ error: 'Username is required' });
+      }
+
+      // Update user with username
+      const user = await storage.updateUser(userId, { username });
+      
+      res.json({ 
+        success: true,
+        message: 'Username created successfully',
+        user 
+      });
+    } catch (error) {
+      console.error("Error creating username:", error);
+      res.status(500).json({ error: "Failed to create username" });
+    }
+  });
+
   // Get current authenticated user
   app.get('/api/auth/user', isAuthenticated, async (req: any, res: Response) => {
     try {
