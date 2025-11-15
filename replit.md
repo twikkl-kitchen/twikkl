@@ -68,12 +68,21 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
     *   `sessions` - Session storage (required for Replit Auth)
 
 ## Backend API Endpoints
-*   **Auth**: `/api/login`, `/api/logout`, `/api/auth/user`
+*   **Auth**: `/api/login`, `/api/logout`, `/api/auth/user`, `/api/auth/create-username`, `/api/auth/telegram`
 *   **Videos**: `/api/videos/upload`, `/api/videos/create`, `/api/videos/stream/:userId/:fileName`
 *   **Servers**: `/api/servers`, `/api/servers/:serverId`, `/api/users/:userId/servers`
 *   **Referrals**: `/api/referrals`, `/api/referrals/code/:code`, `/api/users/:userId/referrals`
 
-## Recent Changes (Oct 31, 2025)
+## Recent Changes (Nov 15, 2025)
+*   **Authentication Redesign**: Created Replit-style unified auth screen with Google OAuth, Telegram OAuth, and Email/Password options
+*   **Username Endpoint**: Added `/api/auth/create-username` backend endpoint for username creation after signup
+*   **Telegram OAuth**: Full Telegram authentication integration with automatic username import
+*   **Navigation Fix**: Fixed post-signup navigation to redirect to NewHome screen instead of unmatched route
+*   **Shorts Video Fix**: Fixed video overlapping issue in Shorts screen - videos now display one at a time with proper scrolling
+*   **Database Schema**: Added `username` field to users table (varchar 50, unique)
+*   **Storage Methods**: Added `updateUser()` method to DatabaseStorage for user profile updates
+
+## Previous Changes (Oct 31, 2025)
 *   **Backend Migration**: Migrated from Heroku NestJS backend to Replit-hosted Express.js backend
 *   **Replit Auth Integration**: Implemented Replit Auth for authentication (supports Google OAuth)
 *   **PostgreSQL Database**: Set up Replit PostgreSQL database with complete schema for users, videos, servers, referrals
