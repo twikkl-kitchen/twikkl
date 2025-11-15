@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     LOGIN: `${API_BASE_URL}/login`,
     LOGOUT: `${API_BASE_URL}/logout`,
     ME: `${API_BASE_URL}/auth/user`,
+    GOOGLE: `${API_BASE_URL}/login`,
   },
   
   // Video endpoints
