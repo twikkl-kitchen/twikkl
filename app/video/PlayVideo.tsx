@@ -5,6 +5,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "react-native-paper";
@@ -21,6 +22,59 @@ import CommentSheet from "@twikkl/components/CommentSheet";
 
 const { width, height } = Dimensions.get("window");
 
+const recommendedVideos = [
+  {
+    id: "rec-video-1",
+    title: "Advanced React Native Performance Tips",
+    creator: "TechGuru",
+    creatorId: "creator-2",
+    thumbnail: "https://picsum.photos/seed/video1/320/180",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    views: "245K",
+    time: "3 days ago",
+  },
+  {
+    id: "rec-video-2",
+    title: "Building Scalable Mobile Apps with Expo",
+    creator: "DevMaster",
+    creatorId: "creator-3",
+    thumbnail: "https://picsum.photos/seed/video2/320/180",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    views: "89K",
+    time: "1 week ago",
+  },
+  {
+    id: "rec-video-3",
+    title: "State Management Best Practices 2025",
+    creator: "CodeAcademy",
+    creatorId: "creator-4",
+    thumbnail: "https://picsum.photos/seed/video3/320/180",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    views: "512K",
+    time: "2 weeks ago",
+  },
+  {
+    id: "rec-video-4",
+    title: "Creating Beautiful UI Animations",
+    creator: "DesignHub",
+    creatorId: "creator-5",
+    thumbnail: "https://picsum.photos/seed/video4/320/180",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    views: "1.2M",
+    time: "1 month ago",
+  },
+  {
+    id: "rec-video-5",
+    title: "TypeScript Tips Every Developer Should Know",
+    creator: "TypeScript Pro",
+    creatorId: "creator-6",
+    thumbnail: "https://picsum.photos/seed/video5/320/180",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    views: "678K",
+    time: "5 days ago",
+  },
+];
+
 export default function PlayVideo() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -36,6 +90,8 @@ export default function PlayVideo() {
   const [viewCount, setViewCount] = useState(0);
   const [viewRecorded, setViewRecorded] = useState(false);
   const [watchDuration, setWatchDuration] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
   const videoId = params.id as string || "demo-video-1";
   const videoUrl = params.url as string || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
@@ -47,7 +103,10 @@ export default function PlayVideo() {
 
   useEffect(() => {
     fetchVideoStats();
+    fetchFollowStatus();
   }, [videoId]);
+
+  const creatorId = params.creatorId as string || "demo-creator-1";
 
   const fetchVideoStats = async () => {
     try {
@@ -68,6 +127,61 @@ export default function PlayVideo() {
       setLiked(likedRes.data.liked || false);
     } catch (error) {
       console.error("Error fetching video stats:", error);
+    }
+  };
+
+  const fetchFollowStatus = async () => {
+    if (!isLoggedIn) {
+      setFollowerCount(Math.floor(Math.random() * 2000000) + 100000);
+      return;
+    }
+
+    try {
+      const [followingRes, followersRes] = await Promise.all([
+        axios.get(API_ENDPOINTS.FOLLOWS.IS_FOLLOWING(creatorId), {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(API_ENDPOINTS.FOLLOWS.GET_FOLLOWERS(creatorId)),
+      ]);
+
+      setIsFollowing(followingRes.data.isFollowing || false);
+      setFollowerCount(followersRes.data.followerCount || 0);
+    } catch (error) {
+      console.error("Error fetching follow status:", error);
+      setFollowerCount(Math.floor(Math.random() * 2000000) + 100000);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!isLoggedIn) {
+      router.push("auth/Register");
+      return;
+    }
+
+    const previousFollowing = isFollowing;
+    const previousCount = followerCount;
+
+    setIsFollowing(!isFollowing);
+    setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
+
+    try {
+      if (isFollowing) {
+        await axios.delete(API_ENDPOINTS.FOLLOWS.UNFOLLOW_USER(creatorId), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await axios.post(
+          API_ENDPOINTS.FOLLOWS.FOLLOW_USER(creatorId),
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      setIsFollowing(previousFollowing);
+      setFollowerCount(previousCount);
     }
   };
 
@@ -232,13 +346,63 @@ export default function PlayVideo() {
                     {creator}
                   </Text>
                   <Text style={[styles.creatorSubs, { color: isDarkMode ? "#888" : "#666" }]}>
-                    1.2M subscribers
+                    {formatCount(followerCount)} followers
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity style={styles.subscribeButton}>
-                <Text style={styles.subscribeText}>Subscribe</Text>
+              <TouchableOpacity
+                style={[
+                  styles.followButton,
+                  isFollowing && { backgroundColor: isDarkMode ? "#333" : "#E5E5E5" },
+                ]}
+                onPress={handleFollowToggle}
+              >
+                <Text
+                  style={[
+                    styles.followText,
+                    isFollowing && { color: textColor },
+                  ]}
+                >
+                  {isFollowing ? "Following" : "Follow"}
+                </Text>
               </TouchableOpacity>
+            </View>
+
+            <View style={[styles.recommendedSection, { borderTopColor: isDarkMode ? "#333" : "#E5E5E5" }]}>
+              <Text style={[styles.recommendedTitle, { color: textColor }]}>
+                Recommended Videos
+              </Text>
+              {recommendedVideos.map((video) => (
+                <Pressable
+                  key={video.id}
+                  style={styles.recommendedCard}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/video/PlayVideo",
+                      params: {
+                        id: video.id,
+                        title: video.title,
+                        creator: video.creator,
+                        creatorId: video.creatorId,
+                        url: video.url,
+                      },
+                    })
+                  }
+                >
+                  <Image source={{ uri: video.thumbnail }} style={styles.recommendedThumbnail} />
+                  <View style={styles.recommendedInfo}>
+                    <Text style={[styles.recommendedVideoTitle, { color: textColor }]} numberOfLines={2}>
+                      {video.title}
+                    </Text>
+                    <Text style={[styles.recommendedCreator, { color: isDarkMode ? "#888" : "#666" }]}>
+                      {video.creator}
+                    </Text>
+                    <Text style={[styles.recommendedStats, { color: isDarkMode ? "#888" : "#666" }]}>
+                      {video.views} views • {video.time}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
             </View>
           </View>
         </ScrollView>
@@ -335,15 +499,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  subscribeButton: {
+  followButton: {
     backgroundColor: "#50A040",
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
   },
-  subscribeText: {
+  followText: {
     color: "#FFF",
     fontWeight: "600",
     fontSize: 14,
+  },
+  recommendedSection: {
+    marginTop: 24,
+    paddingTop: 16,
+    borderTopWidth: 8,
+  },
+  recommendedTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 16,
+  },
+  recommendedCard: {
+    flexDirection: "row",
+    marginBottom: 16,
+  },
+  recommendedThumbnail: {
+    width: 168,
+    height: 94,
+    borderRadius: 8,
+    backgroundColor: "#333",
+  },
+  recommendedInfo: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "flex-start",
+  },
+  recommendedVideoTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 20,
+  },
+  recommendedCreator: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  recommendedStats: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });
