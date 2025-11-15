@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "react-native-paper";
+import { Text, Badge } from "react-native-paper";
 import { Video, ResizeMode, AVPlaybackStatus } from "expo-av";
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -19,6 +20,10 @@ import { API_ENDPOINTS } from "@twikkl/config/api";
 import axios from "axios";
 import AppBottomSheet from "@twikkl/components/BottomSheet";
 import CommentSheet from "@twikkl/components/CommentSheet";
+import Logo from "@twikkl/components/Logo";
+import SunIcon from "@assets/svg/SunIcon";
+import MoonIcon from "@assets/svg/MoonIcon";
+import SearchIcon from "@assets/svg/SearchIcon";
 
 const { width, height } = Dimensions.get("window");
 
@@ -78,7 +83,7 @@ const recommendedVideos = [
 export default function PlayVideo() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { isDarkMode } = useThemeMode();
+  const { isDarkMode, toggleTheme } = useThemeMode();
   const { isLoggedIn, token } = useAuth();
 
   const videoRef = useRef<Video>(null);
@@ -92,6 +97,11 @@ export default function PlayVideo() {
   const [watchDuration, setWatchDuration] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const controlsTimer = useRef<NodeJS.Timeout | null>(null);
 
   const videoId = params.id as string || "demo-video-1";
   const videoUrl = params.url as string || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
@@ -189,6 +199,10 @@ export default function PlayVideo() {
     if (status.isLoaded) {
       setIsPlaying(status.isPlaying);
       const currentTime = status.positionMillis / 1000;
+      const totalDuration = status.durationMillis ? status.durationMillis / 1000 : 0;
+      
+      setProgress(status.positionMillis || 0);
+      setDuration(status.durationMillis || 0);
       
       if (currentTime > watchDuration) {
         setWatchDuration(currentTime);
@@ -204,6 +218,39 @@ export default function PlayVideo() {
         setViewRecorded(true);
       }
     }
+  };
+
+  const resetControlsTimer = () => {
+    if (controlsTimer.current) {
+      clearTimeout(controlsTimer.current);
+    }
+    setShowControls(true);
+    controlsTimer.current = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000);
+  };
+
+  const handleVideoPress = () => {
+    resetControlsTimer();
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const handleSeek = async (value: number) => {
+    if (videoRef.current) {
+      await videoRef.current.setPositionAsync(value);
+    }
+  };
+
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const recordView = async (completed: boolean = false) => {
@@ -272,21 +319,42 @@ export default function PlayVideo() {
     return count.toString();
   };
 
+  const handleProfileClick = () => {
+    if (isLoggedIn) {
+      router.push("/Profile");
+    } else {
+      router.push("/auth/Register");
+    }
+  };
+
   return (
     <>
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <MaterialCommunityIcons name="arrow-left" size={28} color={textColor} />
-          </Pressable>
-          <Text style={[styles.headerTitle, { color: textColor }]} numberOfLines={1}>
-            {title}
-          </Text>
-          <View style={{ width: 40 }} />
+        <View style={[styles.topHeader, { backgroundColor }]}>
+          <View style={styles.topHeaderLeft}>
+            <Logo height={32} />
+          </View>
+          <View style={styles.topHeaderRight}>
+            <Pressable onPress={toggleTheme}>
+              {isDarkMode ? <MoonIcon height={24} width={24} /> : <SunIcon height={24} width={24} />}
+            </Pressable>
+            <Pressable style={{ marginLeft: 16 }}>
+              <SearchIcon height={24} width={24} />
+            </Pressable>
+            <Pressable style={{ marginLeft: 16 }}>
+              <View>
+                <MaterialCommunityIcons name="bell-outline" size={24} color={textColor} />
+                <Badge size={8} style={styles.notificationBadge} />
+              </View>
+            </Pressable>
+            <Pressable style={{ marginLeft: 16 }} onPress={handleProfileClick}>
+              <MaterialCommunityIcons name="account-circle-outline" size={28} color={textColor} />
+            </Pressable>
+          </View>
         </View>
 
         <ScrollView>
-          <Pressable onPress={togglePlayPause} style={styles.videoContainer}>
+          <Pressable onPress={handleVideoPress} style={[styles.videoContainer, isFullscreen && styles.videoContainerFullscreen]}>
             <Video
               ref={videoRef}
               source={{ uri: videoUrl }}
@@ -294,8 +362,41 @@ export default function PlayVideo() {
               shouldPlay={isPlaying}
               onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
               style={styles.video}
-              useNativeControls
             />
+            
+            {showControls && (
+              <View style={styles.videoControls}>
+                <Pressable onPress={togglePlayPause} style={styles.playPauseButton}>
+                  <MaterialCommunityIcons
+                    name={isPlaying ? "pause" : "play"}
+                    size={64}
+                    color="#FFF"
+                  />
+                </Pressable>
+
+                <View style={styles.bottomControls}>
+                  <View style={styles.progressContainer}>
+                    <View style={[styles.progressBar, { width: `${(progress / duration) * 100}%` }]} />
+                    <Pressable
+                      style={[styles.progressThumb, { left: `${(progress / duration) * 100}%` }]}
+                      onPressIn={() => {}}
+                    />
+                  </View>
+                  <View style={styles.controlsBottom}>
+                    <Text style={styles.timeText}>
+                      {formatTime(progress)} / {formatTime(duration)}
+                    </Text>
+                    <Pressable onPress={toggleFullscreen}>
+                      <MaterialCommunityIcons
+                        name={isFullscreen ? "fullscreen-exit" : "fullscreen"}
+                        size={24}
+                        color="#FFF"
+                      />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            )}
           </Pressable>
 
           <View style={styles.infoSection}>
@@ -304,33 +405,33 @@ export default function PlayVideo() {
               {formatCount(viewCount)} views
             </Text>
 
-            <View style={styles.actionsContainer}>
+            <View style={[styles.actionsContainer, { backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5" }]}>
               <TouchableOpacity onPress={handleLikeToggle} style={styles.actionItem}>
                 <MaterialCommunityIcons
                   name={liked ? "thumb-up" : "thumb-up-outline"}
                   size={28}
-                  color={liked ? "#50A040" : textColor}
+                  color={liked ? "#50A040" : (isDarkMode ? "#FFF" : "#000")}
                 />
-                <Text style={[styles.actionText, { color: textColor }]}>
+                <Text style={[styles.actionText, { color: isDarkMode ? "#FFF" : "#000" }]}>
                   {formatCount(likeCount)}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.actionItem}>
-                <MaterialCommunityIcons name="thumb-down-outline" size={28} color={textColor} />
-                <Text style={[styles.actionText, { color: textColor }]}>Dislike</Text>
+                <MaterialCommunityIcons name="thumb-down-outline" size={28} color={isDarkMode ? "#FFF" : "#000"} />
+                <Text style={[styles.actionText, { color: isDarkMode ? "#FFF" : "#000" }]}>Dislike</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleCommentClick} style={styles.actionItem}>
-                <MaterialCommunityIcons name="comment-outline" size={28} color={textColor} />
-                <Text style={[styles.actionText, { color: textColor }]}>
+                <MaterialCommunityIcons name="comment-outline" size={28} color={isDarkMode ? "#FFF" : "#000"} />
+                <Text style={[styles.actionText, { color: isDarkMode ? "#FFF" : "#000" }]}>
                   {formatCount(commentCount)}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.actionItem}>
-                <MaterialCommunityIcons name="share-outline" size={28} color={textColor} />
-                <Text style={[styles.actionText, { color: textColor }]}>Share</Text>
+                <MaterialCommunityIcons name="share-outline" size={28} color={isDarkMode ? "#FFF" : "#000"} />
+                <Text style={[styles.actionText, { color: isDarkMode ? "#FFF" : "#000" }]}>Share</Text>
               </TouchableOpacity>
             </View>
 
@@ -425,31 +526,97 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  topHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(128, 128, 128, 0.2)",
   },
-  backButton: {
-    padding: 4,
+  topHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    flex: 1,
-    textAlign: "center",
-    marginHorizontal: 8,
+  topHeaderRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    backgroundColor: "#50A040",
   },
   videoContainer: {
     width: width,
     height: width * (9 / 16),
     backgroundColor: "#000",
+    position: "relative",
+  },
+  videoContainerFullscreen: {
+    width: width,
+    height: height,
   },
   video: {
     width: "100%",
     height: "100%",
+  },
+  videoControls: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  playPauseButton: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -32 }, { translateY: -32 }],
+  },
+  bottomControls: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+  },
+  progressContainer: {
+    width: "100%",
+    height: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 2,
+    marginBottom: 12,
+    position: "relative",
+  },
+  progressBar: {
+    height: "100%",
+    backgroundColor: "#50A040",
+    borderRadius: 2,
+  },
+  progressThumb: {
+    position: "absolute",
+    top: -6,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#50A040",
+    marginLeft: -8,
+  },
+  controlsBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  timeText: {
+    color: "#FFF",
+    fontSize: 14,
+    fontWeight: "600",
   },
   infoSection: {
     padding: 16,
@@ -466,7 +633,10 @@ const styles = StyleSheet.create({
   actionsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    marginVertical: 8,
   },
   actionItem: {
     alignItems: "center",
