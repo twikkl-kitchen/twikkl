@@ -68,14 +68,37 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
     *   `upload_counts` - 24-hour upload limit tracking (2 per server)
     *   `referrals` - Referral system tracking
     *   `sessions` - Session storage (required for Replit Auth)
+    *   `comments` - Video comments with user associations
+    *   `likes` - Video likes tracking (unique per video/user)
+    *   `follows` - User follow relationships (unique per follower/following)
+    *   `video_views` - Video view tracking with watch metrics
 
 ## Backend API Endpoints
 *   **Auth**: `/api/login`, `/api/logout`, `/api/auth/user`, `/api/auth/create-username`, `/api/auth/telegram`
 *   **Videos**: `/api/videos/upload`, `/api/videos/create`, `/api/videos/stream/:userId/:fileName`
 *   **Servers**: `/api/servers`, `/api/servers/:serverId`, `/api/users/:userId/servers`
 *   **Referrals**: `/api/referrals`, `/api/referrals/code/:code`, `/api/users/:userId/referrals`
+*   **Comments**: POST `/api/comments`, GET `/api/videos/:videoId/comments`, DELETE `/api/comments/:commentId`
+*   **Likes**: POST `/api/videos/:videoId/like`, GET `/api/videos/:videoId/liked`, GET `/api/videos/:videoId/likes`
+*   **Follows**: POST `/api/users/:userId/follow`, DELETE `/api/users/:userId/follow`, GET `/api/users/:userId/following`, GET `/api/users/:userId/followers`, GET `/api/users/:userId/following-list`
+*   **Views**: POST `/api/videos/:videoId/view`, GET `/api/videos/:videoId/views`
+*   **Search**: GET `/api/search/videos?q=`, GET `/api/search/servers?q=`, GET `/api/search/users?q=`
+*   **Feed**: GET `/api/feed/following` (authenticated users only)
 
 ## Recent Changes (Nov 15, 2025)
+*   **Complete Social Features System**: Full implementation of comments, likes, follows, views, and search
+    *   **Database Schema**: Added 4 new tables - `comments`, `likes`, `follows`, `video_views`
+    *   **Comments System**: Create, view, and delete comments on videos with user associations
+    *   **Like System**: Toggle likes on videos with unique constraints and like count tracking
+    *   **Follow System**: Follow/unfollow users, check following status, get follower/following lists with counts
+    *   **View Tracking**: Record video views with watch duration and completion status (supports anonymous views)
+    *   **Search Functionality**: Full-text search across videos (title, description), servers (name, description, location), and users (username, email)
+    *   **Following Feed**: Dedicated feed showing videos from users you follow (app/Following.tsx)
+    *   **Shorts Navigation Fix**: Changed "Following" button to navigate to following feed instead of servers
+    *   **API Config Updates**: Added all social feature endpoints to src/config/api.ts
+    *   **Foreign Keys**: All tables properly linked with cascade delete for referential integrity
+    *   **Indexes**: Optimized queries with indexes on video_id, user_id, follower_id, following_id, viewed_at
+*   **Previous Updates (Same Day)**:
 *   **Admin System & Custom Categories**: Complete server administration system with role-based permissions
     *   **Database Schema**: Added `categories` field (JSON array) to servers table, `role` field to serverMembers table ('owner', 'admin', 'member')
     *   **Backend API Endpoints**: 
