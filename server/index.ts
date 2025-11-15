@@ -16,9 +16,24 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// CORS configuration
+// CORS configuration - restricts origins in production for security
 app.use(cors({
-  origin: true, // Allow all origins in development
+  origin: process.env.NODE_ENV === 'production'
+    ? (origin, callback) => {
+        // Allow requests from your published Replit domain and localhost for development
+        const allowedOrigins = [
+          process.env.REPLIT_DOMAINS?.split(',')[0] ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : '',
+          'http://localhost:5000',
+          'https://localhost:5000',
+        ].filter(Boolean);
+        
+        if (!origin || allowedOrigins.some(allowed => origin.startsWith(allowed))) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    : true, // Allow all origins in development
   credentials: true,
 }));
 
