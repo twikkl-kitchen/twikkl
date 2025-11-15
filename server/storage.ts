@@ -6,6 +6,10 @@ import {
   videos,
   uploadCounts,
   referrals,
+  comments,
+  likes,
+  follows,
+  videoViews,
   type User,
   type UpsertUser,
   type InsertServer,
@@ -18,9 +22,17 @@ import {
   type UploadCount,
   type InsertReferral,
   type Referral,
+  type InsertComment,
+  type Comment,
+  type InsertLike,
+  type Like,
+  type InsertFollow,
+  type Follow,
+  type InsertVideoView,
+  type VideoView,
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
+import { eq, and, desc, gte, sql, or, ilike, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -61,6 +73,38 @@ export interface IStorage {
   getReferralsByReferrer(referrerId: string): Promise<Referral[]>;
   getUserByReferralCode(code: string): Promise<User | undefined>;
   updateReferralStatus(id: string, status: string): Promise<void>;
+  
+  // Comment operations
+  createComment(comment: InsertComment): Promise<Comment>;
+  getVideoComments(videoId: string): Promise<Comment[]>;
+  deleteComment(id: string): Promise<void>;
+  
+  // Like operations
+  toggleLike(videoId: string, userId: string): Promise<{ liked: boolean; likeCount: number }>;
+  isVideoLiked(videoId: string, userId: string): Promise<boolean>;
+  getVideoLikeCount(videoId: string): Promise<number>;
+  
+  // Follow operations
+  followUser(followerId: string, followingId: string): Promise<Follow>;
+  unfollowUser(followerId: string, followingId: string): Promise<void>;
+  isFollowing(followerId: string, followingId: string): Promise<boolean>;
+  getFollowers(userId: string): Promise<User[]>;
+  getFollowing(userId: string): Promise<User[]>;
+  getFollowerCount(userId: string): Promise<number>;
+  getFollowingCount(userId: string): Promise<number>;
+  
+  // Video view operations
+  recordView(view: InsertVideoView): Promise<VideoView>;
+  getVideoViewCount(videoId: string): Promise<number>;
+  updateViewCount(videoId: string): Promise<void>;
+  
+  // Search operations
+  searchVideos(query: string, limit?: number): Promise<Video[]>;
+  searchServers(query: string, limit?: number): Promise<Server[]>;
+  searchUsers(query: string, limit?: number): Promise<User[]>;
+  
+  // Following feed
+  getFollowingFeed(userId: string, limit?: number): Promise<Video[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -282,6 +326,245 @@ export class DatabaseStorage implements IStorage {
       .update(referrals)
       .set({ status, completedAt: status === 'completed' ? new Date() : undefined })
       .where(eq(referrals.id, id));
+  }
+
+  // Comment operations
+  async createComment(commentData: InsertComment): Promise<Comment> {
+    const [comment] = await db.insert(comments).values(commentData).returning();
+    return comment;
+  }
+
+  async getVideoComments(videoId: string): Promise<Comment[]> {
+    return await db
+      .select()
+      .from(comments)
+      .where(eq(comments.videoId, videoId))
+      .orderBy(desc(comments.createdAt));
+  }
+
+  async deleteComment(id: string): Promise<void> {
+    await db.delete(comments).where(eq(comments.id, id));
+  }
+
+  // Like operations
+  async toggleLike(videoId: string, userId: string): Promise<{ liked: boolean; likeCount: number }> {
+    // Check if like exists
+    const [existingLike] = await db
+      .select()
+      .from(likes)
+      .where(and(
+        eq(likes.videoId, videoId),
+        eq(likes.userId, userId)
+      ));
+
+    if (existingLike) {
+      // Unlike - delete the like
+      await db
+        .delete(likes)
+        .where(and(
+          eq(likes.videoId, videoId),
+          eq(likes.userId, userId)
+        ));
+      
+      // Update video like count
+      await this.updateVideoLikeCount(videoId);
+      
+      const likeCount = await this.getVideoLikeCount(videoId);
+      return { liked: false, likeCount };
+    } else {
+      // Like - insert new like
+      await db.insert(likes).values({ videoId, userId });
+      
+      // Update video like count
+      await this.updateVideoLikeCount(videoId);
+      
+      const likeCount = await this.getVideoLikeCount(videoId);
+      return { liked: true, likeCount };
+    }
+  }
+
+  async isVideoLiked(videoId: string, userId: string): Promise<boolean> {
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(and(
+        eq(likes.videoId, videoId),
+        eq(likes.userId, userId)
+      ));
+    return !!like;
+  }
+
+  async getVideoLikeCount(videoId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(likes)
+      .where(eq(likes.videoId, videoId));
+    return Number(result[0]?.count || 0);
+  }
+
+  private async updateVideoLikeCount(videoId: string): Promise<void> {
+    const likeCount = await this.getVideoLikeCount(videoId);
+    await db
+      .update(videos)
+      .set({ likeCount })
+      .where(eq(videos.id, videoId));
+  }
+
+  // Follow operations
+  async followUser(followerId: string, followingId: string): Promise<Follow> {
+    const [follow] = await db
+      .insert(follows)
+      .values({ followerId, followingId })
+      .returning();
+    return follow;
+  }
+
+  async unfollowUser(followerId: string, followingId: string): Promise<void> {
+    await db
+      .delete(follows)
+      .where(and(
+        eq(follows.followerId, followerId),
+        eq(follows.followingId, followingId)
+      ));
+  }
+
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const [follow] = await db
+      .select()
+      .from(follows)
+      .where(and(
+        eq(follows.followerId, followerId),
+        eq(follows.followingId, followingId)
+      ));
+    return !!follow;
+  }
+
+  async getFollowers(userId: string): Promise<User[]> {
+    const followers = await db
+      .select({
+        user: users,
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followerId, users.id))
+      .where(eq(follows.followingId, userId));
+    
+    return followers.map(f => f.user);
+  }
+
+  async getFollowing(userId: string): Promise<User[]> {
+    const following = await db
+      .select({
+        user: users,
+      })
+      .from(follows)
+      .innerJoin(users, eq(follows.followingId, users.id))
+      .where(eq(follows.followerId, userId));
+    
+    return following.map(f => f.user);
+  }
+
+  async getFollowerCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(follows)
+      .where(eq(follows.followingId, userId));
+    return Number(result[0]?.count || 0);
+  }
+
+  async getFollowingCount(userId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(follows)
+      .where(eq(follows.followerId, userId));
+    return Number(result[0]?.count || 0);
+  }
+
+  // Video view operations
+  async recordView(viewData: InsertVideoView): Promise<VideoView> {
+    const [view] = await db.insert(videoViews).values(viewData).returning();
+    
+    // Update video view count
+    await this.updateViewCount(viewData.videoId);
+    
+    return view;
+  }
+
+  async getVideoViewCount(videoId: string): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(videoViews)
+      .where(eq(videoViews.videoId, videoId));
+    return Number(result[0]?.count || 0);
+  }
+
+  async updateViewCount(videoId: string): Promise<void> {
+    const viewCount = await this.getVideoViewCount(videoId);
+    await db
+      .update(videos)
+      .set({ viewCount })
+      .where(eq(videos.id, videoId));
+  }
+
+  // Search operations
+  async searchVideos(query: string, limit: number = 20): Promise<Video[]> {
+    return await db
+      .select()
+      .from(videos)
+      .where(or(
+        ilike(videos.caption, `%${query}%`),
+        ilike(videos.category, `%${query}%`)
+      ))
+      .orderBy(desc(videos.createdAt))
+      .limit(limit);
+  }
+
+  async searchServers(query: string, limit: number = 20): Promise<Server[]> {
+    return await db
+      .select()
+      .from(servers)
+      .where(or(
+        ilike(servers.name, `%${query}%`),
+        ilike(servers.description, `%${query}%`),
+        ilike(servers.hashtags, `%${query}%`)
+      ))
+      .orderBy(desc(servers.createdAt))
+      .limit(limit);
+  }
+
+  async searchUsers(query: string, limit: number = 20): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(or(
+        ilike(users.username, `%${query}%`),
+        ilike(users.email, `%${query}%`),
+        ilike(users.firstName, `%${query}%`),
+        ilike(users.lastName, `%${query}%`)
+      ))
+      .limit(limit);
+  }
+
+  // Following feed
+  async getFollowingFeed(userId: string, limit: number = 50): Promise<Video[]> {
+    // Get list of users that this user follows
+    const followingUsers = await db
+      .select({ userId: follows.followingId })
+      .from(follows)
+      .where(eq(follows.followerId, userId));
+    
+    const followingIds = followingUsers.map(f => f.userId);
+    
+    if (followingIds.length === 0) {
+      return [];
+    }
+    
+    // Get videos from those users
+    return await db
+      .select()
+      .from(videos)
+      .where(inArray(videos.userId, followingIds))
+      .orderBy(desc(videos.createdAt))
+      .limit(limit);
   }
 }
 
