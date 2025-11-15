@@ -153,7 +153,18 @@ export default function NewHome() {
   );
 
   const VideoCard = ({ item }: { item: typeof videos[0] }) => (
-    <View style={[styles.videoCard, { backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }]}>
+    <Pressable 
+      style={[styles.videoCard, { backgroundColor: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)" }]}
+      onPress={() => router.push({
+        pathname: "/video/PlayVideo",
+        params: {
+          id: `demo-video-${item.id}`,
+          title: item.title,
+          creator: item.creator,
+          url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+      })}
+    >
       <View style={styles.videoThumbnailContainer}>
         <Image source={item.thumbnail} style={styles.videoThumbnail} />
         {item.isLive && (
@@ -179,7 +190,7 @@ export default function NewHome() {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 
   return (
