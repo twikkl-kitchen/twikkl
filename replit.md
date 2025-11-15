@@ -77,11 +77,12 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 
 ## Recent Changes (Nov 15, 2025)
 *   **Server UI Redesign**: Completely redesigned server screens for better UX and more video content visibility
-    *   **Compact Header**: Reduced server header from ~40% to ~20% of screen height
-    *   **Banner Fixes**: Fixed banner images to properly fill entire container space in both server list and detail views
-    *   **Category Organization**: Videos now organized by category (Tutorial, Trading, Development, General, News) with horizontal scrolling rows
+    *   **Compact Header**: Reduced server header from ~40% to ~20% of screen height, increased profile image size to 80x80px
+    *   **Banner Fixes**: Fixed banner images to properly fill entire container space (140px height) in both server list and detail views
+    *   **2-Row Grid Layout**: Videos display in YouTube-style 2-row grid - videos arranged in columns (2 per column) that scroll horizontally
+    *   **Category Organization**: Videos organized by category (Tutorial, Trading, Development, General, News) with each category showing 2 rows of videos
     *   **View All Categories**: Added category detail screens to view all videos in a specific category
-    *   **Action Buttons**: Inline Create, Chat, and Invite buttons for quick server actions
+    *   **Action Buttons**: Inline Create and Invite buttons for quick server actions (removed non-existent Chat button)
 *   **Authentication Redesign**: Created Replit-style unified auth screen with Google OAuth, Telegram OAuth, and Email/Password options
 *   **Username Endpoint**: Added `/api/auth/create-username` backend endpoint for username creation after signup
 *   **Telegram OAuth**: Full Telegram authentication integration with automatic username import
