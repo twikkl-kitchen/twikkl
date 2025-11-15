@@ -71,9 +71,18 @@ export default function Shorts() {
         renderItem={({ item, index }) => <VideoFeedItem item={item} index={index} visibleIndex={visibleIndex} onShareClick={() => setShareVisible(true)} />}
         keyExtractor={(item, index) => index.toString()}
         pagingEnabled
+        snapToInterval={height}
+        snapToAlignment="start"
+        decelerationRate="fast"
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         onScroll={onScroll}
+        scrollEventThrottle={16}
+        getItemLayout={(data, index) => ({
+          length: height,
+          offset: height * index,
+          index,
+        })}
       />
       <SafeAreaView style={styles.innerContainer}>
         <View style={ViewVariant.rowSpaceBetween}>

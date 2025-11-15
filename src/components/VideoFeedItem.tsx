@@ -54,8 +54,8 @@ export default function VideoFeedItem({ item, index, visibleIndex, onShareClick 
   };
 
   return (
-    <TouchableWithoutFeedback onPress={togglePlay} style={{ flex: 1 }}>
-      <View style={{ flex: 1, height: height + (StatusBar.currentHeight ?? 41) }}>
+    <TouchableWithoutFeedback onPress={togglePlay}>
+      <View style={{ height: height, width: width }}>
         <Video
           source={item.video}
           shouldPlay={shouldPlay}
