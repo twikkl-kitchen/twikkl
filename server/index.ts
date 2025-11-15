@@ -7,6 +7,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { Client as ObjectStorageClient } from "@replit/object-storage";
 import { v4 as uuidv4 } from "uuid";
+import { AuthDataValidator } from "@telegram-auth/server";
 
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
@@ -58,6 +59,40 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Health check
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ status: 'ok', message: 'Twikkl backend is running' });
+  });
+
+  // Telegram authentication endpoint
+  app.post('/api/auth/telegram', async (req: Request, res: Response) => {
+    try {
+      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      
+      if (!botToken) {
+        return res.status(500).json({ error: 'Telegram bot token not configured' });
+      }
+
+      const validator = new AuthDataValidator({ botToken });
+      const userData = await validator.validate(req.body);
+      
+      // Create or update user from Telegram data
+      const userId = `telegram_${userData.id}`;
+      const username = userData.username || `user${userData.id}`;
+      
+      // Upsert user (create if doesn't exist, update if exists)
+      const user = await storage.upsertUser({
+        id: userId,
+        email: `telegram_${userData.id}@telegram.user`,
+        username: username,
+        profileImage: userData.photo_url,
+      });
+
+      res.json({
+        success: true,
+        user,
+      });
+    } catch (error) {
+      console.error('Telegram auth error:', error);
+      res.status(401).json({ error: 'Invalid Telegram authentication data' });
+    }
   });
 
   // Get current authenticated user

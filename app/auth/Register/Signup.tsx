@@ -1,8 +1,9 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Platform } from "react-native";
 import LabelInput from "@twikkl/components/LabelInput";
 import { Signup as ISignup } from "@twikkl/services";
 import Checkbox from "expo-checkbox";
 import OAuthButton from "@twikkl/components/OAuthButton";
+import TelegramAuthButton from "@twikkl/components/TelegramAuthButton";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
 
@@ -23,6 +24,11 @@ export function SubSignup() {
         text="Sign up with Google" 
         onPress={() => router.push('/auth/GoogleAuth')}
       />
+      {Platform.OS === 'web' && (
+        <View style={{ marginTop: 12 }}>
+          <TelegramAuthButton botName={process.env.EXPO_PUBLIC_TELEGRAM_BOT_NAME || 'twikkl_bot'} />
+        </View>
+      )}
     </View>
   );
 }
