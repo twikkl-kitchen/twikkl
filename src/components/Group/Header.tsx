@@ -20,7 +20,7 @@ import Grid1 from "@assets/svg/Grid1";
 import { useRouter } from "expo-router";
 import MenuIcon from "@assets/svg/Menu";
 import ArrowDown from "@assets/svg/ArrowDown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Grid3 from "@assets/svg/Grid3";
 import Grid2 from "@assets/svg/Grid2";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
@@ -45,11 +45,30 @@ const Header = ({
   const { height } = Dimensions.get("window");
   const { isDarkMode } = useThemeMode();
   const [dropDown, setDropDown] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   
   const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#fff" : "#000";
   const mutedTextColor = isDarkMode ? "#888" : "#666";
+
+  useEffect(() => {
+    checkAdminStatus();
+  }, [id]);
+
+  const checkAdminStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/servers/${id}/is-admin`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsAdmin(data.isAdmin);
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+  };
   
   return (
     <View>
@@ -64,9 +83,11 @@ const Header = ({
         </TouchableOpacity>
         <View style={{ flexDirection: "row", gap: 20 }}>
           <AntDesign name="search1" size={22} color="#fff" />
-          <TouchableOpacity onPress={() => router.push("/server/Settings")}>
-            <Ionicons name="settings-outline" size={22} color="#fff" />
-          </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity onPress={() => router.push(`/server/Settings?serverId=${id}`)}>
+              <Ionicons name="settings-outline" size={22} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
       </ImageBackground>
       

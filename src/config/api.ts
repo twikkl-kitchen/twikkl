@@ -24,6 +24,11 @@ export const API_ENDPOINTS = {
     CREATE: `${API_BASE_URL}/servers`,
     GET: (serverId: string) => `${API_BASE_URL}/servers/${serverId}`,
     USER_SERVERS: (userId: string) => `${API_BASE_URL}/users/${userId}/servers`,
+    CATEGORIES: (serverId: string) => `${API_BASE_URL}/servers/${serverId}/categories`,
+    IS_ADMIN: (serverId: string) => `${API_BASE_URL}/servers/${serverId}/is-admin`,
+    ADMINS: (serverId: string) => `${API_BASE_URL}/servers/${serverId}/admins`,
+    ADD_ADMIN: (serverId: string) => `${API_BASE_URL}/servers/${serverId}/admins`,
+    REMOVE_ADMIN: (serverId: string, userId: string) => `${API_BASE_URL}/servers/${serverId}/admins/${userId}`,
   },
 
   // Referral endpoints

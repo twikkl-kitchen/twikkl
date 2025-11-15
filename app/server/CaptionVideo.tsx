@@ -33,8 +33,6 @@ const Option = styled.View`
   height: ${hp(1.6)}px;
 `;
 
-const categories = ["Tutorial", "Trading", "Development", "General", "News"];
-
 const CaptionVideo = () => {
   const router = useRouter();
   const { videoUri, serverId } = useLocalSearchParams();
@@ -52,7 +50,8 @@ const CaptionVideo = () => {
   const [subData, setSubData] = useState("Followers");
   const [captionText, setCaptionText] = useState("");
   const [options, setOptions] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [categories, setCategories] = useState<string[]>(["Tutorial", "Trading", "Development", "General", "News"]);
+  const [selectedCategory, setSelectedCategory] = useState("Tutorial");
   const [categoryDropdown, setCategoryDropdown] = useState(false);
 
   const optionsArray = [
@@ -67,7 +66,23 @@ const CaptionVideo = () => {
 
   useEffect(() => {
     checkUploadLimit();
+    fetchServerCategories();
   }, []);
+
+  const fetchServerCategories = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/servers/${serverId}/categories`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.categories && data.categories.length > 0) {
+          setCategories(data.categories);
+          setSelectedCategory(data.categories[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   const checkUploadLimit = async () => {
     const storageKey = `uploads_${serverId}`;
