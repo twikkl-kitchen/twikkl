@@ -130,6 +130,69 @@ export const referrals = pgTable("referrals", {
 export type InsertReferral = typeof referrals.$inferInsert;
 export type Referral = typeof referrals.$inferSelect;
 
+// Comments table - for video comments
+export const comments = pgTable("comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  videoId: varchar("video_id").notNull().references(() => videos.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("idx_comments_video").on(table.videoId),
+  index("idx_comments_user").on(table.userId),
+]);
+
+export type InsertComment = typeof comments.$inferInsert;
+export type Comment = typeof comments.$inferSelect;
+
+// Likes table - for video likes
+export const likes = pgTable("likes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  videoId: varchar("video_id").notNull().references(() => videos.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_video_like").on(table.videoId, table.userId),
+  index("idx_likes_video").on(table.videoId),
+  index("idx_likes_user").on(table.userId),
+]);
+
+export type InsertLike = typeof likes.$inferInsert;
+export type Like = typeof likes.$inferSelect;
+
+// Follows table - for user follows
+export const follows = pgTable("follows", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  followerId: varchar("follower_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  followingId: varchar("following_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_follow").on(table.followerId, table.followingId),
+  index("idx_follows_follower").on(table.followerId),
+  index("idx_follows_following").on(table.followingId),
+]);
+
+export type InsertFollow = typeof follows.$inferInsert;
+export type Follow = typeof follows.$inferSelect;
+
+// Video views table - for tracking video views and watch time
+export const videoViews = pgTable("video_views", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  videoId: varchar("video_id").notNull().references(() => videos.id, { onDelete: 'cascade' }),
+  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }), // nullable for anonymous views
+  watchDuration: integer("watch_duration").default(0), // in seconds
+  completed: boolean("completed").default(false), // whether user watched to the end
+  viewedAt: timestamp("viewed_at").defaultNow(),
+}, (table) => [
+  index("idx_video_views_video").on(table.videoId),
+  index("idx_video_views_user").on(table.userId),
+  index("idx_video_views_date").on(table.viewedAt),
+]);
+
+export type InsertVideoView = typeof videoViews.$inferInsert;
+export type VideoView = typeof videoViews.$inferSelect;
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   videos: many(videos),
@@ -137,6 +200,11 @@ export const usersRelations = relations(users, ({ many }) => ({
   ownedServers: many(servers),
   referralsMade: many(referrals, { relationName: 'referrer' }),
   referralsReceived: many(referrals, { relationName: 'referred' }),
+  comments: many(comments),
+  likes: many(likes),
+  following: many(follows, { relationName: 'follower' }),
+  followers: many(follows, { relationName: 'following' }),
+  videoViews: many(videoViews),
 }));
 
 export const serversRelations = relations(servers, ({ one, many }) => ({
@@ -160,7 +228,7 @@ export const serverMembersRelations = relations(serverMembers, ({ one }) => ({
   }),
 }));
 
-export const videosRelations = relations(videos, ({ one }) => ({
+export const videosRelations = relations(videos, ({ one, many }) => ({
   user: one(users, {
     fields: [videos.userId],
     references: [users.id],
@@ -169,6 +237,9 @@ export const videosRelations = relations(videos, ({ one }) => ({
     fields: [videos.serverId],
     references: [servers.id],
   }),
+  comments: many(comments),
+  likes: many(likes),
+  views: many(videoViews),
 }));
 
 export const referralsRelations = relations(referrals, ({ one }) => ({
@@ -181,5 +252,51 @@ export const referralsRelations = relations(referrals, ({ one }) => ({
     fields: [referrals.referredUserId],
     references: [users.id],
     relationName: 'referred',
+  }),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  video: one(videos, {
+    fields: [comments.videoId],
+    references: [videos.id],
+  }),
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+}));
+
+export const likesRelations = relations(likes, ({ one }) => ({
+  video: one(videos, {
+    fields: [likes.videoId],
+    references: [videos.id],
+  }),
+  user: one(users, {
+    fields: [likes.userId],
+    references: [users.id],
+  }),
+}));
+
+export const followsRelations = relations(follows, ({ one }) => ({
+  follower: one(users, {
+    fields: [follows.followerId],
+    references: [users.id],
+    relationName: 'follower',
+  }),
+  following: one(users, {
+    fields: [follows.followingId],
+    references: [users.id],
+    relationName: 'following',
+  }),
+}));
+
+export const videoViewsRelations = relations(videoViews, ({ one }) => ({
+  video: one(videos, {
+    fields: [videoViews.videoId],
+    references: [videos.id],
+  }),
+  user: one(users, {
+    fields: [videoViews.userId],
+    references: [users.id],
   }),
 }));
