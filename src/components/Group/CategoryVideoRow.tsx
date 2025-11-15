@@ -21,7 +21,7 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const THUMBNAIL_WIDTH = width * 0.42;
+const THUMBNAIL_WIDTH = width * 0.38;
 const THUMBNAIL_HEIGHT = THUMBNAIL_WIDTH * 0.56;
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
@@ -34,6 +34,40 @@ const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps)
   const cardBackground = isDarkMode ? "#1a1a1a" : "#f8f8f8";
 
   if (videos.length === 0) return <></>;
+
+  // Split videos into 2 rows for horizontal scrolling (like Netflix)
+  const videosPerRow = Math.ceil(videos.length / 2);
+  const firstRow = videos.slice(0, videosPerRow);
+  const secondRow = videos.slice(videosPerRow, videosPerRow * 2);
+
+  const renderVideoCard = (video: VideoItem) => (
+    <TouchableOpacity 
+      key={video.id} 
+      style={[styles.videoCard, { backgroundColor: cardBackground }]}
+      onPress={() => {
+        console.log("Play video:", video.id);
+      }}
+    >
+      <View style={styles.thumbnailContainer}>
+        <Image 
+          source={video.thumbnail} 
+          style={styles.thumbnail}
+          resizeMode="cover"
+        />
+        <View style={styles.durationBadge}>
+          <Text style={styles.durationText}>{video.duration}</Text>
+        </View>
+      </View>
+      <View style={styles.videoInfo}>
+        <Text style={[styles.videoTitle, { color: textColor }]} numberOfLines={2}>
+          {video.title}
+        </Text>
+        <Text style={[styles.videoMeta, { color: mutedTextColor }]} numberOfLines={1}>
+          {video.views} • {video.time}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -48,40 +82,25 @@ const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps)
         </TouchableOpacity>
       </View>
 
+      {/* First Row */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {videos.slice(0, 6).map((video) => (
-          <TouchableOpacity 
-            key={video.id} 
-            style={[styles.videoCard, { backgroundColor: cardBackground }]}
-            onPress={() => {
-              console.log("Play video:", video.id);
-            }}
-          >
-            <View style={styles.thumbnailContainer}>
-              <Image 
-                source={video.thumbnail} 
-                style={styles.thumbnail}
-                resizeMode="cover"
-              />
-              <View style={styles.durationBadge}>
-                <Text style={styles.durationText}>{video.duration}</Text>
-              </View>
-            </View>
-            <View style={styles.videoInfo}>
-              <Text style={[styles.videoTitle, { color: textColor }]} numberOfLines={2}>
-                {video.title}
-              </Text>
-              <Text style={[styles.videoMeta, { color: mutedTextColor }]} numberOfLines={1}>
-                {video.views} • {video.time}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        ))}
+        {firstRow.map(renderVideoCard)}
       </ScrollView>
+
+      {/* Second Row */}
+      {secondRow.length > 0 && (
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, styles.secondRowContent]}
+        >
+          {secondRow.map(renderVideoCard)}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -114,6 +133,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingLeft: 16,
     paddingRight: 8,
+    marginBottom: 8,
+  },
+  secondRowContent: {
+    marginBottom: 0,
   },
   videoCard: {
     marginRight: 12,
