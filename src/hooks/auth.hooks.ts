@@ -59,7 +59,7 @@ export const useSignup = <T extends Record<any, any>>(defaultForm: T, signupDone
       const data = await createUsername(username);
       console.log({ createUsername: data });
       toastSuccess(data.message);
-      router.push("/(tabs)");
+      router.push("/NewHome");
     } catch (error) {
       console.log({ createUsernameError: error });
     } finally {

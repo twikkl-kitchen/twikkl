@@ -34,7 +34,7 @@ const TelegramAuthButton: React.FC<TelegramAuthButtonProps> = ({ botName }) => {
       toastSuccess('Welcome to Twikkl!');
       
       // Redirect to home
-      router.push('/(tabs)');
+      router.push('/NewHome');
     } catch (error) {
       console.error('Telegram auth error:', error);
     }

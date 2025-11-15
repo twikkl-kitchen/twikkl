@@ -1,35 +1,69 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
 import React from "react";
-import ButtonEl from "@twikkl/components/ButtonEl";
-import { ViewVariant } from "@twikkl/configs";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
-import Logo from "@twikkl/components/Logo";
+import OAuthButton from "@twikkl/components/OAuthButton";
+import TelegramAuthButton from "../../src/components/TelegramAuthButton";
 
 const Index = () => {
   const router = useRouter();
   const { isDarkMode } = useThemeMode();
   
-  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const backgroundColor = isDarkMode ? "#000" : "#F5F5F5";
   const textColor = isDarkMode ? "#FFF" : "#000";
+  const buttonBg = isDarkMode ? "#1E1E1E" : "#E8E8E8";
+  const dividerColor = isDarkMode ? "#444" : "#CCC";
   
   return (
     <View style={[styles.wrapper, { backgroundColor }]}>
-      <View style={styles.top}>
-        <Logo width={120} height={120} />
-        <Text style={[styles.bigText, { color: textColor }]}>
-          A blockchain-based distributed system for video sharing and social networking.
+      <View style={styles.content}>
+        <Text style={[styles.title, { color: textColor }]}>
+          Create a Twikkl account
         </Text>
-        <Text style={[styles.text, { color: textColor }]}>Giving you power to recreate your thoughts in a decentralized system</Text>
+        
+        {/* Google OAuth Button */}
+        <OAuthButton 
+          text="Continue with Google" 
+          icon="google"
+          onPress={() => router.push('/auth/GoogleAuth')}
+          backgroundColor={buttonBg}
+          textColor={textColor}
+        />
+        
+        {/* Telegram OAuth Button - Web only */}
+        {Platform.OS === 'web' && (
+          <View style={styles.telegramWrapper}>
+            <TelegramAuthButton botName={process.env.EXPO_PUBLIC_TELEGRAM_BOT_NAME || 'twikkl_bot'} />
+          </View>
+        )}
+        
+        {/* Divider */}
+        <View style={styles.dividerContainer}>
+          <View style={[styles.dividerLine, { backgroundColor: dividerColor }]} />
+          <Text style={[styles.dividerText, { color: textColor }]}>Or</Text>
+          <View style={[styles.dividerLine, { backgroundColor: dividerColor }]} />
+        </View>
+        
+        {/* Email & Password Option */}
+        <Pressable 
+          style={[styles.emailButton, { backgroundColor: buttonBg }]}
+          onPress={() => router.push("auth/Register")}
+        >
+          <Text style={[styles.emailButtonText, { color: textColor }]}>
+            📧  Email & password
+          </Text>
+        </Pressable>
+        
+        {/* Sign In Link */}
+        <View style={styles.signInContainer}>
+          <Text style={[styles.signInText, { color: textColor }]}>
+            Already have an account?{" "}
+          </Text>
+          <Pressable onPress={() => router.push("auth/Login")}>
+            <Text style={styles.signInLink}>Sign in</Text>
+          </Pressable>
+        </View>
       </View>
-      <View style={styles.btnWrapper}>
-        <ButtonEl onPress={() => router.push("auth/Register")}>
-          <Text style={ViewVariant.buttonText}>Create Account</Text>
-        </ButtonEl>
-      </View>
-      <ButtonEl bg={isDarkMode ? "#1A1A1A" : "#C0CCC1"} onPress={() => router.push("auth/Login")}>
-        <Text style={ViewVariant.buttonText}>Sign In</Text>
-      </ButtonEl>
     </View>
   );
 };
@@ -39,23 +73,60 @@ export default Index;
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 150,
+    paddingHorizontal: 24,
+    justifyContent: "center",
   },
-  bigText: {
-    fontSize: 24,
+  content: {
+    maxWidth: 400,
+    width: "100%",
+    alignSelf: "center",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 40,
   },
-  text: {
-    fontSize: 12,
-    textAlign: "center",
+  telegramWrapper: {
+    marginTop: 16,
   },
-  top: {
+  dividerContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    marginVertical: 24,
   },
-  btnWrapper: {
-    marginBottom: 32,
-    marginTop: 112,
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  emailButton: {
+    height: 56,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
+  emailButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  signInContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 24,
+  },
+  signInText: {
+    fontSize: 14,
+  },
+  signInLink: {
+    fontSize: 14,
+    color: "#50A040",
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
 });
