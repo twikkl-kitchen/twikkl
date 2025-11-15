@@ -46,73 +46,71 @@ const Header = ({
   const { isDarkMode } = useThemeMode();
   const [dropDown, setDropDown] = useState(false);
   const router = useRouter();
-  const gridArr = [<Grid1 />, <Grid2 />, <Grid3 />];
   
   const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#fff" : "#000";
+  const mutedTextColor = isDarkMode ? "#888" : "#666";
+  
   return (
     <View>
-      <ImageBackground style={[styles.bannerImage, { height: height * 0.32 }]} source={img}>
+      <ImageBackground 
+        style={[styles.compactBannerImage]} 
+        source={img}
+        resizeMode="cover"
+        imageStyle={{ opacity: 0.7 }}
+      >
         <TouchableOpacity onPressOut={() => router.back()} style={styles.iconContainer}>
           <Octicons name="chevron-left" size={24} color="#fff" />
         </TouchableOpacity>
-        <View style={{ flexDirection: "row", gap: 26 }}>
-          <AntDesign name="search1" size={24} color="#fff" />
+        <View style={{ flexDirection: "row", gap: 20 }}>
+          <AntDesign name="search1" size={22} color="#fff" />
           <TouchableOpacity onPress={() => router.push("/server/Settings")}>
-            <Ionicons name="settings-outline" size={24} color="#fff" />
+            <Ionicons name="settings-outline" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
       </ImageBackground>
-      <View style={[styles.container, { backgroundColor }]}>
-        <Image style={styles.profilePicture} source={smallImg} />
-        <Text style={[styles.title, { color: textColor }]}>{title}</Text>
-        <Text style={[styles.description, { color: textColor }]}>{desc}</Text>
-        <View style={[styles.horizontal, styles.detailsContainer]}>
-          <View style={styles.horizontal}>
-            <View style={styles.horizontal}>
-              <MaterialCommunityIcons name="lock" size={20} color={colors.white100} />
-              <Text style={styles.details}>{status}</Text>
+      
+      <View style={[styles.compactContainer, { backgroundColor }]}>
+        <View style={styles.compactHeader}>
+          <Image style={styles.compactProfilePicture} source={smallImg} />
+          <View style={styles.compactInfo}>
+            <View style={styles.compactTitleRow}>
+              <Text style={[styles.compactTitle, { color: textColor }]} numberOfLines={1}>
+                {title}
+              </Text>
+              <View style={styles.compactStatusBadge}>
+                <MaterialCommunityIcons name="lock" size={14} color={mutedTextColor} />
+                <Text style={[styles.compactStatusText, { color: mutedTextColor }]}>{status}</Text>
+              </View>
             </View>
-            <View style={[styles.horizontal, { marginLeft: 10 }]}>
-              <FontAwesome5 name="user-friends" size={17} color={isDarkMode ? colors.white200 : "#666"} />
-              <Text style={[styles.details, { color: textColor }]}>{members} members</Text>
+            <Text style={[styles.compactDescription, { color: mutedTextColor }]} numberOfLines={1}>
+              {desc}
+            </Text>
+            <View style={styles.compactMetaRow}>
+              <View style={styles.horizontal}>
+                <FontAwesome5 name="user-friends" size={12} color={mutedTextColor} />
+                <Text style={[styles.compactMeta, { color: mutedTextColor }]}>{members} members</Text>
+              </View>
             </View>
-          </View>
-          <View style={[styles.horizontal, { gap: 10 }]}>
-            <View style={[styles.horizontal]}>
-              {imgArr.map((img, index) => {
-                return <Image key={index} source={img} style={[styles.avatar, index === 0 && { marginLeft: 0 }]} />;
-              })}
-            </View>
-            <TouchableOpacity style={styles.add}>
-              <Ionicons name="add-outline" size={28} color="#50A040" />
-            </TouchableOpacity>
           </View>
         </View>
-      </View>
-
-      <ScrollView horizontal style={{ backgroundColor }}>
-        {smallGroup?.map((topic, index) => {
-          return (
-            <TouchableOpacity key={index} style={[styles.topicsButton]}>
-              <Text style={{ color: textColor }}>{topic}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      <View style={{ backgroundColor, marginBottom: 16 }}>
-        <View style={styles.actionContainer}>
+        
+        <View style={styles.compactActions}>
           <Pressable 
-            style={styles.horizontal}
+            style={styles.compactActionButton}
             onPress={() => router.push(`/server/CreateVideo?serverId=${id}`)}
           >
-            <Image source={require("../../../assets/imgs/smallImg1.png")} style={styles.actionAvatar} />
-            <PlayUpload />
+            <Ionicons name="add-circle" size={20} color="#50A040" />
+            <Text style={[styles.compactActionText, { color: textColor }]}>Create</Text>
           </Pressable>
-          <View style={[styles.horizontal, { gap: 20 }]}>
-            {/* Grid options removed - videos now display as list cards like home screen */}
-          </View>
+          <TouchableOpacity style={styles.compactActionButton}>
+            <Ionicons name="chatbubble-outline" size={18} color={mutedTextColor} />
+            <Text style={[styles.compactActionText, { color: textColor }]}>Chat</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.compactActionButton}>
+            <Ionicons name="person-add-outline" size={18} color={mutedTextColor} />
+            <Text style={[styles.compactActionText, { color: textColor }]}>Invite</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -218,6 +216,80 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 100,
+  },
+  compactBannerImage: {
+    height: 120,
+    paddingTop: 50,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  compactContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  compactHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  compactProfilePicture: {
+    borderRadius: 24,
+    height: 48,
+    width: 48,
+    marginRight: 12,
+  },
+  compactInfo: {
+    flex: 1,
+  },
+  compactTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 2,
+  },
+  compactTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginRight: 8,
+    flex: 1,
+  },
+  compactStatusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  compactStatusText: {
+    fontSize: 12,
+  },
+  compactDescription: {
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  compactMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  compactMeta: {
+    fontSize: 12,
+    marginLeft: 6,
+  },
+  compactActions: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  compactActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  compactActionText: {
+    fontSize: 13,
+    fontWeight: "500",
   },
 });
 export default Header;
