@@ -3,9 +3,8 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
 import OAuthButton from "@twikkl/components/OAuthButton";
-import TelegramAuthButton from "../../src/components/TelegramAuthButton";
+import TelegramLoginWidget from "../../src/components/TelegramLoginWidget";
 import { Octicons } from "@expo/vector-icons";
-import Constants from 'expo-constants';
 
 const Index = () => {
   const router = useRouter();
@@ -50,7 +49,7 @@ const Index = () => {
         {/* Telegram OAuth Button - Web only */}
         {Platform.OS === 'web' && (
           <View style={styles.telegramWrapper}>
-            <TelegramAuthButton botName={Constants.expoConfig?.extra?.EXPO_PUBLIC_TELEGRAM_BOT_NAME || 'twikklbot'} />
+            <TelegramLoginWidget botName="twikklbot" />
           </View>
         )}
         
