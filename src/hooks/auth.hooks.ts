@@ -14,19 +14,18 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useFormField } from "./common.hooks";
 
-export type TRegStage = "signup" | "verify" | "username";
+export type TRegStage = "signup" | "username";
 
 export const useSignup = <T extends Record<any, any>>(defaultForm: T, signupDone: boolean) => {
   const { form, updateField } = useFormField(defaultForm);
-  const { email, password, username, confirmPassword, token } = form;
+  const { email, password, username, confirmPassword } = form;
   const { isRequesting } = useTwikklEntity();
   const router = useRouter();
-  const startStage = signupDone ? "verify" : "signup";
+  const startStage = signupDone ? "username" : "signup";
   const [currentStage, setCurrentStage] = useState<TRegStage>(startStage);
 
   const loading = {
     signup: isRequesting("signUp"),
-    verifyOtp: isRequesting("verify-otp"),
     username: isRequesting("username"),
   };
 
@@ -43,26 +42,10 @@ export const useSignup = <T extends Record<any, any>>(defaultForm: T, signupDone
       console.log({ signData: data });
       toastSuccess(data.message);
       setToken(data.token);
-      setCurrentStage("verify");
+      setAuth(data.data, data.token);
+      setCurrentStage("username");
     } catch (error) {
       console.log({ signupError: error });
-    } finally {
-      requestEnded();
-      hideLoader();
-    }
-  };
-
-  const _verifyOtp = async () => {
-    requestStarted("verify-otp");
-    showLoader();
-    try {
-      const data = await verifyOtp(token);
-      console.log({ verifyOtpData: data });
-      toastSuccess(data.message);
-      setCurrentStage("username");
-      setAuth(data.data, data.token);
-    } catch (error) {
-      console.log({ verifyOtpError: error });
     } finally {
       requestEnded();
       hideLoader();
@@ -76,38 +59,23 @@ export const useSignup = <T extends Record<any, any>>(defaultForm: T, signupDone
       const data = await createUsername(username);
       console.log({ createUsername: data });
       toastSuccess(data.message);
-      router.push("Home");
+      router.push("/(tabs)");
     } catch (error) {
-      console.log({ verifyOtpError: error });
+      console.log({ createUsernameError: error });
     } finally {
       requestEnded();
       hideLoader();
     }
   };
 
-  const _resendOtp = async () => {
-    // showLoader();
-    // const emailToUse = {
-    //   email: email || authEmail,
-    // };
-    // try {
-    //   await resendOtp(emailToUse);
-    // } catch (error) {
-    // } finally {
-    //   hideLoader();
-    // }
-  };
-
   return {
     _signup,
-    _verifyOtp,
-    _resendOtp,
+    _createUsername,
     form,
     updateField,
     loading,
     currentStage,
     setCurrentStage,
-    _createUsername,
   };
 };
 
