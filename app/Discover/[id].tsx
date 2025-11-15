@@ -55,7 +55,8 @@ const Group = (): JSX.Element => {
     <View style={{ flex: 1, backgroundColor }}>
       <Header select={select} setSelect={setSelect} {...groupData} />
       <ScrollView 
-        style={{ flex: 1 }}
+        style={{ flex: 1, backgroundColor }}
+        contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       >
         {videosByCategory.map(({ category, videos }) => (
