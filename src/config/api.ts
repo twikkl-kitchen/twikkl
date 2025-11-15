@@ -38,6 +38,47 @@ export const API_ENDPOINTS = {
     CREATE: `${API_BASE_URL}/referrals`,
     USER_REFERRALS: (userId: string) => `${API_BASE_URL}/users/${userId}/referrals`,
   },
+
+  // Comment endpoints
+  COMMENTS: {
+    CREATE: `${API_BASE_URL}/comments`,
+    GET_VIDEO_COMMENTS: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/comments`,
+    DELETE: (commentId: string) => `${API_BASE_URL}/comments/${commentId}`,
+  },
+
+  // Like endpoints
+  LIKES: {
+    TOGGLE: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/like`,
+    IS_LIKED: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/liked`,
+    GET_COUNT: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/likes`,
+  },
+
+  // Follow endpoints
+  FOLLOWS: {
+    FOLLOW_USER: (userId: string) => `${API_BASE_URL}/users/${userId}/follow`,
+    UNFOLLOW_USER: (userId: string) => `${API_BASE_URL}/users/${userId}/follow`,
+    IS_FOLLOWING: (userId: string) => `${API_BASE_URL}/users/${userId}/following`,
+    GET_FOLLOWERS: (userId: string) => `${API_BASE_URL}/users/${userId}/followers`,
+    GET_FOLLOWING: (userId: string) => `${API_BASE_URL}/users/${userId}/following-list`,
+  },
+
+  // View tracking endpoints
+  VIEWS: {
+    RECORD: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/view`,
+    GET_COUNT: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/views`,
+  },
+
+  // Search endpoints
+  SEARCH: {
+    VIDEOS: `${API_BASE_URL}/search/videos`,
+    SERVERS: `${API_BASE_URL}/search/servers`,
+    USERS: `${API_BASE_URL}/search/users`,
+  },
+
+  // Feed endpoints
+  FEED: {
+    FOLLOWING: `${API_BASE_URL}/feed/following`,
+  },
   
   // Health check
   HEALTH: `${API_BASE_URL}/health`,
