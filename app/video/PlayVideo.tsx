@@ -330,28 +330,30 @@ export default function PlayVideo() {
   return (
     <>
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <View style={[styles.topHeader, { backgroundColor }]}>
-          <View style={styles.topHeaderLeft}>
-            <Pressable onPress={() => router.back()}>
-              <MaterialCommunityIcons name="arrow-left" size={28} color={textColor} />
-            </Pressable>
-            <Logo height={28} />
+        <View style={styles.header}>
+          <View style={styles.logoContainer}>
+            <Logo width={40} height={40} />
+            <Text style={[styles.logoText, { color: textColor }]}>twikkl</Text>
           </View>
-          <View style={styles.topHeaderRight}>
+          <View style={styles.headerActions}>
             <Pressable onPress={toggleTheme}>
-              {isDarkMode ? <MoonIcon height={22} width={22} /> : <SunIcon height={22} width={22} />}
+              {isDarkMode ? (
+                <SunIcon color={textColor} />
+              ) : (
+                <MoonIcon color={textColor} />
+              )}
             </Pressable>
-            <Pressable>
-              <SearchIcon height={22} width={22} />
+            <Pressable onPress={() => alert("Search feature coming soon!")}>
+              <SearchIcon color={textColor} />
             </Pressable>
-            <Pressable>
-              <View>
-                <MaterialCommunityIcons name="bell-outline" size={24} color={textColor} />
-                <Badge size={8} style={styles.notificationBadge} />
-              </View>
+            <Pressable onPress={() => router.push("/Notification")}>
+              <MaterialCommunityIcons name="bell" size={24} color={textColor} />
             </Pressable>
             <Pressable onPress={handleProfileClick}>
-              <MaterialCommunityIcons name="account-circle-outline" size={26} color={textColor} />
+              <Image
+                source={{ uri: "https://images.unsplash.com/photo-1683998215234-02fca98a3b54?w=200&h=200&fit=crop" }}
+                style={styles.profileIcon}
+              />
             </Pressable>
           </View>
         </View>
@@ -529,31 +531,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  topHeader: {
+  header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(128, 128, 128, 0.2)",
-    height: 60,
   },
-  topHeaderLeft: {
+  logoContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  topHeaderRight: {
+  logoText: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  headerActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
   },
-  notificationBadge: {
-    position: "absolute",
-    top: -2,
-    right: -2,
-    backgroundColor: "#50A040",
+  profileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#50A040",
   },
   videoContainer: {
     width: width,

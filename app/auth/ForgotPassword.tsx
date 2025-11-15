@@ -22,7 +22,7 @@ const ForgotPassword = () => {
   const { stage, setStage, updateField, form, forgotPassword, _verifyOtp, _resendOtp, _resetPassword, loading } =
     useForgotPassword(defaultForm);
   
-  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const backgroundColor = isDarkMode ? "#000" : "#FFF";
   const textColor = isDarkMode ? "#FFF" : "#000";
 
   const handleClick = () => (stage === "reset" ? _resetPassword() : forgotPassword());

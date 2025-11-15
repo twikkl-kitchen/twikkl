@@ -10,7 +10,7 @@ const Index = () => {
   const router = useRouter();
   const { isDarkMode } = useThemeMode();
   
-  const backgroundColor = isDarkMode ? "#000" : "#F5F5F5";
+  const backgroundColor = isDarkMode ? "#000" : "#FFF";
   const textColor = isDarkMode ? "#FFF" : "#000";
   const buttonBg = isDarkMode ? "#1E1E1E" : "#E8E8E8";
   const dividerColor = isDarkMode ? "#444" : "#CCC";

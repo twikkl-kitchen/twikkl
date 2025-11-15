@@ -24,7 +24,7 @@ const Register = () => {
   const [tc, setTc] = useState(false);
   
   const textColor = isDarkMode ? "#FFF" : "#000";
-  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const backgroundColor = isDarkMode ? "#000" : "#FFF";
   const {
     form,
     updateField,

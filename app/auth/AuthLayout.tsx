@@ -2,7 +2,7 @@ import Back from "@assets/svg/Back";
 import ButtonEl from "@twikkl/components/ButtonEl";
 import { ViewVariant } from "@twikkl/configs";
 import { ReactElement } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import Logo from "@twikkl/components/Logo";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
 
@@ -24,7 +24,9 @@ const AuthLayout = ({ title, desc, children, btnText, onPress, disabled, handleB
   
   return (
     <View>
-      <Back style={styles.backButton} onPress={() => handleBack()} dark={isDarkMode ? "#FFF" : "#041105"} />
+      <Pressable style={styles.backButton} onPress={() => handleBack()}>
+        <Back dark={isDarkMode ? "#FFF" : "#041105"} />
+      </Pressable>
       <View style={styles.image}>
         <Logo width={80} height={80} />
       </View>
