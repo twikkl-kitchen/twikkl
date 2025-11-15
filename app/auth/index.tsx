@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, Pressable, Platform } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
 import OAuthButton from "@twikkl/components/OAuthButton";
 import TelegramAuthButton from "../../src/components/TelegramAuthButton";
+import { Octicons } from "@expo/vector-icons";
 
 const Index = () => {
   const router = useRouter();
@@ -16,6 +17,13 @@ const Index = () => {
   
   return (
     <View style={[styles.wrapper, { backgroundColor }]}>
+      <TouchableOpacity 
+        onPress={() => router.back()} 
+        style={styles.backButton}
+      >
+        <Octicons name="chevron-left" size={28} color={textColor} />
+      </TouchableOpacity>
+      
       <View style={styles.content}>
         <Text style={[styles.title, { color: textColor }]}>
           Create a Twikkl account
@@ -75,6 +83,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: "center",
+  },
+  backButton: {
+    position: "absolute",
+    top: 50,
+    left: 24,
+    zIndex: 10,
+    padding: 8,
   },
   content: {
     maxWidth: 400,
