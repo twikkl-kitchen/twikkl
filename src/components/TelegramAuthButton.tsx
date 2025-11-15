@@ -15,7 +15,7 @@ const TelegramAuthButton: React.FC<TelegramAuthButtonProps> = ({ botName }) => {
   const handleTelegramResponse = async (response: any) => {
     try {
       // Send Telegram auth data to backend for verification
-      const res = await fetch('http://localhost:3001/api/auth/telegram', {
+      const res = await fetch('/api/auth/telegram', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
