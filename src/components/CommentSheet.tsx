@@ -87,7 +87,7 @@ export default function CommentSheet({ videoId, onClose }: CommentSheetProps) {
       );
 
       const comment = response.data.comment;
-      setComments([{ ...comment, user: { username: user?.username || "You", email: user?.email || "" } }, ...comments]);
+      setComments([{ ...comment, user: { username: user?.name || user?.email || "You", email: user?.email || "" } }, ...comments]);
       setNewComment("");
     } catch (error) {
       console.error("Error posting comment:", error);
