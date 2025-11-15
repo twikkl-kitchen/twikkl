@@ -39,7 +39,7 @@ const Register = () => {
     currentStage === "signup" ? _signup() : _createUsername();
 
   const backClick = () =>
-    currentStage === "signup" ? router.push("auth") : setCurrentStage("signup");
+    currentStage === "signup" ? router.back() : setCurrentStage("signup");
 
   const disableButton =
     currentStage === "signup"

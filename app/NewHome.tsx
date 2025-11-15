@@ -138,7 +138,7 @@ export default function NewHome() {
   );
 
   const ShortCard = ({ item }: { item: typeof shorts[0] }) => (
-    <View style={styles.shortCard}>
+    <Pressable style={styles.shortCard} onPress={() => router.push("/Shorts")}>
       <View style={styles.shortThumbnail}>
         <Image source={item.thumbnail} style={styles.shortImage} />
         <View style={styles.shortBadge}>
@@ -149,7 +149,7 @@ export default function NewHome() {
         {item.title}
       </Text>
       <Text style={[styles.shortViews, { color: isDarkMode ? "#808080" : "#666" }]}>{item.views} views</Text>
-    </View>
+    </Pressable>
   );
 
   const VideoCard = ({ item }: { item: typeof videos[0] }) => (

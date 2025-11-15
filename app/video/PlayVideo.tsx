@@ -332,23 +332,26 @@ export default function PlayVideo() {
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
         <View style={[styles.topHeader, { backgroundColor }]}>
           <View style={styles.topHeaderLeft}>
-            <Logo height={32} />
+            <Pressable onPress={() => router.back()}>
+              <MaterialCommunityIcons name="arrow-left" size={28} color={textColor} />
+            </Pressable>
+            <Logo height={28} />
           </View>
           <View style={styles.topHeaderRight}>
             <Pressable onPress={toggleTheme}>
-              {isDarkMode ? <MoonIcon height={24} width={24} /> : <SunIcon height={24} width={24} />}
+              {isDarkMode ? <MoonIcon height={22} width={22} /> : <SunIcon height={22} width={22} />}
             </Pressable>
-            <Pressable style={{ marginLeft: 16 }}>
-              <SearchIcon height={24} width={24} />
+            <Pressable>
+              <SearchIcon height={22} width={22} />
             </Pressable>
-            <Pressable style={{ marginLeft: 16 }}>
+            <Pressable>
               <View>
                 <MaterialCommunityIcons name="bell-outline" size={24} color={textColor} />
                 <Badge size={8} style={styles.notificationBadge} />
               </View>
             </Pressable>
-            <Pressable style={{ marginLeft: 16 }} onPress={handleProfileClick}>
-              <MaterialCommunityIcons name="account-circle-outline" size={28} color={textColor} />
+            <Pressable onPress={handleProfileClick}>
+              <MaterialCommunityIcons name="account-circle-outline" size={26} color={textColor} />
             </Pressable>
           </View>
         </View>
@@ -531,22 +534,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(128, 128, 128, 0.2)",
+    height: 60,
   },
   topHeaderLeft: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 8,
   },
   topHeaderRight: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 16,
   },
   notificationBadge: {
     position: "absolute",
-    top: 0,
-    right: 0,
+    top: -2,
+    right: -2,
     backgroundColor: "#50A040",
   },
   videoContainer: {

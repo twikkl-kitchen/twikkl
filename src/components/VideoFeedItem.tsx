@@ -160,7 +160,7 @@ export default function VideoFeedItem({ item, index, visibleIndex, onShareClick 
   return (
     <>
       <TouchableWithoutFeedback onPress={togglePlay}>
-        <View style={{ height: height, width: width, position: 'relative' }}>
+        <View style={{ height: height, width: width, position: 'relative', backgroundColor: '#000' }}>
           <Video
             source={item.video}
             shouldPlay={shouldPlay}
@@ -168,54 +168,62 @@ export default function VideoFeedItem({ item, index, visibleIndex, onShareClick 
             resizeMode={ResizeMode.COVER}
             style={{ width: '100%', height: '100%' }}
           />
-          <View style={styles.bottomContainer}>
+          
+          <View style={styles.overlayContainer}>
             <View style={styles.rightActionsContainer}>
-              <View style={styles.actionsColumn}>
-                <TouchableOpacity onPress={handleLikeToggle} style={styles.actionButton}>
-                  <MaterialCommunityIcons
-                    name={liked ? "heart" : "heart-outline"}
-                    size={32}
-                    color={liked ? "#FF3B30" : DEFAULT_CAMERA_ACTION_COLOR}
-                  />
-                  {likeCount > 0 && (
-                    <Text style={styles.actionCount}>{formatCount(likeCount)}</Text>
-                  )}
-                </TouchableOpacity>
+              <TouchableOpacity style={styles.actionButton}>
+                <View style={styles.profileImageContainer}>
+                  <Image style={styles.profileImg} source={profileImg} />
+                  <View style={styles.plusButton}>
+                    <MaterialCommunityIcons name="plus" size={16} color="#FFF" />
+                  </View>
+                </View>
+              </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleCommentClick} style={styles.actionButton}>
-                  <MaterialCommunityIcons
-                    name="comment-outline"
-                    size={30}
-                    color={DEFAULT_CAMERA_ACTION_COLOR}
-                  />
-                  {commentCount > 0 && (
-                    <Text style={styles.actionCount}>{formatCount(commentCount)}</Text>
-                  )}
-                </TouchableOpacity>
+              <TouchableOpacity onPress={handleLikeToggle} style={styles.actionButton}>
+                <MaterialCommunityIcons
+                  name={liked ? "heart" : "heart-outline"}
+                  size={36}
+                  color={liked ? "#FF3B30" : DEFAULT_CAMERA_ACTION_COLOR}
+                />
+                <Text style={styles.actionCount}>{formatCount(likeCount)}</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity onPress={onShareClick} style={styles.actionButton}>
-                  <TwikklIcon name={EIcon.SHARE_NETWORK} size={28} color={DEFAULT_CAMERA_ACTION_COLOR} />
-                </TouchableOpacity>
+              <TouchableOpacity onPress={handleCommentClick} style={styles.actionButton}>
+                <MaterialCommunityIcons
+                  name="comment-outline"
+                  size={34}
+                  color={DEFAULT_CAMERA_ACTION_COLOR}
+                />
+                <Text style={styles.actionCount}>{formatCount(commentCount)}</Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionButton}>
-                  <TwikklIcon name={EIcon.PIN} size={28} color={DEFAULT_CAMERA_ACTION_COLOR} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={onShareClick} style={styles.actionButton}>
+                <MaterialCommunityIcons
+                  name="share-outline"
+                  size={32}
+                  color={DEFAULT_CAMERA_ACTION_COLOR}
+                />
+                <Text style={styles.actionCount}>Share</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.actionButton}>
+                <MaterialCommunityIcons
+                  name="bookmark-outline"
+                  size={32}
+                  color={DEFAULT_CAMERA_ACTION_COLOR}
+                />
+                <Text style={styles.actionCount}>Save</Text>
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.infoContainer}>
-              <View style={styles.profileContainer}>
-                <Image style={styles.profileImg} source={profileImg} />
-                <Text variant="titleMedium" style={[styles.headActionText, { width: "75%" }]}>
-                  @{item.creator || "glory.jgy"} {"\n"}
-                  <Text variant="bodyLarge" style={{ color: DEFAULT_CAMERA_ACTION_COLOR }}>
-                    {item.title || "My very first podcast, it was really fun and I learnt so much just in one day."}
-                  </Text>
+            <View style={styles.bottomInfo}>
+              <View style={styles.creatorInfo}>
+                <Text style={styles.creatorName}>@{item.creator || "glory.jgy"}</Text>
+                <Text style={styles.videoDescription} numberOfLines={2} ellipsizeMode="tail">
+                  {item.title || "My very first podcast, it was really fun and I learnt so much just in one day."}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => router.push("video/CreateUploadVideo")}>
-                <ButtonAddSimple />
-              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -238,53 +246,79 @@ export default function VideoFeedItem({ item, index, visibleIndex, onShareClick 
 }
 
 const styles = StyleSheet.create({
-  headActionText: {
-    color: DEFAULT_CAMERA_ACTION_COLOR,
-    fontWeight: "600",
+  overlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingBottom: 80,
   },
   rightActionsContainer: {
-    justifyContent: "space-between",
-    alignSelf: "flex-end",
-    alignItems: "flex-end",
-    marginVertical: 10,
-    paddingRight: 5,
-  },
-  actionsColumn: {
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
+    position: 'absolute',
+    right: 12,
+    bottom: 100,
+    alignItems: 'center',
+    gap: 20,
   },
   actionButton: {
-    paddingVertical: 8,
     alignItems: "center",
-    minWidth: 50,
+    justifyContent: 'center',
   },
   actionCount: {
     color: DEFAULT_CAMERA_ACTION_COLOR,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  profileImageContainer: {
+    position: 'relative',
+    marginBottom: 4,
   },
   profileImg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-    borderWidth: 1,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
     borderColor: "#FFF",
   },
-  bottomContainer: {
-    flex: 1,
-    marginHorizontal: 10,
-    marginBottom: "20%",
-    justifyContent: "flex-end",
+  plusButton: {
+    position: 'absolute',
+    bottom: -8,
+    left: 12,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#50A040',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  infoContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 14,
+  bottomInfo: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 80,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
-  profileContainer: {
-    flexDirection: "row",
+  creatorInfo: {
+    maxWidth: '90%',
+  },
+  creatorName: {
+    color: DEFAULT_CAMERA_ACTION_COLOR,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  videoDescription: {
+    color: DEFAULT_CAMERA_ACTION_COLOR,
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 20,
+  },
+  headActionText: {
+    color: DEFAULT_CAMERA_ACTION_COLOR,
+    fontWeight: "600",
   },
 });
