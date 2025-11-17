@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, Pressable, ScrollView, Dimensions, ActivityIndicator, Alert } from "react-native";
-import React, { useState, useEffect } from "react";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter, useLocalSearchParams, useFocusEffect } from "expo-router";
 import axios from "axios";
 import Back from "@assets/svg/Back";
 import MoreIcon from "@assets/svg/More";
@@ -154,13 +154,17 @@ const Profile = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUserProfile();
-    fetchFollowStats();
-    if (!isOwnProfile) {
-      checkFollowStatus();
-    }
-  }, [targetUserId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (targetUserId) {
+        fetchUserProfile();
+        fetchFollowStats();
+        if (!isOwnProfile) {
+          checkFollowStatus();
+        }
+      }
+    }, [targetUserId, isOwnProfile])
+  );
 
   if (loading) {
     return (

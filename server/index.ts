@@ -231,6 +231,19 @@ async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Username is required' });
       }
 
+      // Validate username format
+      if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+        return res.status(400).json({ 
+          error: 'Username must be 3-20 characters and contain only letters, numbers, and underscores' 
+        });
+      }
+
+      // Check if username already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+
       // Update user with username
       const user = await storage.updateUser(userId, { username });
       
@@ -239,8 +252,14 @@ async function registerRoutes(app: Express): Promise<Server> {
         message: 'Username created successfully',
         user 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating username:", error);
+      
+      // Handle unique constraint violation at DB level
+      if (error.message && error.message.includes('unique constraint')) {
+        return res.status(400).json({ error: 'Username already taken' });
+      }
+      
       res.status(500).json({ error: "Failed to create username" });
     }
   });
@@ -328,9 +347,16 @@ async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/users/upload-profile-image', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
     try {
       const userId = getUserId(req);
+      
+      if (!userId) {
+        console.error('No userId found in request');
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
       const file = req.file;
 
       if (!file) {
+        console.error('No file in request. Body:', req.body);
         return res.status(400).json({ error: 'No image file provided' });
       }
 
