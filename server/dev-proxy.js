@@ -1,0 +1,56 @@
+// Development proxy server
+// Runs on port 5000, forwards /api/* to backend on port 3001
+// Serves frontend for all other requests
+
+const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const { spawn } = require('child_process');
+
+const app = express();
+const PORT = 5000;
+
+console.log('🚀 Starting development proxy server...\n');
+
+// Start backend server on port 3001
+const backend = spawn('sh', ['-c', 'PORT=3001 npm run server'], {
+  stdio: 'inherit',
+  env: { ...process.env, PORT: 3001 },
+});
+
+// Start frontend server on port 8081
+const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx expo start --web --port 8081'], {
+  stdio: 'inherit',
+});
+
+// Proxy /api/* requests to backend on port 3001
+app.use('/api', createProxyMiddleware({
+  target: 'http://localhost:3001',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api': '/api', // Keep the /api prefix when forwarding
+  },
+  logLevel: 'debug',
+}));
+
+// Proxy all other requests to frontend on port 8081
+app.use('/', createProxyMiddleware({
+  target: 'http://localhost:8081',
+  changeOrigin: true,
+  ws: true, // Enable WebSocket proxy for HMR
+  logLevel: 'warn',
+}));
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n✅ Development proxy server running on http://0.0.0.0:${PORT}`);
+  console.log(`   - Frontend (Expo): http://localhost:8081 → proxied to :${PORT}`);
+  console.log(`   - Backend (API): http://localhost:3001 → proxied to :${PORT}/api`);
+  console.log(`   - Access your app at: http://localhost:${PORT}\n`);
+});
+
+// Cleanup on exit
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down proxy server...');
+  backend.kill();
+  frontend.kill();
+  process.exit();
+});

@@ -1,11 +1,7 @@
 // API Configuration
-// Automatically detect production vs development
-const isProduction = typeof window !== 'undefined' && 
-  (window.location.hostname.includes('replit.app') || window.location.hostname.includes('repl.co'));
-
-export const API_BASE_URL = isProduction 
-  ? ''  // Production: use relative URL (same domain, no prefix)
-  : 'http://localhost:3001';  // Development: local backend
+// Use relative URLs for all environments
+// In Replit, the backend proxy handles routing /api/* to port 3001
+export const API_BASE_URL = '';
 
 export const API_ENDPOINTS = {
   // Auth endpoints (Replit Auth)
