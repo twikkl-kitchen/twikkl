@@ -68,6 +68,15 @@ const CaptionVideo = () => {
   };
 
   const handlePost = async () => {
+    console.log('Post button clicked!');
+    console.log('Video URI:', videoUri);
+    console.log('Server ID:', serverId);
+    
+    if (!videoUri || !serverId) {
+      Alert.alert("Error", "Missing video or server information");
+      return;
+    }
+
     const storageKey = `uploads_${serverId}`;
     const uploads = await AsyncStorage.getItem(storageKey);
     const allUploads = uploads ? JSON.parse(uploads) : [];
@@ -90,12 +99,15 @@ const CaptionVideo = () => {
     }
 
     try {
+      console.log('Starting upload...');
       // Create FormData for video upload
       const formData = new FormData();
       
       // Fetch video file
+      console.log('Fetching video blob...');
       const response = await fetch(videoUri as string);
       const blob = await response.blob();
+      console.log('Blob size:', blob.size);
       
       // Append video file
       formData.append('video', blob, 'video.mp4');
@@ -105,6 +117,7 @@ const CaptionVideo = () => {
       formData.append('allowStitch', data.stitch.toString());
       formData.append('saveToDevice', data.device.toString());
 
+      console.log('Uploading to server...');
       // Upload to server
       const uploadResponse = await fetch(`/api/servers/${serverId}/videos`, {
         method: 'POST',
@@ -112,8 +125,11 @@ const CaptionVideo = () => {
         credentials: 'include',
       });
 
+      console.log('Upload response status:', uploadResponse.status);
+
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json();
+        console.error('Upload failed:', errorData);
         throw new Error(errorData.error || 'Failed to upload video');
       }
 
@@ -127,12 +143,13 @@ const CaptionVideo = () => {
       setUploadsToday(newRecentUploads);
       setUploadCount(newRecentUploads.length);
 
+      console.log('Upload successful!');
       Alert.alert("Success", "Your video has been posted to the server!", [
         { text: "OK", onPress: () => router.back() },
       ]);
     } catch (error) {
       console.error('Upload error:', error);
-      Alert.alert("Error", "Failed to post video. Please try again.", [
+      Alert.alert("Error", `Failed to post video: ${error instanceof Error ? error.message : 'Unknown error'}`, [
         { text: "OK" }
       ]);
     }
