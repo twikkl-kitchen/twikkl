@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, Pressable, Platform, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Pressable, Platform, TouchableOpacity, Alert } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
 import { Octicons } from "@expo/vector-icons";
 import { Svg, Path, Circle } from "react-native-svg";
+import Logo from "@twikkl/components/Logo";
 
 const GoogleIcon = () => (
   <Svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: 12 }}>
@@ -84,7 +85,7 @@ const Index = () => {
       <View style={styles.content}>
         {/* twikkl logo */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logo}>twikkl</Text>
+          <Logo width={80} height={80} />
         </View>
         
         <Text style={[styles.title, { color: textColor }]}>
@@ -104,8 +105,11 @@ const Index = () => {
         <Pressable 
           style={[styles.authButton, { backgroundColor: buttonBg }]}
           onPress={() => {
-            // Handle Telegram auth
-            console.log('Telegram auth clicked');
+            if (Platform.OS === 'web') {
+              alert('Telegram authentication is coming soon!');
+            } else {
+              Alert.alert('Coming Soon', 'Telegram authentication will be available soon.');
+            }
           }}
         >
           <TelegramIcon />
@@ -164,13 +168,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 48,
-  },
-  logo: {
-    fontSize: 24,
-    color: "#50A040",
-    fontWeight: "400",
-    letterSpacing: 2,
+    marginBottom: 40,
   },
   title: {
     fontSize: 24,
