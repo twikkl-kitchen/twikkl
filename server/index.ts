@@ -257,6 +257,193 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get any user's profile (public data)
+  app.get('/api/users/:userId', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Return public profile data (exclude password)
+      const { password, ...publicProfile } = user;
+      res.json(publicProfile);
+    } catch (error) {
+      console.error('Get user profile error:', error);
+      res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+  });
+
+  // Update user profile
+  app.put('/api/users/:userId', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const requestUserId = getUserId(req);
+      const { userId } = req.params;
+
+      // Users can only update their own profile
+      if (requestUserId !== userId) {
+        return res.status(403).json({ error: 'You can only update your own profile' });
+      }
+
+      const { displayName, bio, firstName, lastName } = req.body;
+      
+      const updateData: any = {};
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (bio !== undefined) updateData.bio = bio;
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+
+      const user = await storage.updateUser(userId, updateData);
+      
+      res.json({
+        success: true,
+        message: 'Profile updated successfully',
+        user
+      });
+    } catch (error) {
+      console.error('Update profile error:', error);
+      res.status(500).json({ error: 'Failed to update profile' });
+    }
+  });
+
+  // Upload profile image
+  app.post('/api/users/upload-profile-image', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+
+      // Validate image type
+      if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ error: 'File must be an image' });
+      }
+
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `profile_${userId}_${uuidv4()}.${fileExtension}`;
+      const storagePath = `profile-images/${fileName}`;
+
+      // Upload to Replit Object Storage
+      const objectStorage = getObjectStorage();
+      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+
+      if (!uploadResult.ok) {
+        console.error('Upload error:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload image to storage' });
+      }
+
+      // Generate image URL
+      const imageUrl = `/api/images/profile/${fileName}`;
+
+      // Update user's profile image URL
+      await storage.updateUser(userId, { profileImageUrl: imageUrl });
+
+      res.json({
+        success: true,
+        imageUrl,
+        message: 'Profile image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Profile image upload error:', error);
+      res.status(500).json({ error: 'Failed to upload profile image' });
+    }
+  });
+
+  // Upload banner image
+  app.post('/api/users/upload-banner', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+
+      // Validate image type
+      if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ error: 'File must be an image' });
+      }
+
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `banner_${userId}_${uuidv4()}.${fileExtension}`;
+      const storagePath = `banner-images/${fileName}`;
+
+      // Upload to Replit Object Storage
+      const objectStorage = getObjectStorage();
+      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+
+      if (!uploadResult.ok) {
+        console.error('Upload error:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload image to storage' });
+      }
+
+      // Generate image URL
+      const imageUrl = `/api/images/banner/${fileName}`;
+
+      // Update user's banner image URL
+      await storage.updateUser(userId, { bannerImageUrl: imageUrl });
+
+      res.json({
+        success: true,
+        imageUrl,
+        message: 'Banner image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Banner image upload error:', error);
+      res.status(500).json({ error: 'Failed to upload banner image' });
+    }
+  });
+
+  // Serve profile images
+  app.get('/api/images/profile/:fileName', async (req: Request, res: Response) => {
+    try {
+      const { fileName } = req.params;
+      const storagePath = `profile-images/${fileName}`;
+
+      const objectStorage = getObjectStorage();
+      const result = await objectStorage.downloadAsBytes(storagePath);
+
+      if (!result.ok) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.send(result.value);
+    } catch (error) {
+      console.error('Serve profile image error:', error);
+      res.status(500).json({ error: 'Failed to serve image' });
+    }
+  });
+
+  // Serve banner images
+  app.get('/api/images/banner/:fileName', async (req: Request, res: Response) => {
+    try {
+      const { fileName } = req.params;
+      const storagePath = `banner-images/${fileName}`;
+
+      const objectStorage = getObjectStorage();
+      const result = await objectStorage.downloadAsBytes(storagePath);
+
+      if (!result.ok) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.send(result.value);
+    } catch (error) {
+      console.error('Serve banner image error:', error);
+      res.status(500).json({ error: 'Failed to serve image' });
+    }
+  });
+
   // Video upload endpoint
   app.post('/api/videos/upload', isAuthenticated, upload.single('video'), async (req: any, res: Response) => {
     try {

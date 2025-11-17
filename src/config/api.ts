@@ -54,6 +54,14 @@ export const API_ENDPOINTS = {
     GET_COUNT: (videoId: string) => `${API_BASE_URL}/videos/${videoId}/likes`,
   },
 
+  // User profile endpoints
+  USERS: {
+    GET_PROFILE: (userId: string) => `${API_BASE_URL}/users/${userId}`,
+    UPDATE_PROFILE: (userId: string) => `${API_BASE_URL}/users/${userId}`,
+    UPLOAD_PROFILE_IMAGE: `${API_BASE_URL}/users/upload-profile-image`,
+    UPLOAD_BANNER: `${API_BASE_URL}/users/upload-banner`,
+  },
+
   // Follow endpoints
   FOLLOWS: {
     FOLLOW_USER: (userId: string) => `${API_BASE_URL}/users/${userId}/follow`,
