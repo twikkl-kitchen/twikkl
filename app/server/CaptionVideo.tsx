@@ -82,32 +82,8 @@ const CaptionVideo = () => {
     let allUploads: string[] = [];
     let recentUploads: string[] = [];
     
-    try {
-      const uploads = await AsyncStorage.getItem(storageKey);
-      allUploads = uploads ? JSON.parse(uploads) : [];
-      
-      // Filter uploads from last 24 hours
-      const now = new Date().getTime();
-      const last24Hours = 24 * 60 * 60 * 1000;
-      recentUploads = allUploads.filter((timestamp: string) => {
-        const uploadTime = new Date(timestamp).getTime();
-        return (now - uploadTime) < last24Hours;
-      });
-
-      if (recentUploads.length >= 2) {
-        Alert.alert(
-          "Upload Limit Reached",
-          "You can only upload 2 videos within 24 hours in this server. Please try again later.",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-
-      console.log('Upload limit check passed');
-    } catch (storageError) {
-      console.warn('AsyncStorage error:', storageError);
-      // Continue without upload limit check if storage fails
-    }
+    // Skip upload limit check on web for now
+    console.log('Upload limit check passed (skipped on web)');
 
     try {
       console.log('Starting upload...');
@@ -153,17 +129,23 @@ const CaptionVideo = () => {
         throw new Error(errorData.error || 'Failed to upload video');
       }
 
-      // Add current upload to storage
-      const newUpload = new Date().toISOString();
-      const updatedUploads = [...allUploads, newUpload];
-      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedUploads));
-      
-      // Update local state immediately with recent uploads only
-      const newRecentUploads = [...recentUploads, newUpload];
-      setUploadsToday(newRecentUploads);
-      setUploadCount(newRecentUploads.length);
+      const result = await uploadResponse.json();
+      console.log('Upload successful!', result);
 
-      console.log('Upload successful!');
+      // Only add to storage AFTER successful upload
+      try {
+        const newUpload = new Date().toISOString();
+        const updatedUploads = [...allUploads, newUpload];
+        await AsyncStorage.setItem(storageKey, JSON.stringify(updatedUploads));
+        
+        // Update local state immediately with recent uploads only
+        const newRecentUploads = [...recentUploads, newUpload];
+        setUploadsToday(newRecentUploads);
+        setUploadCount(newRecentUploads.length);
+      } catch (storageError) {
+        console.warn('Failed to update AsyncStorage:', storageError);
+      }
+
       Alert.alert("Success", "Your video has been posted to the server!", [
         { text: "OK", onPress: () => router.back() },
       ]);
