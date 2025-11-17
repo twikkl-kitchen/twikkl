@@ -77,25 +77,36 @@ const CaptionVideo = () => {
       return;
     }
 
+    console.log('Checking upload limits...');
     const storageKey = `uploads_${serverId}`;
-    const uploads = await AsyncStorage.getItem(storageKey);
-    const allUploads = uploads ? JSON.parse(uploads) : [];
+    let allUploads: string[] = [];
+    let recentUploads: string[] = [];
     
-    // Filter uploads from last 24 hours
-    const now = new Date().getTime();
-    const last24Hours = 24 * 60 * 60 * 1000;
-    const recentUploads = allUploads.filter((timestamp: string) => {
-      const uploadTime = new Date(timestamp).getTime();
-      return (now - uploadTime) < last24Hours;
-    });
+    try {
+      const uploads = await AsyncStorage.getItem(storageKey);
+      allUploads = uploads ? JSON.parse(uploads) : [];
+      
+      // Filter uploads from last 24 hours
+      const now = new Date().getTime();
+      const last24Hours = 24 * 60 * 60 * 1000;
+      recentUploads = allUploads.filter((timestamp: string) => {
+        const uploadTime = new Date(timestamp).getTime();
+        return (now - uploadTime) < last24Hours;
+      });
 
-    if (recentUploads.length >= 2) {
-      Alert.alert(
-        "Upload Limit Reached",
-        "You can only upload 2 videos within 24 hours in this server. Please try again later.",
-        [{ text: "OK" }]
-      );
-      return;
+      if (recentUploads.length >= 2) {
+        Alert.alert(
+          "Upload Limit Reached",
+          "You can only upload 2 videos within 24 hours in this server. Please try again later.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      console.log('Upload limit check passed');
+    } catch (storageError) {
+      console.warn('AsyncStorage error:', storageError);
+      // Continue without upload limit check if storage fails
     }
 
     try {
@@ -103,10 +114,19 @@ const CaptionVideo = () => {
       // Create FormData for video upload
       const formData = new FormData();
       
-      // Fetch video file
-      console.log('Fetching video blob...');
-      const response = await fetch(videoUri as string);
-      const blob = await response.blob();
+      // Convert video to blob
+      console.log('Converting video to blob...');
+      let blob: Blob;
+      
+      if ((videoUri as string).startsWith('data:')) {
+        // Handle base64 data URI
+        const base64Response = await fetch(videoUri as string);
+        blob = await base64Response.blob();
+      } else {
+        // Handle file URI
+        const response = await fetch(videoUri as string);
+        blob = await response.blob();
+      }
       console.log('Blob size:', blob.size);
       
       // Append video file
