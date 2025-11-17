@@ -1,39 +1,54 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Octicons } from "@expo/vector-icons";
 import VideoCard from "@twikkl/components/VideoCard";
-import { cardDataGroup, cardDataYou } from "@twikkl/data/discover/cardData";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
-
-const categories = ["Tutorial", "Trading", "Development", "General", "News"];
 
 const ViewAllCategory = (): JSX.Element => {
   const { serverId, category } = useLocalSearchParams();
   const router = useRouter();
   const { isDarkMode } = useThemeMode();
+  const [videos, setVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#fff" : "#000";
   const headerBg = isDarkMode ? "#041105" : "#fff";
 
-  const groups = [...cardDataYou, ...cardDataGroup];
-  const groupData = groups.find((item) => item.id === serverId);
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/servers/${serverId}/videos`, {
+          credentials: 'include',
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setVideos(data.videos || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch server videos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const allServerVideos = groupData?.videos?.map((videoImg: any, index: number) => ({
-    id: index.toString(),
-    title: `${groupData?.title} - ${category} ${index + 1}`,
-    creator: groupData?.title || "Server",
-    views: `${Math.floor(Math.random() * 20 + 5)}K views`,
-    time: index === 0 ? "2 days ago" : index === 1 ? "1 week ago" : "2 weeks ago",
-    thumbnail: videoImg,
-    duration: `${Math.floor(Math.random() * 10 + 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-    isLive: index === 0,
-    creatorAvatar: groupData?.smallImg,
-    category: categories[index % categories.length],
-  })) || [];
+    if (serverId) {
+      fetchVideos();
+    }
+  }, [serverId]);
 
-  const categoryVideos = allServerVideos.filter(video => video.category === category);
+  const categoryVideos = videos.filter(video => video.category === category);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#50A040" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
@@ -53,13 +68,21 @@ const ViewAllCategory = (): JSX.Element => {
         </Text>
       </View>
 
-      <FlatList
-        data={categoryVideos}
-        renderItem={({ item }) => <VideoCard item={item} />}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      />
+      {categoryVideos.length === 0 ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: isDarkMode ? "#888" : "#666", fontSize: 16 }}>
+            No videos in this category yet
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={categoryVideos}
+          renderItem={({ item }) => <VideoCard item={item} />}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
     </View>
   );
 };

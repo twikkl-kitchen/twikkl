@@ -883,7 +883,9 @@ async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log('✅ Video posted successfully:', video.id);
-      res.json({
+      
+      // Send immediate response
+      res.status(200).json({
         success: true,
         video,
         message: 'Video posted to server successfully'

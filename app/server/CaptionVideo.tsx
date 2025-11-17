@@ -10,12 +10,14 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@twikkl/entities/auth.entity";
 import { useColors } from "@twikkl/hooks/themeHooks";
+import { useThemeMode } from "@twikkl/entities/theme.entity";
 
 const CaptionVideo = () => {
   const router = useRouter();
   const { videoUri, serverId } = useLocalSearchParams();
   const { user } = useAuth();
   const colors = useColors();
+  const { isDarkMode } = useThemeMode();
   const [data, setData] = useState({
     device: true,
     duet: true,
@@ -177,17 +179,17 @@ const CaptionVideo = () => {
   };
 
   const tagArr = ["# Hashtags", "@ Tag Friends"];
-  const textColor = colors.dark === "#010301" ? colors.light : colors.dark;
-  const backgroundColor = colors.dark === "#010301" ? colors.dark : colors.light;
-  const borderColor = colors.dark === "#010301" ? "#333" : "#E0E0E0";
-  const placeholderColor = colors.dark === "#010301" ? "#666" : "#999";
-  const dropdownBg = colors.dark === "#010301" ? "#1a1a1a" : "#f5f5f5";
+  const textColor = isDarkMode ? colors.light : colors.dark;
+  const backgroundColor = isDarkMode ? colors.dark : colors.light;
+  const borderColor = isDarkMode ? "#333" : "#E0E0E0";
+  const placeholderColor = isDarkMode ? "#666" : "#999";
+  const dropdownBg = isDarkMode ? "#1a1a1a" : "#f5f5f5";
 
   return (
     <View style={{ paddingHorizontal: 16, backgroundColor, flex: 1 }}>
       <View style={styles.topHeader}>
         <Pressable onPress={() => router.back()}>
-          <Back dark={colors.dark === "#010301" ? "#041105" : "#50A040"} />
+          <Back dark={isDarkMode ? "#041105" : "#50A040"} />
         </Pressable>
         <Text style={[styles.boldText, { color: textColor }]}>Post to Server</Text>
         <View style={{ width: 20 }} />
