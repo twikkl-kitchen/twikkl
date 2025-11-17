@@ -9,6 +9,11 @@ import { Client as ObjectStorageClient } from "@replit/object-storage";
 import { v4 as uuidv4 } from "uuid";
 import { AuthDataValidator } from "@telegram-auth/server";
 
+// Helper function to get userId from either OAuth or email/password session
+function getUserId(req: any): string {
+  return req.user?.claims?.sub || req.user?.id;
+}
+
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
@@ -219,7 +224,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Create username endpoint
   app.post('/api/auth/create-username', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { username } = req.body;
 
       if (!username) {
@@ -243,7 +248,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Get current authenticated user
   app.get('/api/auth/user', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -255,7 +260,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Video upload endpoint
   app.post('/api/videos/upload', isAuthenticated, upload.single('video'), async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const file = req.file;
 
       if (!file) {
@@ -294,7 +299,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Create video post with metadata
   app.post('/api/videos/create', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { videoUrl, fileName, caption, category, visibility, serverId } = req.body;
 
       if (!videoUrl || !fileName) {
@@ -369,7 +374,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Get upload count for user in server
   app.get('/api/videos/server/:serverId/upload-count', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { serverId } = req.params;
 
       const count = await storage.getRecentUploadCount(userId, serverId, 24);
@@ -409,7 +414,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Server management endpoints
   app.post('/api/servers', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { name, description, location, hashtags, privacy } = req.body;
 
       if (!name) {
@@ -490,7 +495,7 @@ async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/servers/:serverId/categories', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { serverId } = req.params;
       const { categories } = req.body;
 
@@ -519,7 +524,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Server admin management endpoints
   app.get('/api/servers/:serverId/is-admin', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { serverId } = req.params;
       
       const isAdmin = await storage.isServerAdmin(serverId, userId);
@@ -546,7 +551,7 @@ async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/servers/:serverId/admins', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const currentUserId = req.user.claims.sub;
+      const currentUserId = getUserId(req);
       const { serverId } = req.params;
       const { userId } = req.body;
 
@@ -577,7 +582,7 @@ async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/servers/:serverId/admins/:targetUserId', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const currentUserId = req.user.claims.sub;
+      const currentUserId = getUserId(req);
       const { serverId, targetUserId } = req.params;
 
       // Check if current user is owner (only owners can remove admins)
@@ -627,7 +632,7 @@ async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/referrals', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { referralCode } = req.body;
 
       if (!referralCode) {
@@ -674,7 +679,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Create comment on video
   app.post('/api/comments', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { videoId, content } = req.body;
 
       if (!videoId || !content) {
@@ -718,7 +723,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Toggle like on video
   app.post('/api/videos/:videoId/like', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { videoId } = req.params;
 
       const result = await storage.toggleLike(videoId, userId);
@@ -732,7 +737,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Check if video is liked by user
   app.get('/api/videos/:videoId/liked', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { videoId } = req.params;
 
       const liked = await storage.isVideoLiked(videoId, userId);
@@ -760,7 +765,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Follow a user
   app.post('/api/users/:userId/follow', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const followerId = req.user.claims.sub;
+      const followerId = getUserId(req);
       const { userId: followingId } = req.params;
 
       if (followerId === followingId) {
@@ -778,7 +783,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Unfollow a user
   app.delete('/api/users/:userId/follow', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const followerId = req.user.claims.sub;
+      const followerId = getUserId(req);
       const { userId: followingId } = req.params;
 
       await storage.unfollowUser(followerId, followingId);
@@ -792,7 +797,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Check if following a user
   app.get('/api/users/:userId/following', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const followerId = req.user.claims.sub;
+      const followerId = getUserId(req);
       const { userId: followingId } = req.params;
 
       const isFollowing = await storage.isFollowing(followerId, followingId);
@@ -922,7 +927,7 @@ async function registerRoutes(app: Express): Promise<Server> {
   // Get videos from users you follow
   app.get('/api/feed/following', isAuthenticated, async (req: any, res: Response) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { limit } = req.query;
 
       const videos = await storage.getFollowingFeed(userId, limit ? parseInt(limit as string) : 50);
