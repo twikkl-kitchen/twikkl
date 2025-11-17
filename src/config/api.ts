@@ -31,6 +31,8 @@ export const API_ENDPOINTS = {
     ADMINS: (serverId: string) => `${API_BASE_URL}/api/servers/${serverId}/admins`,
     ADD_ADMIN: (serverId: string) => `${API_BASE_URL}/api/servers/${serverId}/admins`,
     REMOVE_ADMIN: (serverId: string, userId: string) => `${API_BASE_URL}/api/servers/${serverId}/admins/${userId}`,
+    VIDEOS: (serverId: string) => `${API_BASE_URL}/api/servers/${serverId}/videos`,
+    UPLOAD_VIDEO: (serverId: string) => `${API_BASE_URL}/api/servers/${serverId}/videos`,
   },
 
   // Referral endpoints

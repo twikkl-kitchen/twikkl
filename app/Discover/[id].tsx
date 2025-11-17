@@ -41,6 +41,7 @@ const Group = (): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [serverVideos, setServerVideos] = useState<any[]>([]);
 
   const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#fff" : "#000";
@@ -66,6 +67,18 @@ const Group = (): JSX.Element => {
       
       setCategories(parsedCategories);
       setServerData(server);
+
+      // Fetch server videos
+      try {
+        const videosResponse = await axios.get(`/api/servers/${id}/videos`, {
+          withCredentials: true,
+        });
+        console.log('Server videos loaded:', videosResponse.data.videos?.length || 0);
+        setServerVideos(videosResponse.data.videos || []);
+      } catch (videoErr) {
+        console.error('Error loading videos:', videoErr);
+        setServerVideos([]);
+      }
     } catch (err: any) {
       console.error('Error loading server:', err);
       setError(err.response?.data?.error || 'Failed to load server');
@@ -109,11 +122,10 @@ const Group = (): JSX.Element => {
     videos: [],
   };
 
-  // Group empty videos by category for now
-  // TODO: Fetch real videos from API
+  // Group videos by category
   const videosByCategory = categories.map(category => ({
     category,
-    videos: []
+    videos: serverVideos.filter(video => video.category === category)
   }));
 
   return (

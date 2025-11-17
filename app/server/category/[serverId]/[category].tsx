@@ -26,7 +26,10 @@ const ViewAllCategory = (): JSX.Element => {
         
         if (response.ok) {
           const data = await response.json();
+          console.log('Category videos loaded:', data.videos?.length || 0);
           setVideos(data.videos || []);
+        } else {
+          console.error('Failed to fetch videos, status:', response.status);
         }
       } catch (error) {
         console.error('Failed to fetch server videos:', error);
