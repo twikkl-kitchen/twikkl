@@ -35,11 +35,13 @@ export const fetchFromApi = async ({ method = "get", path, body, headers = {}, p
     };
     params?: any;
     withCredentials?: boolean;
+    timeout?: number;
   } = {
     url,
 
     method,
     withCredentials: true,
+    timeout: 30000, // 30 second timeout
   };
 
   if (method !== "get" && body) requestConfig.data = body;

@@ -35,6 +35,15 @@ app.use(createProxyMiddleware({
   logLevel: 'warn',
   timeout: 300000, // 5 minute timeout for large file uploads
   proxyTimeout: 300000,
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`[PROXY] ${req.method} ${req.url} -> ${proxyReq.path}`);
+  },
+  onProxyRes: (proxyRes, req, res) => {
+    console.log(`[PROXY] Response ${proxyRes.statusCode} for ${req.url}`);
+  },
+  onError: (err, req, res) => {
+    console.error(`[PROXY ERROR] ${req.url}:`, err.message);
+  },
 }));
 
 // Proxy all other requests to frontend on port 8081

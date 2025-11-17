@@ -135,7 +135,7 @@ const Index = () => {
         {/* Sign In Link */}
         <View style={styles.signInContainer}>
           <Text style={[styles.signInText, { color: isDarkMode ? "#888" : "#666" }]}>
-            Already have an account?{" "}
+            Already have an account? 
           </Text>
           <Pressable onPress={() => router.push("auth/Login")}>
             <Text style={styles.signInLink}>Sign in</Text>

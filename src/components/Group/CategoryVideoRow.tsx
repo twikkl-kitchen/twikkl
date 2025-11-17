@@ -21,7 +21,7 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.38; // Landscape card width (reduced slightly)
+const CARD_WIDTH = width * 0.32; // Landscape card width (reduced)
 const CARD_HEIGHT = CARD_WIDTH * 0.56; // Landscape aspect ratio (16:9)
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
