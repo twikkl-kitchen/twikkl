@@ -23,13 +23,12 @@ const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx ex
 });
 
 // Proxy /api/* requests to backend on port 3001
-app.use('/api', createProxyMiddleware({
+// Don't use '/api' as context - it strips the path!
+app.use(createProxyMiddleware({
   target: 'http://localhost:3001',
   changeOrigin: true,
-  pathRewrite: {
-    '^/api': '/api', // Keep the /api prefix when forwarding
-  },
-  logLevel: 'debug',
+  pathFilter: '/api/**',  // Filter which paths to proxy
+  logLevel: 'warn',
 }));
 
 // Proxy all other requests to frontend on port 8081

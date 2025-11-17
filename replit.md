@@ -85,6 +85,25 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Search**: GET `/api/search/videos?q=`, GET `/api/search/servers?q=`, GET `/api/search/users?q=`
 *   **Feed**: GET `/api/feed/following` (authenticated users only)
 
+## Recent Changes (Nov 17, 2025)
+*   **Fixed Email/Password Authentication**: Complete implementation of registration and login
+    *   **Backend Endpoints**: Added `/api/auth/register` and `/api/auth/login` with bcryptjs password hashing
+    *   **Database Field**: Added `password` field to users table with proper hashing (bcryptjs, 10 rounds)
+    *   **Session Support**: Updated passport serialization to handle email/password users alongside OAuth users
+    *   **API Configuration**: Changed to use relative URLs (`API_BASE_URL = ''`) for all environments
+    *   **Development Proxy**: Created unified proxy server (`server/dev-proxy.js`) running on port 5000
+        *   Frontend (Expo Metro): Port 8081 → Proxied to :5000
+        *   Backend (Express API): Port 3001 → Proxied to :5000/api
+        *   Fixes "Network Error" issue where browser couldn't access `localhost:3001`
+    *   **Workflow Consolidation**: Replaced separate "Backend Server" and "Frontend" workflows with single "Development" workflow
+    *   **Login Hook**: Activated useLogin hook to call backend instead of fake navigation
+    *   **Storage Methods**: Added `getUserByEmail()` for email-based lookups
+    *   **Removed Duplicate**: Deleted old `Register1.tsx` auth screen (unused)
+*   **Authentication Flow Now Works**:
+    *   Register → Create username → Stay logged in → Full app access
+    *   Login → Session persists → Can interact with videos/servers
+    *   Sessions stored in PostgreSQL with express-session
+
 ## Recent Changes (Nov 15, 2025)
 *   **Complete Social Features System**: Full implementation of comments, likes, follows, views, and search
     *   **Database Schema**: Added 4 new tables - `comments`, `likes`, `follows`, `video_views`
