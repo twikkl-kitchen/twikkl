@@ -35,7 +35,9 @@ const CaptionVideo = () => {
 
   const fetchServerCategories = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/servers/${serverId}/categories`);
+      const response = await fetch(`/api/servers/${serverId}/categories`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.categories && data.categories.length > 0) {
