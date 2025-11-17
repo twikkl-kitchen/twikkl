@@ -109,6 +109,24 @@ All critical features implemented and verified before publishing:
     *   Owner role protection (cannot be removed)
     *   Admin changes persist in database
 
+*   **Video Playback & Navigation** ✅ (Nov 17, 2025)
+    *   Fixed video player navigation to use existing /video/PlayVideo screen
+    *   Videos now properly navigate from CategoryVideoRow to full video player
+    *   Passes videoId, videoUrl, caption, and username params to player
+    *   Resolved "Unmatched route" error for video clicks
+
+*   **Camera Implementation** ✅ (Nov 17, 2025)
+    *   Real camera connection enabled with CameraView from expo-camera
+    *   Added facing="back" prop to enable rear camera by default
+    *   Camera permissions properly requested on component mount
+    *   Video recording functionality with progress tracking
+
+*   **Upload Response Handling** ✅ (Nov 17, 2025)
+    *   Backend uses explicit return statements for video/image uploads
+    *   Added enhanced error logging for upload debugging
+    *   Response parsing improved with text-first approach for better error handling
+    *   Upload timeout set to 2 minutes with abort controller
+
 ## External Dependencies
 *   **Backend API**: Express.js/TypeScript
 *   **State Management**: simpler-state
