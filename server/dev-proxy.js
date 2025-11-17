@@ -9,10 +9,6 @@ const { spawn } = require('child_process');
 const app = express();
 const PORT = 5000;
 
-// Increase body size limits for large file uploads
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ limit: '100mb', extended: true }));
-
 console.log('🚀 Starting development proxy server...\n');
 
 // Start backend server on port 3001
@@ -27,13 +23,14 @@ const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx ex
 });
 
 // Proxy /api/* requests to backend on port 3001  
-// This MUST come before the frontend proxy to ensure API requests are handled first
-app.use('/api', createProxyMiddleware({
+// Use filter function instead of context path to preserve full path
+app.use(createProxyMiddleware({
   target: 'http://localhost:3001',
   changeOrigin: true,
+  filter: (pathname, req) => pathname.startsWith('/api'),
   logLevel: 'info',
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`✅ [API PROXY] ${req.method} ${req.url} -> http://localhost:3001${proxyReq.path}`);
+    console.log(`✅ [API PROXY] ${req.method} ${req.url} -> http://localhost:3001${req.url}`);
   },
   onProxyRes: (proxyRes, req, res) => {
     console.log(`✅ [API RESPONSE] ${proxyRes.statusCode} for ${req.url}`);
