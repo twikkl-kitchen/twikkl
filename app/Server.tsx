@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { Octicons, AntDesign, Ionicons, FontAwesome5, Feather } from "@expo/vector-icons";
 import Highlights from "@twikkl/components/Discover/Highlights";
 import Card from "@twikkl/components/Discover/Card";
@@ -9,6 +9,9 @@ import ButtonEl from "@twikkl/components/ButtonEl";
 import Scroll from "@twikkl/components/Scrollable";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
+import { useAuth } from "@twikkl/entities/auth.entity";
+import axios from "axios";
+import { API_ENDPOINTS } from "@twikkl/config/api";
 
 export const colors = {
   green100: "#041105",
@@ -36,10 +39,12 @@ type ModalType = "access" | "leave" | null;
 
 const Server = () => {
   const { isDarkMode } = useThemeMode();
+  const { user } = useAuth();
   const [activeTabIndex, setActiveTabIndex] = useState<number>(0);
-  const [groups, setGroups] = useState<Group[]>(cardDataGroup);
-  const [yourGroups, setYourGroups] = useState<Group[]>(cardDataYou);
-  const [favoriteGroups, setFavoriteGroups] = useState<Group[]>([]);
+  const [allServers, setAllServers] = useState<any[]>([]);
+  const [yourServers, setYourServers] = useState<any[]>([]);
+  const [favoriteServers, setFavoriteServers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [modalType, setModalType] = useState<ModalType>(null);
   const router = useRouter();
@@ -67,30 +72,71 @@ const Server = () => {
     },
   ];
 
-  const joinServer = (item: Group) => {
+  // Fetch servers from backend
+  useEffect(() => {
+    const fetchServers = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch all public servers for "For You"
+        const allResponse = await axios.get(`${API_ENDPOINTS.SERVERS.CREATE}`, {
+          params: { type: 'all' },
+          withCredentials: true,
+        });
+        setAllServers(allResponse.data.servers || []);
+
+        // Fetch user's servers if logged in
+        if (user?.id) {
+          const yourResponse = await axios.get(`${API_ENDPOINTS.SERVERS.CREATE}`, {
+            params: { type: 'joined' },
+            withCredentials: true,
+          });
+          setYourServers(yourResponse.data.servers || []);
+
+          const favResponse = await axios.get(`${API_ENDPOINTS.SERVERS.CREATE}`, {
+            params: { type: 'favorites' },
+            withCredentials: true,
+          });
+          setFavoriteServers(favResponse.data.servers || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch servers:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServers();
+  }, [user?.id]);
+
+  const joinServer = async (item: any) => {
     setModalType(null);
     
-    if (item.status === "Closed") {
+    if (item.privacy === "private") {
       alert("Access request sent! The server admin will review your request.");
       return;
     }
     
-    const filteredGroups = groups.filter((group) => group.title !== item.title);
-    setGroups(filteredGroups);
-    setYourGroups((prevGroups) => [item, ...prevGroups]);
+    // TODO: Call API to join server
+    // For now, just move to your servers locally
+    const filtered = allServers.filter((s) => s.id !== item.id);
+    setAllServers(filtered);
+    setYourServers((prev) => [item, ...prev]);
   };
 
-  const leaveServer = (item: Group) => {
+  const leaveServer = async (item: any) => {
     setModalType(null);
-    const filteredGroups = yourGroups.filter((group) => group.title !== item.title);
-    setYourGroups(filteredGroups);
-    setGroups((prevGroups) => [item, ...prevGroups]);
+    // TODO: Call API to leave server
+    const filtered = yourServers.filter((s) => s.id !== item.id);
+    setYourServers(filtered);
+    setAllServers((prev) => [item, ...prev]);
   };
 
-  const favPress = (item: Group) => {
-    const updated = groups.map((group) => (group.title === item.title ? { ...group, fav: !group.fav } : group));
-    setGroups(updated);
-    setFavoriteGroups(updated.filter((item) => item.fav === true));
+  const favPress = (item: any) => {
+    // TODO: Call API to toggle favorite
+    const updated = allServers.map((s) => (s.id === item.id ? { ...s, fav: !s.fav } : s));
+    setAllServers(updated);
+    setFavoriteServers(updated.filter((s) => s.fav === true));
   };
 
   const renderModalContent = () => (
@@ -144,13 +190,21 @@ const Server = () => {
   );
 
   const renderDisplay = () => {
-    if (activeTabIndex === 0) return yourGroups;
-    if (activeTabIndex === 1) return groups;
-    if (activeTabIndex === 2) return favoriteGroups;
+    if (activeTabIndex === 0) return allServers;
+    if (activeTabIndex === 1) return yourServers;
+    if (activeTabIndex === 2) return favoriteServers;
     return [];
   };
 
   const titleText = activeTabIndex === 0 ? "For You" : activeTabIndex === 1 ? "Your Servers" : "Favorite Servers";
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#50A040" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
@@ -191,23 +245,37 @@ const Server = () => {
       <View style={styles.groupContainer}>
         <Text style={[styles.text, { color: textColor }]}>{titleText}</Text>
         <Scroll>
-          {renderDisplay().map((item) => (
-            <Pressable key={item.id} onPress={() => router.push(`/Discover/${item.id}`)}>
-              <Card
-                onPress={() => {
-                  setModalType("access");
-                  setSelectedGroup(item);
-                }}
-                leaveGroup={() => {
-                  setModalType("leave");
-                  setSelectedGroup(item);
-                }}
-                favPress={() => favPress(item)}
-                forYou={activeTabIndex === 0}
-                {...item}
-              />
-            </Pressable>
-          ))}
+          {renderDisplay().length === 0 ? (
+            <Text style={{ color: textColor, textAlign: 'center', marginTop: 20 }}>
+              {activeTabIndex === 1 ? "You haven't joined any servers yet" : "No servers found"}
+            </Text>
+          ) : (
+            renderDisplay().map((item) => (
+              <Pressable key={item.id} onPress={() => router.push(`/Discover/${item.id}`)}>
+                <Card
+                  onPress={() => {
+                    setModalType("access");
+                    setSelectedGroup(item);
+                  }}
+                  leaveGroup={() => {
+                    setModalType("leave");
+                    setSelectedGroup(item);
+                  }}
+                  favPress={() => favPress(item)}
+                  forYou={activeTabIndex === 0}
+                  title={item.name}
+                  desc={item.description}
+                  members={item.memberCount || "0"}
+                  status={item.privacy === 'private' ? 'Closed' : 'Open'}
+                  img={item.profileImageUrl}
+                  smallImg={item.profileImageUrl}
+                  smallGroup={[]}
+                  videos={[]}
+                  {...item}
+                />
+              </Pressable>
+            ))
+          )}
         </Scroll>
       </View>
       {renderModalContent()}
