@@ -1,61 +1,72 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
-import { WebView } from 'react-native-webview';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import authService from '@twikkl/services/auth.service';
-import { API_ENDPOINTS } from '@twikkl/config/api';
+import { API_BASE_URL } from '@twikkl/config/api';
 import { setAuth } from '@twikkl/entities/auth.entity';
 
 const GoogleAuth = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
-  const handleNavigationStateChange = async (navState: any) => {
-    const { url } = navState;
-
-    // Check if this is the callback URL with token
-    if (url.includes('twikkl://auth')) {
+  useEffect(() => {
+    const handleAuth = async () => {
       try {
-        // Extract token and user from URL
-        const urlParams = new URL(url);
-        const token = urlParams.searchParams.get('token');
-        const userJson = urlParams.searchParams.get('user');
+        if (typeof window !== 'undefined') {
+          const loginUrl = `${API_BASE_URL}/api/login`;
+          const popup = window.open(
+            loginUrl,
+            'Replit Auth',
+            'width=500,height=600,left=200,top=100'
+          );
 
-        if (token && userJson) {
-          const user = JSON.parse(decodeURIComponent(userJson));
-          
-          // Save authentication data to AsyncStorage
-          await authService.saveAuth(token, user);
-          
-          // Update auth entity state (for useAuth() hook)
-          setAuth(user, token);
+          const checkAuth = setInterval(async () => {
+            if (popup && popup.closed) {
+              clearInterval(checkAuth);
+              
+              try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
+                  credentials: 'include',
+                });
 
-          // Navigate to home
-          router.replace('/NewHome');
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.authenticated && data.user) {
+                    setAuth(data.user, 'replit_session');
+                    router.replace('/NewHome');
+                  } else {
+                    router.back();
+                  }
+                } else {
+                  router.back();
+                }
+              } catch (error) {
+                console.error('Auth check error:', error);
+                router.back();
+              }
+            }
+          }, 500);
+
+          setTimeout(() => {
+            clearInterval(checkAuth);
+            if (popup && !popup.closed) {
+              popup.close();
+              router.back();
+            }
+          }, 60000);
         }
       } catch (error) {
-        console.error('Auth callback error:', error);
+        console.error('Auth error:', error);
         router.back();
       }
-    }
-  };
+    };
+
+    handleAuth();
+  }, [router]);
 
   return (
     <View style={styles.container}>
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#50A040" />
-        </View>
-      )}
-      <WebView
-        source={{ uri: API_ENDPOINTS.AUTH.GOOGLE }}
-        onNavigationStateChange={handleNavigationStateChange}
-        onLoadStart={() => setLoading(true)}
-        onLoadEnd={() => setLoading(false)}
-        style={styles.webview}
-        javaScriptEnabled
-        domStorageEnabled
-      />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#50A040" />
+      </View>
     </View>
   );
 };
