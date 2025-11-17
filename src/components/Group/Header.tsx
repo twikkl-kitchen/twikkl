@@ -58,7 +58,7 @@ const Header = ({
 
   const checkAdminStatus = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/servers/${id}/is-admin`, {
+      const response = await fetch(`/api/servers/${id}/is-admin`, {
         credentials: 'include',
       });
       if (response.ok) {

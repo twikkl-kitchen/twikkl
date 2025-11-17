@@ -714,6 +714,171 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update server settings
+  app.put('/api/servers/:serverId', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+      const { name, description, location, hashtags, privacy } = req.body;
+
+      // Check if user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can update server settings' });
+      }
+
+      const updateData: any = {};
+      if (name !== undefined) updateData.name = name;
+      if (description !== undefined) updateData.description = description;
+      if (location !== undefined) updateData.location = location;
+      if (hashtags !== undefined) updateData.hashtags = hashtags;
+      if (privacy !== undefined) updateData.privacy = privacy;
+
+      const server = await storage.updateServer(serverId, updateData);
+
+      res.json({
+        success: true,
+        message: 'Server updated successfully',
+        server
+      });
+    } catch (error) {
+      console.error('Update server error:', error);
+      res.status(500).json({ error: 'Failed to update server' });
+    }
+  });
+
+  // Upload server profile image
+  app.post('/api/servers/:serverId/upload-profile-image', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+
+      // Check if user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can update server images' });
+      }
+
+      // Validate image type
+      if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ error: 'File must be an image' });
+      }
+
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `server_profile_${serverId}_${uuidv4()}.${fileExtension}`;
+      const storagePath = `server-images/${fileName}`;
+
+      // Upload to Replit Object Storage
+      const objectStorage = getObjectStorage();
+      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+
+      if (!uploadResult.ok) {
+        console.error('Upload error:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload image to storage' });
+      }
+
+      // Generate image URL
+      const imageUrl = `/api/images/server/${fileName}`;
+
+      // Update server's profile image URL
+      await storage.updateServer(serverId, { profileImageUrl: imageUrl });
+
+      res.json({
+        success: true,
+        imageUrl,
+        message: 'Server profile image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Server profile image upload error:', error);
+      res.status(500).json({ error: 'Failed to upload server profile image' });
+    }
+  });
+
+  // Upload server banner image
+  app.post('/api/servers/:serverId/upload-banner', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+      const file = req.file;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No image file provided' });
+      }
+
+      // Check if user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can update server images' });
+      }
+
+      // Validate image type
+      if (!file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ error: 'File must be an image' });
+      }
+
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `server_banner_${serverId}_${uuidv4()}.${fileExtension}`;
+      const storagePath = `server-images/${fileName}`;
+
+      // Upload to Replit Object Storage
+      const objectStorage = getObjectStorage();
+      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+
+      if (!uploadResult.ok) {
+        console.error('Upload error:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload image to storage' });
+      }
+
+      // Generate image URL
+      const imageUrl = `/api/images/server/${fileName}`;
+
+      // Update server's banner image URL
+      await storage.updateServer(serverId, { bannerImageUrl: imageUrl });
+
+      res.json({
+        success: true,
+        imageUrl,
+        message: 'Server banner image uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Server banner image upload error:', error);
+      res.status(500).json({ error: 'Failed to upload server banner image' });
+    }
+  });
+
+  // Serve server images
+  app.get('/api/images/server/:fileName', async (req: Request, res: Response) => {
+    try {
+      const { fileName } = req.params;
+      const storagePath = `server-images/${fileName}`;
+
+      const objectStorage = getObjectStorage();
+      const downloadResult = await objectStorage.downloadAsBytes(storagePath);
+
+      if (!downloadResult.ok) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      // Determine content type from filename
+      const ext = fileName.split('.').pop()?.toLowerCase();
+      const contentType = ext === 'png' ? 'image/png' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/jpeg';
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.send(Buffer.from(downloadResult.value));
+    } catch (error) {
+      console.error('Serve server image error:', error);
+      res.status(500).json({ error: 'Failed to serve image' });
+    }
+  });
+
   app.get('/api/users/:userId/servers', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
