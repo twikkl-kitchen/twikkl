@@ -21,8 +21,8 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.45; // Large card width
-const CARD_HEIGHT = CARD_WIDTH * 1.6; // Portrait aspect ratio (9:16)
+const CARD_WIDTH = width * 0.42; // Landscape card width
+const CARD_HEIGHT = CARD_WIDTH * 0.56; // Landscape aspect ratio (16:9)
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
   const router = useRouter();
