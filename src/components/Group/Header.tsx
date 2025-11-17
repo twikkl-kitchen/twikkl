@@ -70,6 +70,8 @@ const Header = ({
     }
   };
   
+  const headerIconColor = isDarkMode ? "#fff" : "#000";
+
   return (
     <View>
       <ImageBackground 
@@ -78,14 +80,19 @@ const Header = ({
         resizeMode="cover"
         imageStyle={styles.bannerImageStyle}
       >
-        <TouchableOpacity onPressOut={() => router.back()} style={styles.iconContainer}>
-          <Octicons name="chevron-left" size={24} color="#fff" />
+        <TouchableOpacity onPressOut={() => router.back()} style={[styles.iconContainer, { backgroundColor: isDarkMode ? "#000" : "rgba(255,255,255,0.9)" }]}>
+          <Octicons name="chevron-left" size={24} color={headerIconColor} />
         </TouchableOpacity>
         <View style={{ flexDirection: "row", gap: 20 }}>
-          <AntDesign name="search1" size={22} color="#fff" />
+          <TouchableOpacity style={[styles.iconContainer, { backgroundColor: isDarkMode ? "#000" : "rgba(255,255,255,0.9)" }]}>
+            <AntDesign name="search1" size={22} color={headerIconColor} />
+          </TouchableOpacity>
           {isAdmin && (
-            <TouchableOpacity onPress={() => router.push(`/server/Settings?serverId=${id}`)}>
-              <Ionicons name="settings-outline" size={22} color="#fff" />
+            <TouchableOpacity 
+              style={[styles.iconContainer, { backgroundColor: isDarkMode ? "#000" : "rgba(255,255,255,0.9)" }]}
+              onPress={() => router.push(`/server/Settings?serverId=${id}`)}
+            >
+              <Ionicons name="settings-outline" size={22} color={headerIconColor} />
             </TouchableOpacity>
           )}
         </View>

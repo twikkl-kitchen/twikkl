@@ -818,6 +818,174 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get server categories
+  app.get('/api/servers/:serverId/categories', async (req: Request, res: Response) => {
+    try {
+      const { serverId } = req.params;
+      const server = await storage.getServer(serverId);
+
+      if (!server) {
+        return res.status(404).json({ error: 'Server not found' });
+      }
+
+      const categories = server.categories ? JSON.parse(server.categories) : [];
+      res.json({ categories });
+    } catch (error) {
+      console.error('Get categories error:', error);
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
+  // Update server categories
+  app.put('/api/servers/:serverId/categories', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+      const { categories } = req.body;
+
+      // Check if user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can update categories' });
+      }
+
+      if (!Array.isArray(categories)) {
+        return res.status(400).json({ error: 'Categories must be an array' });
+      }
+
+      // Validate categories
+      if (categories.length === 0) {
+        return res.status(400).json({ error: 'Categories cannot be empty' });
+      }
+
+      // Update server categories
+      const categoriesJson = JSON.stringify(categories);
+      await storage.updateServer(serverId, { categories: categoriesJson });
+
+      res.json({
+        success: true,
+        message: 'Categories updated successfully',
+        categories
+      });
+    } catch (error) {
+      console.error('Update categories error:', error);
+      res.status(500).json({ error: 'Failed to update categories' });
+    }
+  });
+
+  // Get server admins
+  app.get('/api/servers/:serverId/admins', async (req: Request, res: Response) => {
+    try {
+      const { serverId } = req.params;
+      const members = await storage.getServerMembers(serverId);
+
+      // Filter for admins and owners only
+      const admins = members.filter(m => m.role === 'admin' || m.role === 'owner');
+
+      // Get user details for each admin
+      const adminsWithDetails = await Promise.all(
+        admins.map(async (admin) => {
+          const user = await storage.getUser(admin.userId);
+          return {
+            userId: admin.userId,
+            username: user?.username,
+            email: user?.email,
+            role: admin.role
+          };
+        })
+      );
+
+      res.json({ admins: adminsWithDetails });
+    } catch (error) {
+      console.error('Get admins error:', error);
+      res.status(500).json({ error: 'Failed to fetch admins' });
+    }
+  });
+
+  // Add admin to server
+  app.post('/api/servers/:serverId/admins', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const currentUserId = getUserId(req);
+      const { serverId } = req.params;
+      const { userId } = req.body;
+
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      // Check if current user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, currentUserId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can add admins' });
+      }
+
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Check if user is already a member
+      const isMember = await storage.isServerMember(serverId, userId);
+      if (!isMember) {
+        // Add as member first
+        await storage.addServerMember({
+          serverId,
+          userId,
+          role: 'admin',
+        });
+      } else {
+        // Update existing member to admin
+        await storage.updateServerMemberRole(serverId, userId, 'admin');
+      }
+
+      res.json({
+        success: true,
+        message: 'Admin added successfully'
+      });
+    } catch (error) {
+      console.error('Add admin error:', error);
+      res.status(500).json({ error: 'Failed to add admin' });
+    }
+  });
+
+  // Remove admin from server
+  app.delete('/api/servers/:serverId/admins/:userId', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const currentUserId = getUserId(req);
+      const { serverId, userId } = req.params;
+
+      // Check if current user is admin
+      const isAdmin = await storage.isServerAdmin(serverId, currentUserId);
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only server admins can remove admins' });
+      }
+
+      // Get the member to check if they're the owner
+      const members = await storage.getServerMembers(serverId);
+      const targetMember = members.find(m => m.userId === userId);
+
+      if (!targetMember) {
+        return res.status(404).json({ error: 'User is not a member of this server' });
+      }
+
+      if (targetMember.role === 'owner') {
+        return res.status(403).json({ error: 'Cannot remove the server owner' });
+      }
+
+      // Update role to member instead of removing
+      await storage.updateServerMemberRole(serverId, userId, 'member');
+
+      res.json({
+        success: true,
+        message: 'Admin removed successfully'
+      });
+    } catch (error) {
+      console.error('Remove admin error:', error);
+      res.status(500).json({ error: 'Failed to remove admin' });
+    }
+  });
+
   // Upload server banner image
   app.post('/api/servers/:serverId/upload-banner', isAuthenticated, upload.single('image'), async (req: any, res: Response) => {
     try {
