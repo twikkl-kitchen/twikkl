@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toastError } from "./common";
 import { clearAuth, getToken } from "../entities/auth.entity";
-import { baseUrl } from "./config";
+import { API_BASE_URL } from "@twikkl/config/api";
 
 type MethodTypes = "get" | "post" | "put" | "patch" | "delete";
 
@@ -17,9 +17,9 @@ export const fetchFromApi = async ({ method = "get", path, body, headers = {}, p
   let token = getToken();
   console.log("token", token);
 
-  const url = `${baseUrl}${path}`;
+  const url = `${API_BASE_URL}/api/${path}`;
 
-  console.log({ baseUrl, url });
+  console.log({ API_BASE_URL, url });
 
   const requestConfig: {
     url: string;
@@ -34,10 +34,12 @@ export const fetchFromApi = async ({ method = "get", path, body, headers = {}, p
       "Content-Type"?: string;
     };
     params?: any;
+    withCredentials?: boolean;
   } = {
     url,
 
     method,
+    withCredentials: true,
   };
 
   if (method !== "get" && body) requestConfig.data = body;
