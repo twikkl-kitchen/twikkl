@@ -6,9 +6,9 @@ export const API_BASE_URL = '';
 export const API_ENDPOINTS = {
   // Auth endpoints (Replit Auth)
   AUTH: {
-    LOGIN: `${API_BASE_URL}/login`,
+    LOGIN: `${API_BASE_URL}/api/auth/login`,
     LOGOUT: `${API_BASE_URL}/api/logout`,
-    ME: `${API_BASE_URL}/auth/user`,
+    ME: `${API_BASE_URL}/api/auth/user`,
     GOOGLE: `${API_BASE_URL}/login`,
   },
   
