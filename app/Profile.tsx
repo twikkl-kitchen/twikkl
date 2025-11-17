@@ -49,7 +49,6 @@ const Profile = () => {
   const [error, setError] = useState<string | null>(null);
   const [followLoading, setFollowLoading] = useState(false);
   const [videos, setVideos] = useState<any[]>([]);
-  const [authChecked, setAuthChecked] = useState(false);
   
   const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
   const textColor = isDarkMode ? "#FFF" : "#000";
@@ -59,6 +58,11 @@ const Profile = () => {
   // Determine which user's profile to view
   const targetUserId = userId || currentUser?.id;
   const isOwnProfile = targetUserId === currentUser?.id;
+  
+  // Debug logging
+  console.log('Profile Screen - currentUser:', currentUser);
+  console.log('Profile Screen - userId param:', userId);
+  console.log('Profile Screen - targetUserId:', targetUserId);
 
   // Fetch user profile data
   const fetchUserProfile = useCallback(async () => {
@@ -157,50 +161,18 @@ const Profile = () => {
 
   useFocusEffect(
     useCallback(() => {
-      const checkAuthAndFetch = async () => {
-        try {
-          // Check backend session first to ensure we're authenticated
-          const authResponse = await axios.get(API_ENDPOINTS.AUTH.ME, {
-            withCredentials: true,
-          });
-          
-          if (authResponse.data.authenticated && authResponse.data.user) {
-            // Update local auth state if needed
-            const sessionUser = authResponse.data.user;
-            const currentUserId = userId || sessionUser.id;
-            
-            if (currentUserId) {
-              fetchUserProfile();
-              fetchFollowStats();
-              if (userId && userId !== sessionUser.id) {
-                checkFollowStatus();
-              }
-            }
-          } else {
-            // Not authenticated on backend
-            setError("Please login to view your profile");
-            setLoading(false);
-          }
-        } catch (err) {
-          console.error('Auth check failed:', err);
-          // If auth check fails, fall back to local storage
-          const currentUserId = userId || currentUser?.id;
-          
-          if (currentUserId) {
-            fetchUserProfile();
-            fetchFollowStats();
-            if (!isOwnProfile) {
-              checkFollowStatus();
-            }
-          } else {
-            setError("Please login to view your profile");
-            setLoading(false);
-          }
+      if (targetUserId) {
+        fetchUserProfile();
+        fetchFollowStats();
+        if (!isOwnProfile) {
+          checkFollowStatus();
         }
-      };
-      
-      checkAuthAndFetch();
-    }, [userId, currentUser?.id, isOwnProfile, fetchUserProfile, fetchFollowStats, checkFollowStatus])
+      } else {
+        // No user ID available - user not authenticated
+        setError("Please login to view your profile");
+        setLoading(false);
+      }
+    }, [targetUserId, isOwnProfile, fetchUserProfile, fetchFollowStats, checkFollowStatus])
   );
 
   if (loading) {
