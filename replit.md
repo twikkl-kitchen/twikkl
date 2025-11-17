@@ -27,9 +27,58 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
     *   **Follows**: Follow/unfollow users, check status, and retrieve follower/following lists.
     *   **View Tracking**: Records video views with watch duration and completion status (supports anonymous views).
 *   **Search Functionality**: Full-text search across videos, servers, and users.
-*   **Profile Management**: Complete user profiles with customizable display name, bio, profile image, and banner image. Includes a dedicated profile settings screen for editing.
+*   **Profile Management**: Complete user profiles with customizable display name, bio, profile image, and banner image. Includes a Settings hub with Edit Profile, Referrals, and Logout options.
+*   **Referral System**: Full referral tracking with unique codes, referral count, and referred user details. Users can share codes via copy/share functionality.
 *   **Admin System**: Role-based permissions for server administration (owner, admin, member) with custom category management and admin management.
 *   **Development Setup**: Configured for web execution on Replit, running on port 5000 with host `0.0.0.0`.
+
+## Pre-Publish Checklist (Nov 17, 2025) ✅
+All critical features implemented and verified before publishing:
+
+*   **Settings Navigation** ✅
+    *   Created Settings.tsx as main settings hub
+    *   Profile screen settings button navigates to Settings (not directly to ProfileSettings)
+    *   Settings includes: Edit Profile, Referrals, Logout options
+    *   Modern UI with user info card and icon-based menu items
+
+*   **Logout Functionality** ✅
+    *   Backend: POST /api/logout endpoint with session destruction
+    *   Frontend: Confirmation dialog before logout
+    *   Clears user session and redirects to home screen
+    *   Works for both OAuth and email/password users
+
+*   **Profile Settings Save Button** ✅
+    *   Save button now calls PUT /api/users/:userId endpoint
+    *   Successfully updates displayName, bio, firstName, lastName
+    *   Refreshes user data after save
+    *   Shows success/error alerts
+
+*   **Light Mode Background Fix** ✅
+    *   ProfileSettings background changed from #F1FCF2 to #fff
+    *   Matches other screens in light mode
+    *   Consistent user experience across the app
+
+*   **API Endpoint Fixes** ✅
+    *   All API endpoints now use /api/ prefix for proper proxy routing
+    *   Videos, Servers, Comments, Likes, Follows, Views, Search all updated
+    *   Fixes 404 errors caused by missing /api/ prefix
+
+*   **Referral System** ✅
+    *   Backend: GET /api/users/:userId/referrals endpoint with full stats
+    *   Returns: referralCode, totalReferrals, referred user details
+    *   Frontend: Referrals.tsx screen with code display, copy, share
+    *   Shows referral stats and list of referred users
+    *   expo-clipboard package installed for copy functionality
+
+*   **Server Creation Visibility** ✅
+    *   Server creation already adds creator as owner in serverMembers table
+    *   GET /api/users/:userId/servers properly queries serverMembers
+    *   Creator immediately appears as server member
+
+*   **Social Features Verification** ✅
+    *   All endpoints use getUserId() helper for both OAuth and email/password
+    *   Likes, comments, follows, views work when authenticated
+    *   Backend properly handles session-based authentication
 
 ## External Dependencies
 *   **Backend API**: Express.js/TypeScript
