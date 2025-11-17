@@ -7,9 +7,10 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { spawn } = require('child_process');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;  // Always use port 5000 for published apps
 
 console.log('🚀 Starting production proxy server...\n');
+console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 
 // Start backend server on port 3001
 const backend = spawn('sh', ['-c', 'PORT=3001 npm run server'], {
@@ -17,10 +18,18 @@ const backend = spawn('sh', ['-c', 'PORT=3001 npm run server'], {
   env: { ...process.env, PORT: 3001, NODE_ENV: 'production' },
 });
 
-// Start frontend server on port 8081 in production mode (no dev tools)
-const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx expo start --web --port 8081 --no-dev'], {
+backend.on('error', (err) => {
+  console.error('❌ Backend process error:', err);
+});
+
+// Start frontend server on port 8081 for production
+const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx expo start --web --port 8081'], {
   stdio: 'inherit',
-  env: { ...process.env, NODE_ENV: 'production' },
+  env: { ...process.env },
+});
+
+frontend.on('error', (err) => {
+  console.error('❌ Frontend process error:', err);
 });
 
 // Proxy /api/* requests to backend on port 3001  
@@ -45,6 +54,19 @@ const frontendProxy = createProxyMiddleware({
   changeOrigin: true,
   ws: true, // Enable WebSocket proxy
   logLevel: 'silent',
+  onError: (err, req, res) => {
+    console.error(`❌ [FRONTEND PROXY ERROR] ${req.url}:`, err.message);
+    // Return a more helpful error page
+    res.status(502).send(`
+      <html>
+        <body style="font-family: sans-serif; padding: 20px;">
+          <h1>⚠️ Application Loading...</h1>
+          <p>The frontend is starting up. Please refresh in a few seconds.</p>
+          <p>Error: ${err.message}</p>
+        </body>
+      </html>
+    `);
+  },
 });
 
 // Apply both proxies - filter will determine which one handles the request
