@@ -30,6 +30,7 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Profile Management**: Complete user profiles with customizable display name, bio, profile image, and banner image. Includes a Settings hub with Edit Profile, Referrals, and Logout options.
 *   **Referral System**: Full referral tracking with unique codes, referral count, and referred user details. Users can share codes via copy/share functionality.
 *   **Admin System**: Role-based permissions for server administration (owner, admin, member) with custom category management and admin management.
+*   **Server Image Management**: Full server customization with profile and banner image uploads. Admins can access server settings via gear icon in server header, with dedicated UI for uploading/updating server images through Settings > Images tab.
 *   **Development Setup**: Configured for web execution on Replit, running on port 5000 with host `0.0.0.0`.
 
 ## Pre-Publish Checklist (Nov 17, 2025) ✅
@@ -79,6 +80,18 @@ All critical features implemented and verified before publishing:
     *   All endpoints use getUserId() helper for both OAuth and email/password
     *   Likes, comments, follows, views work when authenticated
     *   Backend properly handles session-based authentication
+
+*   **Server Image Management** ✅ (Nov 17, 2025)
+    *   Backend endpoints: POST /api/servers/:serverId/upload-profile-image
+    *   Backend endpoints: POST /api/servers/:serverId/upload-banner
+    *   Backend endpoint: PUT /api/servers/:serverId for general server updates
+    *   Backend endpoint: GET /api/images/server/:fileName for serving images
+    *   Settings screen has three tabs: Categories, Admins, Images
+    *   Images tab provides easy navigation to EditImages screen
+    *   EditImages.tsx fully integrated with backend APIs using FormData
+    *   Loading states and error handling for image uploads
+    *   Admin-only access enforced on backend and frontend
+    *   Settings button visible in server header for admins/owners
 
 ## External Dependencies
 *   **Backend API**: Express.js/TypeScript

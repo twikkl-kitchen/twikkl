@@ -872,7 +872,7 @@ async function registerRoutes(app: Express): Promise<Server> {
 
       res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'public, max-age=31536000');
-      res.send(Buffer.from(downloadResult.value));
+      res.send(downloadResult.value);
     } catch (error) {
       console.error('Serve server image error:', error);
       res.status(500).json({ error: 'Failed to serve image' });
