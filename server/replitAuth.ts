@@ -122,7 +122,22 @@ export async function setupAuth(app: Express) {
   };
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  passport.deserializeUser(async (user: any, cb) => {
+    if (user.id) {
+      try {
+        const dbUser = await storage.getUser(user.id);
+        if (dbUser) {
+          cb(null, { id: dbUser.id, email: dbUser.email, username: dbUser.username });
+        } else {
+          cb(null, user);
+        }
+      } catch (error) {
+        cb(null, user);
+      }
+    } else {
+      cb(null, user);
+    }
+  });
 
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
@@ -157,7 +172,7 @@ export async function setupAuth(app: Express) {
     }
 
     const user = req.user as any;
-    const userId = user.claims?.sub;
+    const userId = user.id || user.claims?.sub;
 
     if (!userId) {
       return res.status(401).json({ authenticated: false });
@@ -171,7 +186,12 @@ export async function setupAuth(app: Express) {
 
       res.json({
         authenticated: true,
-        user: dbUser,
+        user: {
+          id: dbUser.id,
+          email: dbUser.email,
+          username: dbUser.username,
+          profileImageUrl: dbUser.profileImageUrl,
+        },
       });
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -181,9 +201,17 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (user.id && !user.claims) {
+    return next();
+  }
+
+  if (!user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
