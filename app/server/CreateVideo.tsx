@@ -13,6 +13,7 @@ import Cancel from "@assets/svg/Cancel";
 import Send from "@assets/svg/Send";
 import AppBottomSheet from "@twikkl/components/BottomSheet";
 import Effects from "@twikkl/components/Effects";
+import { useColors } from "@twikkl/hooks/themeHooks";
 
 const speedArr = ["0.25x", "0.5x", "1x", "1.5x", "2x"];
 const timerArr = ["15s", "30s", "60s", "3m", "5m"];
@@ -20,6 +21,7 @@ const timerArr = ["15s", "30s", "60s", "3m", "5m"];
 const CreateVideo = () => {
   const router = useRouter();
   const { serverId } = useLocalSearchParams();
+  const colors = useColors();
   const cameraRef = useRef<any>(null);
   const [permission, requestPermission] = useCameraPermissions();
   const [isRecording, setIsRecording] = useState(false);
@@ -177,8 +179,8 @@ const CreateVideo = () => {
                   </View>
                 )}
                 {!isRecording && (
-                  <Pressable style={styles.addSound}>
-                    <Text>Add Sound</Text>
+                  <Pressable style={[styles.addSound, { backgroundColor: colors.tertiary }]}>
+                    <Text style={{ color: colors.brand }}>Add Sound</Text>
                   </Pressable>
                 )}
               </View>
@@ -318,7 +320,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     paddingHorizontal: 12,
     borderRadius: 16,
-    backgroundColor: "#f1fcf2",
     alignSelf: "center",
   },
   record: {
