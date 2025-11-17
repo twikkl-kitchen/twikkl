@@ -30,6 +30,9 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -37,7 +40,8 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: sessionTtl,
     },
   });
@@ -145,6 +149,34 @@ export async function setupAuth(app: Express) {
         }).href
       );
     });
+  });
+
+  app.get("/api/auth/user", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ authenticated: false });
+    }
+
+    const user = req.user as any;
+    const userId = user.claims?.sub;
+
+    if (!userId) {
+      return res.status(401).json({ authenticated: false });
+    }
+
+    try {
+      const dbUser = await storage.getUser(userId);
+      if (!dbUser) {
+        return res.status(404).json({ authenticated: true, user: null });
+      }
+
+      res.json({
+        authenticated: true,
+        user: dbUser,
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ error: "Failed to fetch user data" });
+    }
   });
 }
 
