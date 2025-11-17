@@ -44,7 +44,12 @@ export const fetchFromApi = async ({ method = "get", path, body, headers = {}, p
 
   if (method !== "get" && body) requestConfig.data = body;
   requestConfig.headers = {};
-  if (token) requestConfig.headers = { Authorization: token };
+  
+  // Only set Authorization header if token is not "session"
+  // Session auth uses cookies via withCredentials
+  if (token && token !== "session") {
+    requestConfig.headers = { Authorization: token };
+  }
 
   if (params) requestConfig.params = params;
 
