@@ -124,7 +124,13 @@ const Header = ({
             <Ionicons name="add-circle" size={20} color="#50A040" />
             <Text style={[styles.compactActionText, { color: textColor }]}>Create</Text>
           </Pressable>
-          <TouchableOpacity style={styles.compactActionButton}>
+          <TouchableOpacity 
+            style={styles.compactActionButton}
+            onPress={() => {
+              // TODO: Implement proper invite flow
+              alert('Invite functionality coming soon! Share your server with friends.');
+            }}
+          >
             <Ionicons name="person-add-outline" size={18} color={mutedTextColor} />
             <Text style={[styles.compactActionText, { color: textColor }]}>Invite</Text>
           </TouchableOpacity>

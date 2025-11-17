@@ -718,6 +718,20 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if user is admin of a server
+  app.get('/api/servers/:serverId/is-admin', isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+
+      const isAdmin = await storage.isServerAdmin(serverId, userId);
+      res.json({ isAdmin });
+    } catch (error) {
+      console.error('Check admin status error:', error);
+      res.status(500).json({ error: 'Failed to check admin status' });
+    }
+  });
+
   // Update server settings
   app.put('/api/servers/:serverId', isAuthenticated, async (req: any, res: Response) => {
     try {
