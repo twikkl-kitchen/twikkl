@@ -76,6 +76,112 @@ async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', message: 'Twikkl backend is running' });
   });
 
+  // Email/Password Registration endpoint
+  app.post('/api/auth/register', async (req: Request, res: Response) => {
+    try {
+      const { email, password, confirmPassword } = req.body;
+
+      if (!email || !password || !confirmPassword) {
+        return res.status(400).json({ error: 'Email, password, and confirmPassword are required' });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ error: 'Passwords do not match' });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ error: 'Password must be at least 6 characters' });
+      }
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email already registered' });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const generateReferralCode = () => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 8; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+      };
+
+      const user = await storage.upsertUser({
+        email,
+        password: hashedPassword,
+        referralCode: generateReferralCode(),
+      });
+
+      (req as any).login({ id: user.id }, (err: any) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to create session' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Registration successful',
+          data: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            profileImageUrl: user.profileImageUrl,
+          },
+          token: 'session',
+        });
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ error: 'Registration failed' });
+    }
+  });
+
+  // Email/Password Login endpoint
+  app.post('/api/auth/login', async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user || !user.password) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      const bcrypt = require('bcryptjs');
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+      }
+
+      (req as any).login({ id: user.id }, (err: any) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to create session' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Login successful',
+          data: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            profileImageUrl: user.profileImageUrl,
+          },
+          token: 'session',
+        });
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Login failed' });
+    }
+  });
+
   // Telegram authentication endpoint
   app.post('/api/auth/telegram', async (req: Request, res: Response) => {
     try {
