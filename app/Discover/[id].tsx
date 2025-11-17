@@ -1,10 +1,10 @@
-import { View, ScrollView, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import Header from "@twikkl/components/Group/Header";
 import CategoryVideoRow from "@twikkl/components/Group/CategoryVideoRow";
-import { cardDataGroup, cardDataYou } from "@twikkl/data/discover/cardData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
+import axios from "axios";
 
 export interface IGroup {
   desc: string;
@@ -20,35 +20,100 @@ export interface IGroup {
   videos: any;
 }
 
-const categories = ["Tutorial", "Trading", "Development", "General", "News"];
+interface ServerData {
+  id: string;
+  name: string;
+  description: string | null;
+  privacy: string;
+  profileImageUrl: string | null;
+  bannerImageUrl: string | null;
+  categories: string | null;
+  memberCount?: number;
+}
+
+const defaultCategories = ["Tutorial", "Trading", "Development", "General", "News"];
 
 const Group = (): JSX.Element => {
   const { id } = useLocalSearchParams();
   const { isDarkMode } = useThemeMode();
-  const groups = [...cardDataYou, ...cardDataGroup];
-  const groupData = groups.find((item) => item.id === id);
   const [select, setSelect] = useState(0);
+  const [serverData, setServerData] = useState<ServerData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>(defaultCategories);
 
   const backgroundColor = isDarkMode ? "#000" : "#fff";
+  const textColor = isDarkMode ? "#fff" : "#000";
+  const mutedTextColor = isDarkMode ? "#888" : "#666";
 
-  // Convert existing video images to VideoCard format
-  const allServerVideos = groupData?.videos?.map((videoImg: any, index: number) => ({
-    id: index.toString(),
-    title: `${groupData?.title} - Tutorial ${index + 1}`,
-    creator: groupData?.title || "Server",
-    views: `${Math.floor(Math.random() * 20 + 5)}K views`,
-    time: index === 0 ? "2 days ago" : index === 1 ? "1 week ago" : "2 weeks ago",
-    thumbnail: videoImg,
-    duration: `${Math.floor(Math.random() * 10 + 5)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
-    isLive: index === 0,
-    creatorAvatar: groupData?.smallImg,
-    category: categories[index % categories.length],
-  })) || [];
+  useEffect(() => {
+    loadServerData();
+  }, [id]);
 
-  // Group videos by category
+  const loadServerData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch server details
+      const serverResponse = await axios.get(`/api/servers/${id}`);
+      const server = serverResponse.data;
+
+      // Parse categories if available
+      const parsedCategories = server.categories 
+        ? JSON.parse(server.categories) 
+        : defaultCategories;
+      
+      setCategories(parsedCategories);
+      setServerData(server);
+    } catch (err: any) {
+      console.error('Error loading server:', err);
+      setError(err.response?.data?.error || 'Failed to load server');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.centerContainer, { backgroundColor }]}>
+        <ActivityIndicator size="large" color="#50a040" />
+        <Text style={[styles.loadingText, { color: mutedTextColor }]}>
+          Loading server...
+        </Text>
+      </View>
+    );
+  }
+
+  if (error || !serverData) {
+    return (
+      <View style={[styles.centerContainer, { backgroundColor }]}>
+        <Text style={[styles.errorText, { color: textColor }]}>
+          {error || 'Server not found'}
+        </Text>
+      </View>
+    );
+  }
+
+  // Transform server data to match IGroup interface for Header component
+  const groupData: IGroup = {
+    id: serverData.id,
+    title: serverData.name,
+    desc: serverData.description || 'No description',
+    status: serverData.privacy === 'private' ? 'Private' : 'Public',
+    members: serverData.memberCount?.toString() || '1',
+    // Use actual images if available, otherwise use placeholder
+    img: serverData.bannerImageUrl ? { uri: serverData.bannerImageUrl } : { uri: 'https://via.placeholder.com/1600x900/50a040/ffffff?text=Server+Banner' },
+    smallImg: serverData.profileImageUrl ? { uri: serverData.profileImageUrl } : { uri: 'https://via.placeholder.com/500x500/50a040/ffffff?text=Server' },
+    smallGroup: [],
+    videos: [],
+  };
+
+  // Group empty videos by category for now
+  // TODO: Fetch real videos from API
   const videosByCategory = categories.map(category => ({
     category,
-    videos: allServerVideos.filter(video => video.category === category)
+    videos: []
   }));
 
   return (
@@ -75,6 +140,20 @@ const Group = (): JSX.Element => {
 const styles = StyleSheet.create({
   listContent: {
     padding: 16,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
 

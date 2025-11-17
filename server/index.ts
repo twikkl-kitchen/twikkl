@@ -707,7 +707,11 @@ async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: 'Server not found' });
       }
 
-      res.json(server);
+      // Get member count
+      const members = await storage.getServerMembers(serverId);
+      const memberCount = members.length;
+
+      res.json({ ...server, memberCount });
     } catch (error) {
       console.error('Get server error:', error);
       res.status(500).json({ error: 'Failed to fetch server' });
