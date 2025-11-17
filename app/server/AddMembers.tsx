@@ -7,9 +7,12 @@ import {
   TextInput,
   FlatList,
   Image,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { createServer } from "../../src/services/server.services";
 
 interface Member {
   id: string;
@@ -29,8 +32,10 @@ const mockMembers: Member[] = [
 
 const AddMembers = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
 
   const toggleMember = (memberId: string) => {
     setSelectedMembers((prev) =>
@@ -40,9 +45,36 @@ const AddMembers = () => {
     );
   };
 
-  const handleCreate = () => {
-    alert(`Server created with ${selectedMembers.length} members invited!`);
-    router.push("/Server");
+  const handleCreate = async () => {
+    try {
+      setIsCreating(true);
+      
+      // Create server with data from params
+      const serverData = {
+        name: params.serverName as string,
+        description: params.description as string || undefined,
+        location: params.location as string || undefined,
+        hashtags: params.hashtag as string || undefined,
+        privacy: (params.privacy as 'public' | 'private') || 'public',
+      };
+
+      await createServer(serverData);
+      
+      Alert.alert(
+        "Success!", 
+        `Server "${serverData.name}" created successfully!`,
+        [
+          {
+            text: "OK",
+            onPress: () => router.push("/Server")
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Server creation error:', error);
+      Alert.alert("Error", "Failed to create server. Please try again.");
+      setIsCreating(false);
+    }
   };
 
   const filteredMembers = mockMembers.filter(
@@ -115,12 +147,17 @@ const AddMembers = () => {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={styles.createButton}
+          style={[styles.createButton, isCreating && styles.createButtonDisabled]}
           onPress={handleCreate}
+          disabled={isCreating}
         >
-          <Text style={styles.createButtonText}>
-            Create Server{selectedMembers.length > 0 ? ` & Invite ${selectedMembers.length}` : ""}
-          </Text>
+          {isCreating ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.createButtonText}>
+              Create Server{selectedMembers.length > 0 ? ` & Invite ${selectedMembers.length}` : ""}
+            </Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -239,5 +276,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+  },
+  createButtonDisabled: {
+    opacity: 0.6,
   },
 });

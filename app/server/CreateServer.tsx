@@ -25,7 +25,17 @@ const CreateServer = () => {
       return;
     }
     
-    router.push("/server/AddMembers");
+    // Pass server data to AddMembers page
+    router.push({
+      pathname: "/server/AddMembers",
+      params: {
+        serverName,
+        description,
+        location,
+        hashtag,
+        privacy: isPrivate ? 'private' : 'public'
+      }
+    });
   };
 
   return (

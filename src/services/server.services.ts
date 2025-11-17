@@ -15,11 +15,11 @@ export interface Server {
 }
 
 export interface CreateServerData {
-  title: string;
+  name: string;
   description?: string;
   location?: string;
-  hashtags?: string[];
-  isPrivate: boolean;
+  hashtags?: string;
+  privacy?: 'public' | 'private';
   memberIds?: string[];
 }
 
