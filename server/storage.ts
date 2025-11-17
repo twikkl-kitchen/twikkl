@@ -46,6 +46,7 @@ export interface IStorage {
   // Server operations
   createServer(server: InsertServer): Promise<Server>;
   getServer(id: string): Promise<Server | undefined>;
+  getAllServers(limit?: number): Promise<Server[]>;
   getUserServers(userId: string): Promise<Server[]>;
   updateServer(id: string, data: Partial<InsertServer>): Promise<Server | undefined>;
   deleteServer(id: string): Promise<void>;
@@ -159,6 +160,15 @@ export class DatabaseStorage implements IStorage {
   async getServer(id: string): Promise<Server | undefined> {
     const [server] = await db.select().from(servers).where(eq(servers.id, id));
     return server;
+  }
+
+  async getAllServers(limit: number = 50): Promise<Server[]> {
+    return await db
+      .select()
+      .from(servers)
+      .where(eq(servers.privacy, 'public'))
+      .orderBy(desc(servers.createdAt))
+      .limit(limit);
   }
 
   async getUserServers(userId: string): Promise<Server[]> {

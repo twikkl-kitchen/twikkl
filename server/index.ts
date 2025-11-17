@@ -641,6 +641,31 @@ async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Server management endpoints
+  // GET all servers or filter by type
+  app.get('/api/servers', async (req: any, res: Response) => {
+    try {
+      const { type } = req.query;
+      const userId = req.session?.userId || req.session?.user?.id;
+
+      if (type === 'joined' && userId) {
+        // Get servers the user has joined
+        const servers = await storage.getUserServers(userId);
+        return res.json({ servers });
+      } else if (type === 'favorites' && userId) {
+        // Get favorited servers (we'll implement this later)
+        // For now, return empty array
+        return res.json({ servers: [] });
+      } else {
+        // Get all public servers
+        const allServers = await storage.getAllServers();
+        return res.json({ servers: allServers });
+      }
+    } catch (error) {
+      console.error('Get servers error:', error);
+      res.status(500).json({ error: 'Failed to fetch servers' });
+    }
+  });
+
   app.post('/api/servers', isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = getUserId(req);
