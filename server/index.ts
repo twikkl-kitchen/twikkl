@@ -64,8 +64,10 @@ function getObjectStorage(): ObjectStorageClient {
   if (!objectStorage) {
     try {
       objectStorage = new ObjectStorageClient();
-    } catch (error) {
-      throw new Error('Object Storage not configured. Please create a bucket in the Replit Object Storage pane.');
+      console.log('✅ Object Storage initialized successfully');
+    } catch (error: any) {
+      console.error('❌ Object Storage initialization failed:', error.message);
+      throw new Error('Object Storage not configured. Please create an Object Storage bucket in the Replit Storage tab, then restart the server.');
     }
   }
   return objectStorage;
