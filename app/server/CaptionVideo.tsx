@@ -5,33 +5,9 @@ import ListItem from "@twikkl/components/ListItem";
 import ToggleButton from "@twikkl/components/ToggleButton";
 import { useState, useEffect } from "react";
 import { ResizeMode, Video } from "expo-av";
-import styled from "styled-components/native";
-import { heightPercentageToDP as hp, widthPercentageToDP as wp } from "react-native-responsive-screen";
 import ArrowDown from "@assets/svg/ArrowDown";
-import People from "@assets/svg/People";
-import Key from "@assets/svg/Key";
-import Globe from "@assets/svg/Globe";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const SubscribeOption = styled.View`
-  flex-direction: row;
-  align-items: center;
-  padding: ${hp(1.6)}px ${wp(2.3)}px;
-`;
-const OptionWrapper = styled.View`
-  border: 2px solid #fff;
-  border-radius: 99px;
-  width: ${wp(6)}px;
-  height: ${hp(2.8)}px;
-  align-items: center;
-  justify-content: center;
-`;
-const Option = styled.View`
-  border-radius: 99px;
-  width: ${wp(3.5)}px;
-  height: ${hp(1.6)}px;
-`;
 
 const CaptionVideo = () => {
   const router = useRouter();
@@ -47,22 +23,10 @@ const CaptionVideo = () => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
   const [shouldPlay, setShouldPlay] = useState(false);
-  const [subData, setSubData] = useState("Followers");
   const [captionText, setCaptionText] = useState("");
-  const [options, setOptions] = useState(false);
   const [categories, setCategories] = useState<string[]>(["Tutorial", "Trading", "Development", "General", "News"]);
   const [selectedCategory, setSelectedCategory] = useState("Tutorial");
   const [categoryDropdown, setCategoryDropdown] = useState(false);
-
-  const optionsArray = [
-    {
-      icon: <People color="#fff" />,
-      title: "Followers",
-      desc: "Only those who follow you or those you follow will see this post.",
-    },
-    { icon: <Globe />, title: "Public", desc: "This post will be visible to everyone on the network." },
-    { icon: <Key />, title: "Private", desc: "This post will only be seen by you." },
-  ];
 
   useEffect(() => {
     checkUploadLimit();
@@ -123,29 +87,53 @@ const CaptionVideo = () => {
       return;
     }
 
-    // Add current upload to storage
-    const newUpload = new Date().toISOString();
-    const updatedUploads = [...allUploads, newUpload];
-    await AsyncStorage.setItem(storageKey, JSON.stringify(updatedUploads));
-    
-    // Update local state immediately with recent uploads only
-    const newRecentUploads = [...recentUploads, newUpload];
-    setUploadsToday(newRecentUploads);
-    setUploadCount(newRecentUploads.length);
+    try {
+      // Create FormData for video upload
+      const formData = new FormData();
+      
+      // Fetch video file
+      const response = await fetch(videoUri as string);
+      const blob = await response.blob();
+      
+      // Append video file
+      formData.append('video', blob, 'video.mp4');
+      formData.append('caption', captionText);
+      formData.append('category', selectedCategory);
+      formData.append('allowDuet', data.duet.toString());
+      formData.append('allowStitch', data.stitch.toString());
+      formData.append('saveToDevice', data.device.toString());
 
-    // Here you would normally upload the video to the server
-    console.log("Posting video:", {
-      videoUri,
-      caption: captionText,
-      category: selectedCategory,
-      visibility: subData,
-      serverId,
-      settings: data,
-    });
+      // Upload to server
+      const uploadResponse = await fetch(`/api/servers/${serverId}/videos`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
 
-    Alert.alert("Success", "Your video has been posted to the server!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || 'Failed to upload video');
+      }
+
+      // Add current upload to storage
+      const newUpload = new Date().toISOString();
+      const updatedUploads = [...allUploads, newUpload];
+      await AsyncStorage.setItem(storageKey, JSON.stringify(updatedUploads));
+      
+      // Update local state immediately with recent uploads only
+      const newRecentUploads = [...recentUploads, newUpload];
+      setUploadsToday(newRecentUploads);
+      setUploadCount(newRecentUploads.length);
+
+      Alert.alert("Success", "Your video has been posted to the server!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      console.error('Upload error:', error);
+      Alert.alert("Error", "Failed to post video. Please try again.", [
+        { text: "OK" }
+      ]);
+    }
   };
 
   const tagArr = ["# Hashtags", "@ Tag Friends"];
@@ -163,47 +151,11 @@ const CaptionVideo = () => {
           <Avatar.Image size={34} source={require("../../assets/imgs/avatar1.png")} />
           <View>
             <Text style={{ fontWeight: "600", fontSize: 15, color: "#fff" }}>@glorypraise.eth</Text>
-            <Pressable style={styles.select} onPress={() => setOptions(!options)}>
-              <People color="#fff" />
-              <Text style={{ fontSize: 12, color: "#fff" }}>{subData}</Text>
-              <ArrowDown color="#fff" />
-            </Pressable>
           </View>
         </View>
         <Pressable style={styles.bgGreen} onPress={handlePost}>
           <Text style={styles.textWhite}>Post</Text>
         </Pressable>
-      </View>
-      <View style={{ zIndex: 2 }}>
-        {options && (
-          <View style={styles.optionsWrapper}>
-            {optionsArray.map(({ icon, title, desc }) => (
-              <Pressable
-                key={title}
-                onPress={() => {
-                  setSubData(title);
-                  setOptions(false);
-                }}
-              >
-                <SubscribeOption>
-                  <Text style={{ width: 23 }}>{icon}</Text>
-                  <View style={{ flex: 1, paddingHorizontal: 20 }}>
-                    <Text style={styles.optionText}>{title}</Text>
-                    <Text style={{ color: "#50A040", fontSize: 12 }}>{desc}</Text>
-                  </View>
-                  <OptionWrapper>
-                    <Option
-                      style={{
-                        backgroundColor: title === subData ? "#fff" : "transparent",
-                        padding: 5,
-                      }}
-                    />
-                  </OptionWrapper>
-                </SubscribeOption>
-              </Pressable>
-            ))}
-          </View>
-        )}
       </View>
       <TextInput
         multiline
