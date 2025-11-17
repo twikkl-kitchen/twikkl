@@ -33,11 +33,11 @@ const Settings = () => {
           onPress: async () => {
             try {
               await axios.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { withCredentials: true });
-              setUser(null);
+              setUser(null as any);
               router.replace('/');
             } catch (error) {
               console.error('Logout error:', error);
-              setUser(null);
+              setUser(null as any);
               router.replace('/');
             }
           }
