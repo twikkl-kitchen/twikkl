@@ -9,6 +9,10 @@ const { spawn } = require('child_process');
 const app = express();
 const PORT = 5000;
 
+// Increase body size limits for large file uploads
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
 console.log('🚀 Starting development proxy server...\n');
 
 // Start backend server on port 3001
@@ -29,6 +33,8 @@ app.use(createProxyMiddleware({
   changeOrigin: true,
   pathFilter: '/api/**',  // Filter which paths to proxy
   logLevel: 'warn',
+  timeout: 300000, // 5 minute timeout for large file uploads
+  proxyTimeout: 300000,
 }));
 
 // Proxy all other requests to frontend on port 8081

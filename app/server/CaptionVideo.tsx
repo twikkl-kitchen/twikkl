@@ -118,14 +118,22 @@ const CaptionVideo = () => {
       formData.append('saveToDevice', data.device.toString());
 
       console.log('Uploading to server...');
-      // Upload to server
-      const uploadResponse = await fetch(`/api/servers/${serverId}/videos`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
+      console.log('FormData prepared with video blob:', blob.size, 'bytes');
+      
+      // Upload to server with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
+      try {
+        const uploadResponse = await fetch(`/api/servers/${serverId}/videos`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
 
-      console.log('Upload response status:', uploadResponse.status);
+        console.log('Upload response status:', uploadResponse.status);
 
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json();
@@ -150,12 +158,19 @@ const CaptionVideo = () => {
         console.warn('Failed to update AsyncStorage:', storageError);
       }
 
-      Alert.alert("Success", "Your video has been posted to the server!", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+        Alert.alert("Success", "Your video has been posted to the server!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      Alert.alert("Error", `Failed to post video: ${error instanceof Error ? error.message : 'Unknown error'}`, [
+      const errorMsg = error instanceof Error ? 
+        (error.name === 'AbortError' ? 'Upload timed out. Please try again.' : error.message) : 
+        'Unknown error';
+      Alert.alert("Error", `Failed to post video: ${errorMsg}`, [
         { text: "OK" }
       ]);
     }

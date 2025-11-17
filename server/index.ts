@@ -17,9 +17,9 @@ function getUserId(req: any): string {
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middleware - increase limits for large file uploads
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // CORS configuration - restricts origins in production for security
 app.use(cors({
