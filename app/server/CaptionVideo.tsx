@@ -8,10 +8,14 @@ import { ResizeMode, Video } from "expo-av";
 import ArrowDown from "@assets/svg/ArrowDown";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "@twikkl/entities/auth.entity";
+import { useColors } from "@twikkl/hooks/themeHooks";
 
 const CaptionVideo = () => {
   const router = useRouter();
   const { videoUri, serverId } = useLocalSearchParams();
+  const { user } = useAuth();
+  const colors = useColors();
   const [data, setData] = useState({
     device: true,
     duet: true,
@@ -158,20 +162,32 @@ const CaptionVideo = () => {
   };
 
   const tagArr = ["# Hashtags", "@ Tag Friends"];
+  const textColor = colors.dark === "#010301" ? colors.light : colors.dark;
+  const backgroundColor = colors.dark === "#010301" ? colors.dark : colors.light;
+  const borderColor = colors.dark === "#010301" ? "#333" : "#E0E0E0";
+  const placeholderColor = colors.dark === "#010301" ? "#666" : "#999";
+  const dropdownBg = colors.dark === "#010301" ? "#1a1a1a" : "#f5f5f5";
+
   return (
-    <View style={{ paddingHorizontal: 16, backgroundColor: "#000", flex: 1 }}>
+    <View style={{ paddingHorizontal: 16, backgroundColor, flex: 1 }}>
       <View style={styles.topHeader}>
         <Pressable onPress={() => router.back()}>
-          <Back dark="#041105" />
+          <Back dark={colors.dark === "#010301" ? "#041105" : "#50A040"} />
         </Pressable>
-        <Text style={styles.boldText}>Post to Server</Text>
+        <Text style={[styles.boldText, { color: textColor }]}>Post to Server</Text>
         <View style={{ width: 20 }} />
       </View>
       <View style={styles.post}>
         <View style={styles.nameAvatar}>
-          <Avatar.Image size={34} source={require("../../assets/imgs/avatar1.png")} />
+          {user?.profileImageUrl ? (
+            <Avatar.Image size={34} source={{ uri: user.profileImageUrl }} />
+          ) : (
+            <Avatar.Text size={34} label={(user?.username || user?.displayName || "U")[0].toUpperCase()} />
+          )}
           <View>
-            <Text style={{ fontWeight: "600", fontSize: 15, color: "#fff" }}>@glorypraise.eth</Text>
+            <Text style={{ fontWeight: "600", fontSize: 15, color: textColor }}>
+              @{user?.username || user?.displayName || "user"}
+            </Text>
           </View>
         </View>
         <Pressable style={styles.bgGreen} onPress={handlePost}>
@@ -183,8 +199,8 @@ const CaptionVideo = () => {
         value={captionText}
         onChangeText={(val) => setCaptionText(val)}
         placeholder="Give your video a caption..."
-        placeholderTextColor="#666"
-        style={{ maxHeight: 100, fontSize: 15, marginTop: 10, color: "#fff" }}
+        placeholderTextColor={placeholderColor}
+        style={{ maxHeight: 100, fontSize: 15, marginTop: 10, color: textColor }}
       />
       <Pressable onPress={() => setShouldPlay(!shouldPlay)} style={styles.videoWrapper}>
         <Video
@@ -197,39 +213,39 @@ const CaptionVideo = () => {
       </Pressable>
       
       <View style={{ zIndex: 1, marginBottom: 10 }}>
-        <Text style={{ fontWeight: "600", marginBottom: 8, color: "#fff" }}>Category</Text>
+        <Text style={{ fontWeight: "600", marginBottom: 8, color: textColor }}>Category</Text>
         <Pressable style={styles.categorySelect} onPress={() => setCategoryDropdown(!categoryDropdown)}>
-          <Text style={{ color: "#fff" }}>{selectedCategory}</Text>
-          <ArrowDown color="#fff" />
+          <Text style={{ color: textColor }}>{selectedCategory}</Text>
+          <ArrowDown color={textColor} />
         </Pressable>
         {categoryDropdown && (
-          <View style={styles.categoryDropdown}>
+          <View style={[styles.categoryDropdown, { backgroundColor: dropdownBg, borderColor: borderColor }]}>
             {categories.map((cat) => (
               <Pressable
                 key={cat}
-                style={styles.categoryOption}
+                style={[styles.categoryOption, { borderBottomColor: borderColor }]}
                 onPress={() => {
                   setSelectedCategory(cat);
                   setCategoryDropdown(false);
                 }}
               >
-                <Text style={{ color: selectedCategory === cat ? "#50A040" : "#fff" }}>{cat}</Text>
+                <Text style={{ color: selectedCategory === cat ? colors.primary : textColor }}>{cat}</Text>
               </Pressable>
             ))}
           </View>
         )}
       </View>
 
-      <View style={styles.tags}>
+      <View style={[styles.tags, { borderBottomColor: borderColor }]}>
         {tagArr.map((tag) => (
           <View key={tag} style={styles.tagItem}>
-            <Text style={{ color: "#fff" }}>{tag}</Text>
+            <Text style={{ color: textColor }}>{tag}</Text>
           </View>
         ))}
       </View>
       
       {uploadCount > 0 && (
-        <Text style={styles.uploadInfo}>
+        <Text style={[styles.uploadInfo, { color: placeholderColor }]}>
           {uploadCount}/2 videos uploaded today
         </Text>
       )}
@@ -285,7 +301,6 @@ const styles = StyleSheet.create({
     top: 60,
     left: 0,
     right: 0,
-    backgroundColor: "#1a1a1a",
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#50A040",
@@ -298,7 +313,6 @@ const styles = StyleSheet.create({
   categoryOption: {
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#333",
   },
   videoWrapper: { height: 250, marginVertical: 10 },
   topHeader: {
@@ -313,7 +327,6 @@ const styles = StyleSheet.create({
     gap: 15,
     paddingBottom: 20,
     marginBottom: 20,
-    borderBottomColor: "#E0E0E0",
     borderBottomWidth: 1,
   },
   tagItem: {
@@ -326,7 +339,6 @@ const styles = StyleSheet.create({
   boldText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
   },
   video: { borderRadius: 16, width: "100%", height: "100%" },
   bgGreen: {
@@ -359,7 +371,6 @@ const styles = StyleSheet.create({
   },
   uploadInfo: {
     fontSize: 12,
-    color: "#666",
     marginBottom: 10,
     textAlign: "center",
   },
