@@ -23,37 +23,37 @@ const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx ex
 });
 
 // Proxy /api/* requests to backend on port 3001  
-// Use filter function instead of context path to preserve full path
-app.use(createProxyMiddleware({
+// Use filter function to only catch /api paths
+const apiProxy = createProxyMiddleware({
   target: 'http://localhost:3001',
   changeOrigin: true,
   filter: (pathname, req) => pathname.startsWith('/api'),
-  logLevel: 'info',
+  logLevel: 'silent',
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`✅ [API PROXY] ${req.method} ${req.url} -> http://localhost:3001${req.url}`);
-  },
-  onProxyRes: (proxyRes, req, res) => {
-    console.log(`✅ [API RESPONSE] ${proxyRes.statusCode} for ${req.url}`);
+    console.log(`✅ [API] ${req.method} ${req.url} -> http://localhost:3001${req.url}`);
   },
   onError: (err, req, res) => {
-    console.error(`❌ [API PROXY ERROR] ${req.url}:`, err.message);
+    console.error(`❌ [API ERROR] ${req.url}:`, err.message);
     res.status(502).json({ error: 'API proxy error', message: err.message });
   },
-}));
+});
 
 // Proxy all other requests to frontend on port 8081
-app.use('/', createProxyMiddleware({
+const frontendProxy = createProxyMiddleware({
   target: 'http://localhost:8081',
   changeOrigin: true,
   ws: true, // Enable WebSocket proxy for HMR
-  logLevel: 'silent', // Reduce noise
-  onProxyReq: (proxyReq, req, res) => {
-    // Only log non-asset requests to reduce noise
-    if (!req.url.includes('.') && !req.url.includes('_next') && !req.url.includes('hot-update')) {
-      console.log(`[FRONTEND] ${req.method} ${req.url}`);
-    }
-  },
-}));
+  logLevel: 'silent',
+});
+
+// Apply both proxies - filter will determine which one handles the request
+app.use((req, res, next) => {
+  if (req.url.startsWith('/api')) {
+    apiProxy(req, res, next);
+  } else {
+    frontendProxy(req, res, next);
+  }
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅ Development proxy server running on http://0.0.0.0:${PORT}`);
