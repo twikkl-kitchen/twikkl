@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Pressable, ActivityIndicator, TextInput } from "react-native";
 import { Octicons, AntDesign, Ionicons, FontAwesome5, Feather } from "@expo/vector-icons";
 import Highlights from "@twikkl/components/Discover/Highlights";
 import Card from "@twikkl/components/Discover/Card";
@@ -45,6 +45,8 @@ const Server = () => {
   const [yourServers, setYourServers] = useState<any[]>([]);
   const [favoriteServers, setFavoriteServers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [modalType, setModalType] = useState<ModalType>(null);
   const router = useRouter();
@@ -108,6 +110,47 @@ const Server = () => {
 
     fetchServers();
   }, [user?.id]);
+
+  // Handle search
+  useEffect(() => {
+    const searchServers = async () => {
+      if (!searchQuery.trim()) {
+        return;
+      }
+
+      try {
+        const response = await axios.get(API_ENDPOINTS.SEARCH.SERVERS, {
+          params: { q: searchQuery },
+          withCredentials: true,
+        });
+        
+        // Update the current tab's servers with search results
+        if (activeTabIndex === 0) {
+          setAllServers(response.data.servers || []);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+      }
+    };
+
+    const debounce = setTimeout(() => {
+      if (searchQuery) {
+        searchServers();
+      } else {
+        // Re-fetch all servers when search is cleared
+        const refetch = async () => {
+          const allResponse = await axios.get(`${API_ENDPOINTS.SERVERS.CREATE}`, {
+            params: { type: 'all' },
+            withCredentials: true,
+          });
+          setAllServers(allResponse.data.servers || []);
+        };
+        refetch();
+      }
+    }, 500);
+
+    return () => clearTimeout(debounce);
+  }, [searchQuery, activeTabIndex]);
 
   const joinServer = async (item: any) => {
     setModalType(null);
@@ -214,8 +257,28 @@ const Server = () => {
             <Octicons name="chevron-left" size={24} color={textColor} />
           </TouchableOpacity>
           <Text style={[styles.text, { color: textColor }]}>Servers</Text>
-          <AntDesign name="search1" size={24} color={textColor} />
+          <TouchableOpacity onPress={() => setShowSearch(!showSearch)}>
+            <AntDesign name="search1" size={24} color={textColor} />
+          </TouchableOpacity>
         </View>
+        {showSearch && (
+          <View style={[styles.searchContainer, { backgroundColor: isDarkMode ? "#1A1A1A" : "#F5F5F5" }]}>
+            <AntDesign name="search1" size={18} color="#888" style={{ marginRight: 8 }} />
+            <TextInput
+              style={[styles.searchInput, { color: textColor }]}
+              placeholder="Search servers..."
+              placeholderTextColor="#888"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <AntDesign name="close" size={18} color="#888" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
         <View style={{ flexDirection: "row" }}>
           <ScrollView
             contentContainerStyle={{ alignItems: "center" }}
@@ -366,5 +429,19 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 0,
   },
 });
