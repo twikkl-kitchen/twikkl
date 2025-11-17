@@ -26,23 +26,21 @@ const frontend = spawn('sh', ['-c', 'EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 npx ex
   stdio: 'inherit',
 });
 
-// Proxy /api/* requests to backend on port 3001
-// Don't use '/api' as context - it strips the path!
-app.use(createProxyMiddleware({
+// Proxy /api/* requests to backend on port 3001  
+// This MUST come before the frontend proxy to ensure API requests are handled first
+app.use('/api', createProxyMiddleware({
   target: 'http://localhost:3001',
   changeOrigin: true,
-  pathFilter: '/api/**',  // Filter which paths to proxy
-  logLevel: 'warn',
-  timeout: 300000, // 5 minute timeout for large file uploads
-  proxyTimeout: 300000,
+  logLevel: 'info',
   onProxyReq: (proxyReq, req, res) => {
-    console.log(`[PROXY] ${req.method} ${req.url} -> ${proxyReq.path}`);
+    console.log(`✅ [API PROXY] ${req.method} ${req.url} -> http://localhost:3001${proxyReq.path}`);
   },
   onProxyRes: (proxyRes, req, res) => {
-    console.log(`[PROXY] Response ${proxyRes.statusCode} for ${req.url}`);
+    console.log(`✅ [API RESPONSE] ${proxyRes.statusCode} for ${req.url}`);
   },
   onError: (err, req, res) => {
-    console.error(`[PROXY ERROR] ${req.url}:`, err.message);
+    console.error(`❌ [API PROXY ERROR] ${req.url}:`, err.message);
+    res.status(502).json({ error: 'API proxy error', message: err.message });
   },
 }));
 
@@ -51,7 +49,13 @@ app.use('/', createProxyMiddleware({
   target: 'http://localhost:8081',
   changeOrigin: true,
   ws: true, // Enable WebSocket proxy for HMR
-  logLevel: 'warn',
+  logLevel: 'silent', // Reduce noise
+  onProxyReq: (proxyReq, req, res) => {
+    // Only log non-asset requests to reduce noise
+    if (!req.url.includes('.') && !req.url.includes('_next') && !req.url.includes('hot-update')) {
+      console.log(`[FRONTEND] ${req.method} ${req.url}`);
+    }
+  },
 }));
 
 app.listen(PORT, '0.0.0.0', () => {

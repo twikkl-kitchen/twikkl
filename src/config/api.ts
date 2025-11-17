@@ -1,7 +1,6 @@
-// API Configuration
-// Use relative URLs for all environments
-// In Replit, the backend proxy handles routing /api/* to port 3001
-export const API_BASE_URL = '';
+// API Configuration  
+// TEMPORARY FIX: Direct connection to backend on port 3001 to bypass proxy issue
+export const API_BASE_URL = 'http://localhost:3001';
 
 export const API_ENDPOINTS = {
   // Auth endpoints (Replit Auth)

@@ -54,7 +54,7 @@ const Login = () => {
         </>
       </AuthLayout>
       <View style={styles.option}>
-        <Text style={{ color: textColor }}>Don't have an account?</Text>
+        <Text style={{ color: textColor }}>Don't have an account? </Text>
         <Pressable onPress={() => router.push("auth/Register")}>
           <Text style={styles.signUpText}>Sign up</Text>
         </Pressable>
