@@ -194,7 +194,7 @@ const Profile = () => {
             </Pressable>
           )}
           {error === "Please login to view your profile" && (
-            <Pressable style={styles.retryButton} onPress={() => router.push('/login')}>
+            <Pressable style={styles.retryButton} onPress={() => router.push('/auth')}>
               <Text style={styles.retryButtonText}>Login</Text>
             </Pressable>
           )}
