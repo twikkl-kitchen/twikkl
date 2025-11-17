@@ -136,14 +136,22 @@ const CaptionVideo = () => {
         clearTimeout(timeoutId);
 
         console.log('Upload response status:', uploadResponse.status);
+        console.log('Upload response headers:', uploadResponse.headers.get('content-type'));
 
       if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        console.error('Upload failed:', errorData);
-        throw new Error(errorData.error || 'Failed to upload video');
+        const errorText = await uploadResponse.text();
+        console.error('Upload failed:', errorText);
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.error || 'Failed to upload video');
+        } catch {
+          throw new Error('Failed to upload video: ' + errorText.substring(0, 100));
+        }
       }
 
-      const result = await uploadResponse.json();
+      const responseText = await uploadResponse.text();
+      console.log('Upload response text:', responseText);
+      const result = JSON.parse(responseText);
       console.log('Upload successful!', result);
 
       // Only add to storage AFTER successful upload

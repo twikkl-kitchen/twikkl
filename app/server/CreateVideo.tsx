@@ -151,6 +151,7 @@ const CreateVideo = () => {
             <CameraView
               style={[StyleSheet.absoluteFill]}
               ref={cameraRef}
+              facing="back"
             />
             <View style={styles.container}>
               <View>
