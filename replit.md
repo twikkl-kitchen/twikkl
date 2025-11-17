@@ -127,6 +127,19 @@ All critical features implemented and verified before publishing:
     *   Response parsing improved with text-first approach for better error handling
     *   Upload timeout set to 2 minutes with abort controller
 
+*   **Updated Auth Screen Design** ✅ (Nov 17, 2025)
+    *   Redesigned first auth screen with clean, modern UI matching new design
+    *   Added twikkl logo at top with brand green color (#50A040)
+    *   Custom SVG icons for Google, Telegram, and Email authentication
+    *   Dark background (#041104) with gray button containers (#1a1a1a)
+    *   Proper spacing and typography matching design specifications
+    *   Back button and "Sign in" link integrated
+
+*   **Video Card Size Adjustment** ✅ (Nov 17, 2025)
+    *   Reverted video cards to larger portrait dimensions (45% width, 1.6 aspect ratio)
+    *   Maintains 9:16 portrait format for better video preview
+    *   Improved visual hierarchy in category rows
+
 ## External Dependencies
 *   **Backend API**: Express.js/TypeScript
 *   **State Management**: simpler-state
