@@ -92,6 +92,22 @@ All critical features implemented and verified before publishing:
     *   Loading states and error handling for image uploads
     *   Admin-only access enforced on backend and frontend
     *   Settings button visible in server header for admins/owners
+    *   Icons in server header (search, settings, back) adapt to light/dark mode
+
+*   **Server Categories Management** ✅ (Nov 17, 2025)
+    *   Backend endpoint: GET /api/servers/:serverId/categories - Fetch server categories
+    *   Backend endpoint: PUT /api/servers/:serverId/categories - Update categories with validation
+    *   Frontend: Full CRUD UI in Settings > Categories tab
+    *   Categories saved to database and persist across sessions
+    *   Validation: no duplicates, no empty arrays
+
+*   **Server Admin Management** ✅ (Nov 17, 2025)
+    *   Backend endpoint: GET /api/servers/:serverId/admins - List all admins with user details
+    *   Backend endpoint: POST /api/servers/:serverId/admins - Add new admin
+    *   Backend endpoint: DELETE /api/servers/:serverId/admins/:userId - Remove admin
+    *   Frontend: Admin management UI in Settings > Admins tab
+    *   Owner role protection (cannot be removed)
+    *   Admin changes persist in database
 
 ## External Dependencies
 *   **Backend API**: Express.js/TypeScript
