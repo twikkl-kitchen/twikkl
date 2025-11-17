@@ -61,7 +61,7 @@ localPort = 46149
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", "PORT=3001 npm run server & npm run web"]
+run = ["sh", "-c", "npm run dev"]
 
 [objectStorage]
 defaultBucketID = "replit-objstore-05a22b8d-73fe-4320-b898-cc7ae7ea7de5"
