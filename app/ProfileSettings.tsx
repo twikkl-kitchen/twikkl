@@ -76,14 +76,18 @@ const ProfileSettings = () => {
       
       const formData = new FormData();
       const filename = uri.split('/').pop() || 'image.jpg';
-      const match = /\.(\w+)$/.exec(filename);
-      const fileType = match ? `image/${match[1]}` : 'image/jpeg';
+      
+      // Convert URI to blob for web compatibility
+      let blob: Blob;
+      if (uri.startsWith('data:')) {
+        const base64Response = await fetch(uri);
+        blob = await base64Response.blob();
+      } else {
+        const response = await fetch(uri);
+        blob = await response.blob();
+      }
 
-      formData.append('image', {
-        uri,
-        name: filename,
-        type: fileType,
-      } as any);
+      formData.append('image', blob, filename);
 
       const endpoint = type === 'profile' 
         ? API_ENDPOINTS.USERS.UPLOAD_PROFILE_IMAGE 

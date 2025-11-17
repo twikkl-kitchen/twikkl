@@ -387,7 +387,7 @@ async function registerRoutes(app: Express): Promise<Server> {
       // Update user's profile image URL
       await storage.updateUser(userId, { profileImageUrl: imageUrl });
 
-      res.json({
+      return res.json({
         success: true,
         imageUrl,
         message: 'Profile image uploaded successfully'
@@ -433,7 +433,7 @@ async function registerRoutes(app: Express): Promise<Server> {
       // Update user's banner image URL
       await storage.updateUser(userId, { bannerImageUrl: imageUrl });
 
-      res.json({
+      return res.json({
         success: true,
         imageUrl,
         message: 'Banner image uploaded successfully'
@@ -884,11 +884,11 @@ async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('✅ Video posted successfully:', video.id);
       
-      // Send immediate response
-      res.status(200).json({
+      // Send immediate simplified response to avoid timeout
+      return res.status(200).json({
         success: true,
-        video,
-        message: 'Video posted to server successfully'
+        videoId: video.id,
+        message: 'Video posted successfully'
       });
     } catch (error) {
       console.error('❌ Post video to server error:', error);

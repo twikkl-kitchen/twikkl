@@ -51,6 +51,16 @@ const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps)
       style={[styles.videoCard, { backgroundColor: cardBackground }]}
       onPress={() => {
         console.log("Play video:", video.id);
+        // Navigate to video player with video details
+        router.push({
+          pathname: '/VideoPlayer',
+          params: {
+            videoId: video.id,
+            videoUrl: (video as any).videoUrl || '',
+            title: video.title,
+            creator: video.creator
+          }
+        });
       }}
     >
       <View style={styles.thumbnailContainer}>

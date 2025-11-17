@@ -122,11 +122,28 @@ const Group = (): JSX.Element => {
     videos: [],
   };
 
-  // Group videos by category
-  const videosByCategory = categories.map(category => ({
-    category,
-    videos: serverVideos.filter(video => video.category === category)
-  }));
+  // Transform and group videos by category
+  const videosByCategory = categories.map(category => {
+    const categoryVideos = serverVideos
+      .filter(video => video.category === category)
+      .map(video => ({
+        id: video.id,
+        title: video.caption || 'Untitled Video',
+        thumbnail: video.thumbnailUrl 
+          ? { uri: video.thumbnailUrl } 
+          : { uri: 'https://via.placeholder.com/640x360/50a040/ffffff?text=Video' },
+        duration: '0:00',
+        views: `${video.viewCount || 0} views`,
+        time: new Date(video.createdAt).toLocaleDateString(),
+        creator: serverData?.name || 'Server',
+        videoUrl: video.videoUrl,
+      }));
+    
+    return {
+      category,
+      videos: categoryVideos
+    };
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor }}>
