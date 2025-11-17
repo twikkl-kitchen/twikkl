@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
 
 const EditServerImages = () => {
   const router = useRouter();
+  const { serverId } = useLocalSearchParams();
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [bannerImage, setBannerImage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const pickProfileImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,12 +58,60 @@ const EditServerImages = () => {
     }
   };
 
-  const handleSave = () => {
-    // Here you would normally upload the images to the server
-    console.log("Saving images:", { profileImage, bannerImage });
-    Alert.alert("Success", "Server images updated successfully!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+  const uploadImage = async (uri: string, type: 'profile' | 'banner') => {
+    try {
+      // Convert image URI to blob
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      const formData = new FormData();
+      formData.append('image', blob as any, 'image.jpg');
+
+      const endpoint = type === 'profile' 
+        ? `/api/servers/${serverId}/upload-profile-image`
+        : `/api/servers/${serverId}/upload-banner`;
+
+      const uploadResponse = await axios.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+
+      return uploadResponse.data;
+    } catch (error: any) {
+      console.error(`${type} upload error:`, error);
+      throw new Error(error.response?.data?.error || `Failed to upload ${type} image`);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!profileImage && !bannerImage) {
+      Alert.alert("No Changes", "Please select at least one image to upload");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const promises = [];
+
+      if (profileImage) {
+        promises.push(uploadImage(profileImage, 'profile'));
+      }
+      if (bannerImage) {
+        promises.push(uploadImage(bannerImage, 'banner'));
+      }
+
+      await Promise.all(promises);
+
+      Alert.alert("Success", "Server images updated successfully!", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to upload images");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -69,8 +121,12 @@ const EditServerImages = () => {
           <Ionicons name="chevron-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Server Images</Text>
-        <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.saveButton}>Save</Text>
+        <TouchableOpacity onPress={handleSave} disabled={isSaving}>
+          {isSaving ? (
+            <ActivityIndicator color="#50a040" />
+          ) : (
+            <Text style={styles.saveButton}>Save</Text>
+          )}
         </TouchableOpacity>
       </View>
 
