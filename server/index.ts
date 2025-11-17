@@ -864,9 +864,9 @@ async function registerRoutes(app: Express): Promise<Server> {
       const video = await storage.createVideo({
         userId,
         serverId,
-        title: caption || 'Untitled Video',
-        description: caption || '',
+        fileName,
         videoUrl,
+        caption: caption || '',
         category: category || 'General',
         visibility: 'public',
         allowDuet: allowDuet === 'true' || allowDuet === true,

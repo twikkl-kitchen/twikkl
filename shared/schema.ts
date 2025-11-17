@@ -96,6 +96,8 @@ export const videos = pgTable("videos", {
   thumbnailUrl: varchar("thumbnail_url"),
   viewCount: integer("view_count").default(0),
   likeCount: integer("like_count").default(0),
+  allowDuet: boolean("allow_duet").default(true),
+  allowStitch: boolean("allow_stitch").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

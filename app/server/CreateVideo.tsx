@@ -328,7 +328,8 @@ const styles = StyleSheet.create({
     borderRadius: 99,
   },
   recordWrapper: {
-    border: "8px solid rgba(255, 255, 255, 0.45)",
+    borderWidth: 8,
+    borderColor: "rgba(255, 255, 255, 0.45)",
     borderRadius: 99,
   },
   modeBorder: {
