@@ -15,7 +15,7 @@ import { useThemeMode } from "@twikkl/entities/theme.entity";
 import { API_ENDPOINTS } from "@twikkl/config/api";
 import axios from "axios";
 
-type Tab = "categories" | "admins";
+type Tab = "categories" | "admins" | "images";
 
 interface Admin {
   userId: string;
@@ -360,9 +360,61 @@ const ServerSettings = () => {
             Admins
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            activeTab === "images" && styles.activeTab,
+          ]}
+          onPress={() => setActiveTab("images")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              { color: activeTab === "images" ? "#50a040" : mutedTextColor },
+            ]}
+          >
+            Images
+          </Text>
+        </TouchableOpacity>
       </View>
 
-      {activeTab === "categories" ? (
+      {activeTab === "images" ? (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>
+              Server Images
+            </Text>
+            <Text style={[styles.sectionDesc, { color: mutedTextColor }]}>
+              Customize your server's profile and banner images to make it stand out
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.imageSettingButton, { backgroundColor: cardBgColor, borderColor }]}
+            onPress={() => router.push(`/server/EditImages?serverId=${serverId}`)}
+          >
+            <View style={styles.imageButtonContent}>
+              <Ionicons name="images-outline" size={32} color="#50a040" />
+              <View style={styles.imageButtonText}>
+                <Text style={[styles.imageButtonTitle, { color: textColor }]}>
+                  Edit Server Images
+                </Text>
+                <Text style={[styles.imageButtonDesc, { color: mutedTextColor }]}>
+                  Update profile picture and banner image
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={mutedTextColor} />
+          </TouchableOpacity>
+
+          <View style={[styles.infoBox, { backgroundColor: cardBgColor, borderColor: "#50a040" }]}>
+            <Ionicons name="information-circle" size={20} color="#50a040" />
+            <Text style={[styles.infoText, { color: textColor }]}>
+              Recommended sizes: Profile image 500x500px, Banner image 1600x900px
+            </Text>
+          </View>
+        </ScrollView>
+      ) : activeTab === "categories" ? (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>
@@ -735,5 +787,47 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     padding: 8,
+  },
+  sectionDesc: {
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  imageSettingButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+  },
+  imageButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    flex: 1,
+  },
+  imageButtonText: {
+    flex: 1,
+  },
+  imageButtonTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  imageButtonDesc: {
+    fontSize: 14,
+  },
+  infoBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    flex: 1,
   },
 });
