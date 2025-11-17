@@ -822,24 +822,31 @@ async function registerRoutes(app: Express): Promise<Server> {
 
   // Post video to server
   app.post('/api/servers/:serverId/videos', isAuthenticated, upload.single('video'), async (req: any, res: Response) => {
+    console.log('📹 Video upload received for server:', req.params.serverId);
     try {
       const userId = getUserId(req);
       const { serverId } = req.params;
       const file = req.file;
       const { caption, category, allowDuet, allowStitch, saveToDevice } = req.body;
 
+      console.log('📹 Upload from user:', userId, 'File size:', file?.size);
+
       if (!file) {
+        console.error('❌ No file provided');
         return res.status(400).json({ error: 'No video file provided' });
       }
 
       // Check if user is a member of the server
+      console.log('🔍 Checking server membership...');
       const isMember = await storage.isServerMember(serverId, userId);
       if (!isMember) {
+        console.error('❌ User is not a server member');
         return res.status(403).json({ error: 'You must be a member of this server to post videos' });
       }
 
       // Validate video type
       if (!file.mimetype.startsWith('video/')) {
+        console.error('❌ Invalid file type:', file.mimetype);
         return res.status(400).json({ error: 'File must be a video' });
       }
 
@@ -849,11 +856,12 @@ async function registerRoutes(app: Express): Promise<Server> {
       const storagePath = `videos/${fileName}`;
 
       // Upload to Replit Object Storage
+      console.log('☁️  Uploading to Object Storage:', storagePath);
       const objectStorage = getObjectStorage();
       const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
 
       if (!uploadResult.ok) {
-        console.error('Video upload error:', uploadResult.error);
+        console.error('❌ Storage upload failed:', uploadResult.error);
         return res.status(500).json({ error: 'Failed to upload video to storage' });
       }
 
@@ -861,6 +869,7 @@ async function registerRoutes(app: Express): Promise<Server> {
       const videoUrl = `/api/videos/file/${fileName}`;
 
       // Create video record
+      console.log('💾 Creating video database record...');
       const video = await storage.createVideo({
         userId,
         serverId,
@@ -873,14 +882,27 @@ async function registerRoutes(app: Express): Promise<Server> {
         allowStitch: allowStitch === 'true' || allowStitch === true,
       });
 
+      console.log('✅ Video posted successfully:', video.id);
       res.json({
         success: true,
         video,
         message: 'Video posted to server successfully'
       });
     } catch (error) {
-      console.error('Post video to server error:', error);
+      console.error('❌ Post video to server error:', error);
       res.status(500).json({ error: 'Failed to post video to server' });
+    }
+  });
+
+  // Get videos from a server
+  app.get('/api/servers/:serverId/videos', async (req: Request, res: Response) => {
+    try {
+      const { serverId } = req.params;
+      const videos = await storage.getServerVideos(serverId);
+      res.json({ videos });
+    } catch (error) {
+      console.error('Get server videos error:', error);
+      res.status(500).json({ error: 'Failed to fetch server videos' });
     }
   });
 
