@@ -58,11 +58,6 @@ const Profile = () => {
   // Determine which user's profile to view
   const targetUserId = userId || currentUser?.id;
   const isOwnProfile = targetUserId === currentUser?.id;
-  
-  // Debug logging
-  console.log('Profile Screen - currentUser:', currentUser);
-  console.log('Profile Screen - userId param:', userId);
-  console.log('Profile Screen - targetUserId:', targetUserId);
 
   // Fetch user profile data
   const fetchUserProfile = useCallback(async () => {
