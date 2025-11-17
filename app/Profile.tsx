@@ -60,7 +60,7 @@ const Profile = () => {
   const isOwnProfile = targetUserId === currentUser?.id;
 
   // Fetch user profile data
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     if (!targetUserId) {
       setError("User ID not found");
       setLoading(false);
@@ -84,10 +84,10 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [targetUserId]);
 
   // Fetch follower/following counts
-  const fetchFollowStats = async () => {
+  const fetchFollowStats = useCallback(async () => {
     if (!targetUserId) return;
 
     try {
@@ -107,10 +107,10 @@ const Profile = () => {
     } catch (err) {
       console.error('Failed to fetch follow stats:', err);
     }
-  };
+  }, [targetUserId]);
 
   // Check if current user is following this profile
-  const checkFollowStatus = async () => {
+  const checkFollowStatus = useCallback(async () => {
     if (!targetUserId || isOwnProfile) return;
 
     try {
@@ -122,7 +122,7 @@ const Profile = () => {
     } catch (err) {
       console.error('Failed to check follow status:', err);
     }
-  };
+  }, [targetUserId, isOwnProfile]);
 
   // Handle follow/unfollow
   const handleFollowToggle = async () => {
@@ -162,8 +162,12 @@ const Profile = () => {
         if (!isOwnProfile) {
           checkFollowStatus();
         }
+      } else {
+        // No user ID available - user not authenticated
+        setError("Please login to view your profile");
+        setLoading(false);
       }
-    }, [targetUserId, isOwnProfile])
+    }, [targetUserId, isOwnProfile, fetchUserProfile, fetchFollowStats, checkFollowStatus])
   );
 
   if (loading) {
@@ -184,9 +188,16 @@ const Profile = () => {
         </View>
         <View style={styles.errorContainer}>
           <Text style={[styles.errorText, { color: textColor }]}>{error || 'User not found'}</Text>
-          <Pressable style={styles.retryButton} onPress={fetchUserProfile}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </Pressable>
+          {error !== "Please login to view your profile" && (
+            <Pressable style={styles.retryButton} onPress={fetchUserProfile}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </Pressable>
+          )}
+          {error === "Please login to view your profile" && (
+            <Pressable style={styles.retryButton} onPress={() => router.push('/login')}>
+              <Text style={styles.retryButtonText}>Login</Text>
+            </Pressable>
+          )}
         </View>
       </View>
     );
