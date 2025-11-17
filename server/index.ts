@@ -818,6 +818,70 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Post video to server
+  app.post('/api/servers/:serverId/videos', isAuthenticated, upload.single('video'), async (req: any, res: Response) => {
+    try {
+      const userId = getUserId(req);
+      const { serverId } = req.params;
+      const file = req.file;
+      const { caption, category, allowDuet, allowStitch, saveToDevice } = req.body;
+
+      if (!file) {
+        return res.status(400).json({ error: 'No video file provided' });
+      }
+
+      // Check if user is a member of the server
+      const isMember = await storage.isServerMember(serverId, userId);
+      if (!isMember) {
+        return res.status(403).json({ error: 'You must be a member of this server to post videos' });
+      }
+
+      // Validate video type
+      if (!file.mimetype.startsWith('video/')) {
+        return res.status(400).json({ error: 'File must be a video' });
+      }
+
+      // Generate unique filename
+      const fileExtension = file.originalname.split('.').pop() || 'mp4';
+      const fileName = `video_${serverId}_${userId}_${uuidv4()}.${fileExtension}`;
+      const storagePath = `videos/${fileName}`;
+
+      // Upload to Replit Object Storage
+      const objectStorage = getObjectStorage();
+      const uploadResult = await objectStorage.uploadFromBytes(storagePath, file.buffer);
+
+      if (!uploadResult.ok) {
+        console.error('Video upload error:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload video to storage' });
+      }
+
+      // Generate video URL
+      const videoUrl = `/api/videos/file/${fileName}`;
+
+      // Create video record
+      const video = await storage.createVideo({
+        userId,
+        serverId,
+        title: caption || 'Untitled Video',
+        description: caption || '',
+        videoUrl,
+        category: category || 'General',
+        visibility: 'public',
+        allowDuet: allowDuet === 'true' || allowDuet === true,
+        allowStitch: allowStitch === 'true' || allowStitch === true,
+      });
+
+      res.json({
+        success: true,
+        video,
+        message: 'Video posted to server successfully'
+      });
+    } catch (error) {
+      console.error('Post video to server error:', error);
+      res.status(500).json({ error: 'Failed to post video to server' });
+    }
+  });
+
   // Get server categories
   app.get('/api/servers/:serverId/categories', async (req: Request, res: Response) => {
     try {
