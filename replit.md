@@ -32,6 +32,8 @@ I want to ensure all code changes are thoroughly reviewed. Please ask before mak
 *   **Admin System**: Role-based permissions for server administration (owner, admin, member) with custom category management and admin management.
 *   **Server Image Management**: Full server customization with profile and banner image uploads. Admins can access server settings via gear icon in server header, with dedicated UI for uploading/updating server images through Settings > Images tab.
 *   **Development Setup**: Configured for web execution on Replit, running on port 5000 with host `0.0.0.0`.
+    *   **Development Mode**: Use `npm run dev` for local development with hot reload
+    *   **Production Mode**: Use `npm run prod` for production deployment (no dev tools, optimized)
 
 ## Pre-Publish Checklist (Nov 17, 2025) ✅
 All critical features implemented and verified before publishing:

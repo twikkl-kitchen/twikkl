@@ -46,6 +46,10 @@ localPort = 8081
 externalPort = 8081
 
 [[ports]]
+localPort = 8082
+externalPort = 3003
+
+[[ports]]
 localPort = 38629
 externalPort = 3002
 
@@ -57,15 +61,11 @@ localPort = 45193
 externalPort = 3000
 
 [[ports]]
-localPort = 46013
-externalPort = 3003
-
-[[ports]]
 localPort = 46149
 
 [deployment]
 deploymentTarget = "vm"
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "npm run prod"]
 
 [objectStorage]
 defaultBucketID = "replit-objstore-05a22b8d-73fe-4320-b898-cc7ae7ea7de5"
