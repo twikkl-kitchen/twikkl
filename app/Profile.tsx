@@ -1,99 +1,298 @@
-import { View, Text, StyleSheet, Image, Pressable, ScrollView, Dimensions } from "react-native";
-import React, { useState } from "react";
+import { View, Text, StyleSheet, Image, Pressable, ScrollView, Dimensions, ActivityIndicator, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import axios from "axios";
 import Back from "@assets/svg/Back";
 import MoreIcon from "@assets/svg/More";
-import Twitter from "@assets/svg/Twitter";
-import LiveIcon from "@assets/svg/LiveIcon";
+import GroupSettings from "@assets/svg/GroupSettings";
 import Play from "@assets/svg/Play";
 import PinIcon from "@assets/svg/PinIcon";
-import LabelIcon from "@assets/svg/LabelIcon";
-import ImgBgRender from "@twikkl/components/ImgBgRender";
-import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
+import { useAuth } from "@twikkl/entities/auth.entity";
+import { API_ENDPOINTS } from "@twikkl/config/api";
 
 const { width } = Dimensions.get('window');
 
 const tabs = [
-  { id: 'videos', label: 'Videos', Icon: Play },
-  { id: 'shorts', label: 'Shorts', Icon: PinIcon },
-  { id: 'live', label: 'Live', Icon: LiveIcon },
-  { id: 'playlists', label: 'Playlists', Icon: LabelIcon },
+  { id: 'videos', label: 'Your Videos', Icon: Play },
+  { id: 'saved', label: 'Saved', Icon: PinIcon },
+  { id: 'history', label: 'History', Icon: Play },
 ];
 
-const imgArr = [
-  require("../assets/imgs/prof1.png"),
-  require("../assets/imgs/prof2.png"),
-  require("../assets/imgs/prof3.png"),
-  require("../assets/imgs/prof4.png"),
-  require("../assets/imgs/prof5.png"),
-  require("../assets/imgs/prof6.png"),
-];
+interface UserProfile {
+  id: string;
+  username: string;
+  displayName?: string;
+  bio?: string;
+  profileImageUrl?: string;
+  bannerImageUrl?: string;
+  email?: string;
+}
+
+interface FollowStats {
+  followers: number;
+  following: number;
+}
 
 const Profile = () => {
   const router = useRouter();
+  const { userId } = useLocalSearchParams();
   const { isDarkMode } = useThemeMode();
+  const { user: currentUser } = useAuth();
+  
   const [activeTab, setActiveTab] = useState('videos');
   const [showFullBio, setShowFullBio] = useState(false);
+  const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
+  const [followStats, setFollowStats] = useState<FollowStats>({ followers: 0, following: 0 });
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [videos, setVideos] = useState<any[]>([]);
   
   const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
   const textColor = isDarkMode ? "#FFF" : "#000";
   const cardBg = isDarkMode ? "#1A1A1A" : "#FFF";
   const borderColor = isDarkMode ? "#333" : "#E0E0E0";
   
-  const bio = "UX Design Enthusiast currently working as a chef in Lagos. Passionate about creating amazing digital experiences and sharing cooking tutorials.";
-  
+  // Determine which user's profile to view
+  const targetUserId = userId || currentUser?.id;
+  const isOwnProfile = targetUserId === currentUser?.id;
+
+  // Fetch user profile data
+  const fetchUserProfile = async () => {
+    if (!targetUserId) {
+      setError("User ID not found");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.get(API_ENDPOINTS.USERS.GET_PROFILE(targetUserId as string), {
+        withCredentials: true,
+      });
+
+      if (response.data) {
+        setProfileUser(response.data);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch user profile:', err);
+      setError(err.response?.data?.error || 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch follower/following counts
+  const fetchFollowStats = async () => {
+    if (!targetUserId) return;
+
+    try {
+      const [followersResponse, followingResponse] = await Promise.all([
+        axios.get(API_ENDPOINTS.FOLLOWS.GET_FOLLOWERS(targetUserId as string), {
+          withCredentials: true,
+        }),
+        axios.get(API_ENDPOINTS.FOLLOWS.GET_FOLLOWING(targetUserId as string), {
+          withCredentials: true,
+        }),
+      ]);
+
+      setFollowStats({
+        followers: followersResponse.data.followers?.length || 0,
+        following: followingResponse.data.following?.length || 0,
+      });
+    } catch (err) {
+      console.error('Failed to fetch follow stats:', err);
+    }
+  };
+
+  // Check if current user is following this profile
+  const checkFollowStatus = async () => {
+    if (!targetUserId || isOwnProfile) return;
+
+    try {
+      const response = await axios.get(API_ENDPOINTS.FOLLOWS.IS_FOLLOWING(targetUserId as string), {
+        withCredentials: true,
+      });
+
+      setIsFollowing(response.data.isFollowing || false);
+    } catch (err) {
+      console.error('Failed to check follow status:', err);
+    }
+  };
+
+  // Handle follow/unfollow
+  const handleFollowToggle = async () => {
+    if (!targetUserId || isOwnProfile) return;
+
+    try {
+      setFollowLoading(true);
+
+      if (isFollowing) {
+        // Unfollow
+        await axios.delete(API_ENDPOINTS.FOLLOWS.UNFOLLOW_USER(targetUserId as string), {
+          withCredentials: true,
+        });
+        setIsFollowing(false);
+        setFollowStats(prev => ({ ...prev, followers: prev.followers - 1 }));
+      } else {
+        // Follow
+        await axios.post(API_ENDPOINTS.FOLLOWS.FOLLOW_USER(targetUserId as string), {}, {
+          withCredentials: true,
+        });
+        setIsFollowing(true);
+        setFollowStats(prev => ({ ...prev, followers: prev.followers + 1 }));
+      }
+    } catch (err: any) {
+      console.error('Failed to toggle follow:', err);
+      Alert.alert("Error", err.response?.data?.error || "Failed to update follow status");
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+    fetchFollowStats();
+    if (!isOwnProfile) {
+      checkFollowStatus();
+    }
+  }, [targetUserId]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#50A040" />
+      </View>
+    );
+  }
+
+  if (error || !profileUser) {
+    return (
+      <View style={[styles.container, { backgroundColor }]}>
+        <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+          <Pressable onPress={() => router.back()} style={styles.headerButton}>
+            <Back dark={textColor} />
+          </Pressable>
+        </View>
+        <View style={styles.errorContainer}>
+          <Text style={[styles.errorText, { color: textColor }]}>{error || 'User not found'}</Text>
+          <Pressable style={styles.retryButton} onPress={fetchUserProfile}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  const displayName = profileUser.displayName || profileUser.username;
+  const username = profileUser.username;
+  const bio = profileUser.bio || '';
+
   return (
     <View style={[styles.container, { backgroundColor }]}>
       <ScrollView>
+        {/* Banner Section */}
         <View style={styles.bannerContainer}>
-          <Image 
-            source={require("../assets/imgs/prof1.png")} 
-            style={styles.bannerImage}
-            resizeMode="cover"
-          />
+          {profileUser.bannerImageUrl ? (
+            <Image 
+              source={{ uri: profileUser.bannerImageUrl }} 
+              style={styles.bannerImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={[styles.bannerPlaceholder, { backgroundColor: borderColor }]} />
+          )}
+          
+          {/* Header Buttons */}
           <Pressable 
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Back dark={isDarkMode ? "#FFF" : "#041105"} />
+            <Back dark="#FFF" />
           </Pressable>
-          <Pressable style={styles.moreButton}>
-            <MoreIcon />
-          </Pressable>
+          
+          {isOwnProfile && (
+            <Pressable 
+              style={styles.settingsButton}
+              onPress={() => router.push('/ProfileSettings')}
+            >
+              <GroupSettings fill="#FFF" />
+            </Pressable>
+          )}
         </View>
 
+        {/* Profile Info Section */}
         <View style={[styles.profileInfo, { backgroundColor }]}>
           <View style={styles.profileImageContainer}>
-            <Image 
-              source={require("../assets/imgs/profile.png")} 
-              style={styles.profileImage}
-            />
+            {profileUser.profileImageUrl ? (
+              <Image 
+                source={{ uri: profileUser.profileImageUrl }} 
+                style={styles.profileImage}
+              />
+            ) : (
+              <View style={[styles.profileImagePlaceholder, { backgroundColor: borderColor }]}>
+                <Text style={[styles.profileImagePlaceholderText, { color: textColor }]}>
+                  {username ? username[0].toUpperCase() : '?'}
+                </Text>
+              </View>
+            )}
           </View>
           
           <View style={styles.profileDetails}>
-            <Text style={[styles.channelName, { color: textColor }]}>jerry</Text>
+            <Text style={[styles.channelName, { color: textColor }]}>{displayName}</Text>
             <View style={styles.statsRow}>
-              <Text style={[styles.statsText, { color: textColor }]}>@jerry</Text>
+              <Text style={[styles.statsText, { color: textColor }]}>@{username}</Text>
               <Text style={[styles.statsText, { color: textColor }]}> • </Text>
-              <Text style={[styles.statsText, { color: textColor }]}>4.5K subscribers</Text>
+              <Text style={[styles.statsText, { color: textColor }]}>
+                {followStats.followers} {followStats.followers === 1 ? 'follower' : 'followers'}
+              </Text>
               <Text style={[styles.statsText, { color: textColor }]}> • </Text>
-              <Text style={[styles.statsText, { color: textColor }]}>240 videos</Text>
+              <Text style={[styles.statsText, { color: textColor }]}>
+                {followStats.following} following
+              </Text>
             </View>
             
-            <Text style={[styles.bioText, { color: textColor }]} numberOfLines={showFullBio ? undefined : 2}>
-              {bio}
-            </Text>
-            <Pressable onPress={() => setShowFullBio(!showFullBio)}>
-              <Text style={styles.moreText}>{showFullBio ? 'Show less' : 'More'}</Text>
-            </Pressable>
+            {bio ? (
+              <>
+                <Text style={[styles.bioText, { color: textColor }]} numberOfLines={showFullBio ? undefined : 2}>
+                  {bio}
+                </Text>
+                {bio.length > 100 && (
+                  <Pressable onPress={() => setShowFullBio(!showFullBio)}>
+                    <Text style={styles.moreText}>{showFullBio ? 'Show less' : 'More'}</Text>
+                  </Pressable>
+                )}
+              </>
+            ) : (
+              <Text style={[styles.bioText, { color: textColor, opacity: 0.5 }]}>
+                No bio yet
+              </Text>
+            )}
             
+            {/* Action Buttons */}
             <View style={styles.actionButtons}>
-              <Pressable style={styles.subscribeButton}>
-                <Text style={styles.subscribeText}>Subscribe</Text>
-              </Pressable>
-              <Pressable style={[styles.iconButton, { backgroundColor: cardBg, borderColor }]}>
-                <Twitter />
-              </Pressable>
+              {!isOwnProfile ? (
+                <Pressable 
+                  style={[
+                    styles.followButton,
+                    { backgroundColor: isFollowing ? cardBg : '#50A040', borderColor, borderWidth: isFollowing ? 1 : 0 }
+                  ]}
+                  onPress={handleFollowToggle}
+                  disabled={followLoading}
+                >
+                  {followLoading ? (
+                    <ActivityIndicator size="small" color={isFollowing ? textColor : "#FFF"} />
+                  ) : (
+                    <Text style={[styles.followButtonText, { color: isFollowing ? textColor : '#FFF' }]}>
+                      {isFollowing ? 'Following' : 'Follow'}
+                    </Text>
+                  )}
+                </Pressable>
+              ) : null}
               <Pressable style={[styles.iconButton, { backgroundColor: cardBg, borderColor }]}>
                 <MoreIcon />
               </Pressable>
@@ -101,6 +300,7 @@ const Profile = () => {
           </View>
         </View>
 
+        {/* Tabs Section */}
         <View style={[styles.tabsContainer, { borderBottomColor: borderColor }]}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {tabs.map((tab) => (
@@ -127,10 +327,41 @@ const Profile = () => {
           </ScrollView>
         </View>
 
-        <View style={styles.contentGrid}>
-          {imgArr.map((item, index) => (
-            <ImgBgRender key={index} img={item} />
-          ))}
+        {/* Content Section - YouTube Style Video Grid */}
+        <View style={styles.videosContainer}>
+          {videos.length > 0 ? (
+            videos.map((video, index) => (
+              <View key={index} style={[styles.videoItem, { borderBottomColor: borderColor }]}>
+                <View style={styles.thumbnailContainer}>
+                  <Image 
+                    source={{ uri: video.thumbnailUrl }} 
+                    style={styles.thumbnail}
+                    resizeMode="cover"
+                  />
+                  <View style={styles.videoDuration}>
+                    <Text style={styles.videoDurationText}>{video.duration || '0:00'}</Text>
+                  </View>
+                </View>
+                <View style={styles.videoDetails}>
+                  <Text style={[styles.videoTitle, { color: textColor }]} numberOfLines={2}>
+                    {video.title || 'Untitled Video'}
+                  </Text>
+                  <Text style={[styles.videoStats, { color: textColor }]}>
+                    {video.views || 0} views • {video.createdAt || 'Recently'}
+                  </Text>
+                </View>
+              </View>
+            ))
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Play dark={isDarkMode ? "#333" : "#CCC"} />
+              <Text style={[styles.emptyText, { color: textColor, opacity: 0.5 }]}>
+                {activeTab === 'videos' ? 'No videos yet' : 
+                 activeTab === 'saved' ? 'No saved videos' : 
+                 'No watch history'}
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -143,12 +374,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 50,
+    borderBottomWidth: 1,
+  },
+  headerButton: {
+    padding: 8,
+  },
   bannerContainer: {
     width: '100%',
     height: 180,
     position: 'relative',
   },
   bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  bannerPlaceholder: {
     width: '100%',
     height: '100%',
   },
@@ -160,7 +407,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 8,
   },
-  moreButton: {
+  settingsButton: {
     position: 'absolute',
     top: 40,
     right: 16,
@@ -182,6 +429,19 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 4,
     borderColor: '#FFF',
+  },
+  profileImagePlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 4,
+    borderColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileImagePlaceholderText: {
+    fontSize: 36,
+    fontWeight: 'bold',
   },
   profileDetails: {
     marginTop: 16,
@@ -215,17 +475,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginBottom: 16,
+    marginTop: 12,
   },
-  subscribeButton: {
-    backgroundColor: '#50A040',
+  followButton: {
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
   },
-  subscribeText: {
-    color: '#FFF',
+  followButtonText: {
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -264,11 +525,84 @@ const styles = StyleSheet.create({
     height: 2,
     backgroundColor: '#50A040',
   },
-  contentGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 10,
+  videosContainer: {
     padding: 16,
+  },
+  videoItem: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+  },
+  thumbnailContainer: {
+    width: width * 0.4,
+    aspectRatio: 16 / 9,
+    borderRadius: 8,
+    overflow: 'hidden',
+    position: 'relative',
+    marginRight: 12,
+  },
+  thumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  videoDuration: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 2,
+  },
+  videoDurationText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  videoDetails: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  videoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+    lineHeight: 18,
+  },
+  videoStats: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 16,
+    marginTop: 12,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#50A040',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

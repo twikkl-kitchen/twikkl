@@ -4,8 +4,18 @@ import { remoteStorage } from "./entityHelpers";
 export type TUser = {
   id: string;
   email: string;
-  phone: string;
-  name: string;
+  phone?: string;
+  name?: string;
+  username?: string;
+  displayName?: string;
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
+  profileImageUrl?: string;
+  bannerImageUrl?: string;
+  referralCode?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type IAuthEntity = {

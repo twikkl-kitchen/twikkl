@@ -21,8 +21,8 @@ interface CategoryVideoRowProps {
 }
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.38;
-const CARD_HEIGHT = CARD_WIDTH * 0.7;
+const CARD_WIDTH = width * 0.42; // Slightly larger cards
+const CARD_HEIGHT = CARD_WIDTH * 0.56; // 16:9 aspect ratio
 
 const CategoryVideoRow = ({ category, videos, serverId }: CategoryVideoRowProps): JSX.Element => {
   const router = useRouter();
@@ -130,22 +130,22 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingLeft: 16,
-    paddingRight: 8,
+    paddingRight: 16,
   },
   column: {
     flexDirection: "column",
-    gap: 10,
-    marginRight: 12,
+    gap: 12,
+    marginRight: 14,
   },
   videoCard: {
-    borderRadius: 12,
+    borderRadius: 8,
     overflow: "hidden",
     width: CARD_WIDTH,
   },
   thumbnailContainer: {
     position: "relative",
     width: CARD_WIDTH,
-    height: CARD_HEIGHT * 0.65,
+    height: CARD_HEIGHT,
   },
   thumbnail: {
     width: "100%",
@@ -166,16 +166,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   videoInfo: {
-    padding: 8,
+    padding: 10,
+    paddingTop: 8,
   },
   videoTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "600",
-    marginBottom: 3,
-    lineHeight: 16,
+    marginBottom: 4,
+    lineHeight: 17,
   },
   videoMeta: {
-    fontSize: 10,
+    fontSize: 11,
   },
 });
 
