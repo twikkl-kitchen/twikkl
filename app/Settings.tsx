@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert, Platform } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { useThemeMode } from "@twikkl/entities/theme.entity";
@@ -18,32 +18,42 @@ const Settings = () => {
   const cardBg = isDarkMode ? "#1A1A1A" : "#FFF";
   const borderColor = isDarkMode ? "#333" : "#E0E0E0";
 
+  const performLogout = async () => {
+    try {
+      await axios.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { withCredentials: true });
+      setUser(null as any);
+      router.replace('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      setUser(null as any);
+      router.replace('/');
+    }
+  };
+
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.post(API_ENDPOINTS.AUTH.LOGOUT, {}, { withCredentials: true });
-              setUser(null as any);
-              router.replace('/');
-            } catch (error) {
-              console.error('Logout error:', error);
-              setUser(null as any);
-              router.replace('/');
-            }
+    // On web, use native confirm dialog. On mobile, use Alert.alert
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to logout?');
+      if (confirmed) {
+        await performLogout();
+      }
+    } else {
+      Alert.alert(
+        "Logout",
+        "Are you sure you want to logout?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Logout",
+            style: "destructive",
+            onPress: performLogout
           }
-        }
-      ]
-    );
+        ]
+      );
+    }
   };
 
   const settingsOptions = [
