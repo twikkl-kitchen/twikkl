@@ -218,7 +218,7 @@ const Profile = () => {
           {isOwnProfile && (
             <Pressable 
               style={styles.settingsButton}
-              onPress={() => router.push('/ProfileSettings')}
+              onPress={() => router.push('/Settings')}
             >
               <GroupSettings fill="#FFF" />
             </Pressable>

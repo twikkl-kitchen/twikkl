@@ -32,7 +32,7 @@ const ProfileSettings = () => {
   const [bannerImage, setBannerImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const backgroundColor = isDarkMode ? "#000" : "#F1FCF2";
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
   const textColor = isDarkMode ? "#FFF" : "#000";
   const cardBg = isDarkMode ? "#1A1A1A" : "#FFF";
   const borderColor = isDarkMode ? "#333" : "#E0E0E0";

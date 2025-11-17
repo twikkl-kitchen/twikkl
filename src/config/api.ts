@@ -7,7 +7,7 @@ export const API_ENDPOINTS = {
   // Auth endpoints (Replit Auth)
   AUTH: {
     LOGIN: `${API_BASE_URL}/login`,
-    LOGOUT: `${API_BASE_URL}/logout`,
+    LOGOUT: `${API_BASE_URL}/api/logout`,
     ME: `${API_BASE_URL}/auth/user`,
     GOOGLE: `${API_BASE_URL}/login`,
   },
@@ -35,9 +35,9 @@ export const API_ENDPOINTS = {
 
   // Referral endpoints
   REFERRALS: {
-    VALIDATE: (code: string) => `${API_BASE_URL}/referrals/code/${code}`,
-    CREATE: `${API_BASE_URL}/referrals`,
-    USER_REFERRALS: (userId: string) => `${API_BASE_URL}/users/${userId}/referrals`,
+    VALIDATE: (code: string) => `${API_BASE_URL}/api/referrals/code/${code}`,
+    CREATE: `${API_BASE_URL}/api/referrals`,
+    GET_USER_REFERRALS: (userId: string) => `${API_BASE_URL}/api/users/${userId}/referrals`,
   },
 
   // Comment endpoints

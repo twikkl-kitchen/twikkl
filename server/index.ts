@@ -245,6 +245,22 @@ async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logout endpoint
+  app.post('/api/logout', (req: Request, res: Response) => {
+    req.logout((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ error: 'Failed to logout' });
+      }
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destroy error:', err);
+        }
+        res.json({ success: true, message: 'Logged out successfully' });
+      });
+    });
+  });
+
   // Get current authenticated user
   app.get('/api/auth/user', isAuthenticated, async (req: any, res: Response) => {
     try {
@@ -853,8 +869,33 @@ async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/users/:userId/referrals', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
+      
+      // Get user to get their referral code
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Get all referrals for this user
       const referrals = await storage.getReferralsByReferrer(userId);
-      res.json({ referrals });
+      
+      // Get details for each referred user
+      const referralDetails = await Promise.all(
+        referrals.map(async (referral) => {
+          const referredUser = await storage.getUser(referral.referredUserId);
+          return {
+            id: referral.id,
+            referredUsername: referredUser?.username || 'Unknown',
+            createdAt: referral.createdAt,
+          };
+        })
+      );
+
+      res.json({
+        referralCode: user.referralCode,
+        totalReferrals: referrals.length,
+        referrals: referralDetails,
+      });
     } catch (error) {
       console.error('Get referrals error:', error);
       res.status(500).json({ error: 'Failed to fetch referrals' });
