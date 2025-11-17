@@ -6,20 +6,21 @@ import * as schema from "../shared/schema";
 
 neonConfig.webSocketConstructor = ws;
 
+// Fix SSL certificate verification for Neon WebSocket connections
+neonConfig.wsProxy = (host) => `${host}?sslmode=require`;
+neonConfig.useSecureWebSocket = true;
+neonConfig.pipelineConnect = false;
+
 if (!process.env.DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-// Convert to Neon pooled connection for production scalability
-// This allows handling 15,000+ concurrent users with efficient connection pooling
-const connectionString = process.env.DATABASE_URL.replace(
-  /\.([a-z0-9-]+)\.aws\.neon\.tech/,
-  '-pooler.$1.aws.neon.tech'
-);
+// Use direct connection (not pooled) to avoid SSL certificate issues
+const connectionString = process.env.DATABASE_URL;
 
-// Connection pool configuration optimized for production
+// Connection pool configuration
 export const pool = new Pool({ 
   connectionString,
   // Application-level connection pool settings
